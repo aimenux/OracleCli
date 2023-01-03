@@ -1,3 +1,5 @@
+[![.NET](https://github.com/aimenux/OracleCli/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/aimenux/OracleCli/actions/workflows/ci.yml)
+
 # OracleCli
 ```
 A net global tool helping to retrieve package(s), procedure(s) and argument(s) infos from oracle
@@ -14,7 +16,9 @@ A net global tool helping to retrieve package(s), procedure(s) and argument(s) i
 > To run the tool, type commands :
 > - `Oracle -h` to show help
 > - `Oracle -s` to show settings
-> - `Oracle Package -d [database-name]` to list packages from oracle
+> - `Oracle Package -d [db-name]` to list packages from oracle
+> - `Oracle Procedure -d [db-name]` to list procedures from oracle
+> - `Oracle Argument -d [db-name] -pkg [pkg-name] -spc [spc-name]` to list procedure arguments from oracle
 >
 >
 > To install global tool from a local source path, type commands :
