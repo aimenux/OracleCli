@@ -26,9 +26,9 @@ jobs:
       run: dotnet build --no-restore
     - name: Test
       run: dotnet test --no-build --verbosity normal
-    - name: Publish NuGetCli
+    - name: Publish OracleCli
       uses: alirezanet/publish-nuget@v3.0.3
       with:
-          PACKAGE_NAME: NuGetCli
+          PACKAGE_NAME: OracleCli
           PROJECT_FILE_PATH: src/App/App.csproj
           NUGET_KEY: ${{secrets.NUGET_API_KEY}}
