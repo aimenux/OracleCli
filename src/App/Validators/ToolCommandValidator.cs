@@ -10,7 +10,9 @@ public static class ToolCommandValidator
         return command switch
         {
             ToolCommand _ => ValidationErrors.New<ToolCommand>(),
+            ObjectsCommand objectsCommand => Validate(new ObjectsCommandValidator(), objectsCommand),
             ArgumentsCommand argumentsCommand => Validate(new ArgumentsCommandValidator(), argumentsCommand),
+            FunctionsCommand functionsCommand => Validate(new FunctionsCommandValidator(), functionsCommand),
             ProceduresCommand proceduresCommand => Validate(new ProceduresCommandValidator(), proceduresCommand),
             PackagesCommand packagesCommand => Validate(new PackagesCommandValidator(), packagesCommand),
             _ => throw new ArgumentOutOfRangeException(nameof(command), typeof(TCommand), "Unexpected command type")

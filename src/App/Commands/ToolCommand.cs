@@ -6,8 +6,8 @@ using static App.Extensions.PathExtensions;
 
 namespace App.Commands;
 
-[Command(Name = Settings.Cli.UsageName, FullName = Settings.Cli.FriendlyName, Description = "A net global tool helping to retrieve package(s), procedure(s) and argument(s) infos from oracle.")]
-[Subcommand(typeof(PackagesCommand), typeof(ProceduresCommand), typeof(ArgumentsCommand))]
+[Command(Name = Settings.Cli.UsageName, FullName = $"\n{Settings.Cli.FriendlyName}", Description = "A net global tool helping to retrieve package(s), function(s), procedure(s) and argument(s) infos from oracle.")]
+[Subcommand(typeof(ObjectsCommand), typeof(PackagesCommand), typeof(ProceduresCommand), typeof(FunctionsCommand), typeof(ArgumentsCommand))]
 [VersionOptionFromMember(MemberName = nameof(GetVersion))]
 public class ToolCommand : AbstractCommand
 {
@@ -36,9 +36,11 @@ public class ToolCommand : AbstractCommand
 
     private static string GetVersion()
     {
-        return typeof(ToolCommand)
+        var version = typeof(ToolCommand)
             .Assembly
             .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
             .InformationalVersion;
+        
+        return $"V{version}";
     }
 }

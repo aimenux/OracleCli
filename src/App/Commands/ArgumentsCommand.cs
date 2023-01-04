@@ -14,10 +14,10 @@ public class ArgumentsCommand : AbstractCommand
         _oracleService = oracleService ?? throw new ArgumentNullException(nameof(oracleService));
     }
 
-    [Option("-pkg|--package", "Package name", CommandOptionType.SingleValue)]
+    [Option("-p|--pkg", "Package name", CommandOptionType.SingleValue)]
     public string PackageName { get; init; }
     
-    [Option("-spc|--procedure", "Procedure name", CommandOptionType.SingleValue)]
+    [Option("-s|--spc", "Procedure name", CommandOptionType.SingleValue)]
     public string ProcedureName { get; init; }
 
     protected override async Task ExecuteAsync(CommandLineApplication app, CancellationToken cancellationToken = default)

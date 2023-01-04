@@ -88,6 +88,36 @@ public class ConsoleService : IConsoleService
         AnsiConsole.WriteLine();
     }
 
+    public void RenderOracleObjects(IEnumerable<OracleObject> oracleObjects, OracleParameters parameters)
+    {
+        var databaseName = parameters.DatabaseName.ToUpper();
+        var results = oracleObjects.ToList();
+        var title = results.Count > parameters.MaxItems
+            ? $"[yellow][bold]Found more than {parameters.MaxItems} object(s)[/][/]"
+            : $"[yellow][bold]Found {results.Count} object(s)[/][/]";
+        var table = new Table()
+            .BorderColor(Color.White)
+            .Border(TableBorder.Square)
+            .Title(title)
+            .AddColumn(new TableColumn("[u]#[/]").Centered())
+            .AddColumn(new TableColumn("[u]OwnerName[/]").Centered())
+            .AddColumn(new TableColumn("[u]ObjectName[/]").Centered())
+            .AddColumn(new TableColumn("[u]ObjectType[/]").Centered())
+            .AddColumn(new TableColumn("[u]CreationDate[/]").Centered())
+            .Caption($"[yellow][bold]{databaseName}[/][/]");
+
+        var index = 1;
+        var count = Math.Min(results.Count, parameters.MaxItems);
+        foreach (var result in results.Take(count))
+        {
+            table.AddRow(IndexMarkup(index++), ToMarkup(result.OwnerName), ToMarkup(result.ObjectName), ToMarkup(result.ObjectType), ToMarkup(result.CreationDate.ToString("g")));
+        }
+
+        AnsiConsole.WriteLine();
+        AnsiConsole.Write(table);
+        AnsiConsole.WriteLine();
+    }
+
     public void RenderOraclePackages(IEnumerable<OraclePackage> oraclePackages, OracleParameters parameters)
     {
         var databaseName = parameters.DatabaseName.ToUpper();
@@ -102,6 +132,7 @@ public class ConsoleService : IConsoleService
             .AddColumn(new TableColumn("[u]#[/]").Centered())
             .AddColumn(new TableColumn("[u]OwnerName[/]").Centered())
             .AddColumn(new TableColumn("[u]PackageName[/]").Centered())
+            .AddColumn(new TableColumn("[u]CreationDate[/]").Centered())
             .AddColumn(new TableColumn("[u]ProceduresCount[/]").Centered())
             .Caption($"[yellow][bold]{databaseName}[/][/]");
         
@@ -109,7 +140,7 @@ public class ConsoleService : IConsoleService
         var count = Math.Min(results.Count, parameters.MaxItems);
         foreach (var result in results.Take(count))
         {
-            table.AddRow(IndexMarkup(index++), ToMarkup(result.OwnerName), ToMarkup(result.PackageName), ToMarkup($"{result.ProceduresCount}"));
+            table.AddRow(IndexMarkup(index++), ToMarkup(result.OwnerName), ToMarkup(result.PackageName), ToMarkup(result.CreationDate.ToString("g")), ToMarkup($"{result.ProceduresCount}"));
         }
 
         AnsiConsole.WriteLine();
@@ -134,6 +165,35 @@ public class ConsoleService : IConsoleService
         foreach (var result in results)
         {
             table.AddRow(ToMarkup($"{result.Position}"), ToMarkup(result.Name), ToMarkup(result.DataType), ToMarkup(result.Direction));
+        }
+
+        AnsiConsole.WriteLine();
+        AnsiConsole.Write(table);
+        AnsiConsole.WriteLine();
+    }
+
+    public void RenderOracleFunctions(IEnumerable<OracleFunction> oracleFunctions, OracleParameters parameters)
+    {
+        var databaseName = parameters.DatabaseName.ToUpper();
+        var results = oracleFunctions.ToList();
+        var title = results.Count > parameters.MaxItems
+            ? $"[yellow][bold]Found more than {parameters.MaxItems} function(s)[/][/]"
+            : $"[yellow][bold]Found {results.Count} function(s)[/][/]";
+        var table = new Table()
+            .BorderColor(Color.White)
+            .Border(TableBorder.Square)
+            .Title(title)
+            .AddColumn(new TableColumn("[u]#[/]").Centered())
+            .AddColumn(new TableColumn("[u]OwnerName[/]").Centered())
+            .AddColumn(new TableColumn("[u]FunctionName[/]").Centered())
+            .AddColumn(new TableColumn("[u]CreationDate[/]").Centered())
+            .Caption($"[yellow][bold]{databaseName}[/][/]");
+
+        var index = 1;
+        var count = Math.Min(results.Count, parameters.MaxItems);
+        foreach (var result in results.Take(count))
+        {
+            table.AddRow(IndexMarkup(index++), ToMarkup(result.OwnerName), ToMarkup(result.FunctionName), ToMarkup(result.CreationDate.ToString("g")));
         }
 
         AnsiConsole.WriteLine();

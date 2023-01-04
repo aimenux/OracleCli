@@ -7,5 +7,5 @@ public sealed class OracleParameters
     public string PackageName { get; init; }
     public string ProcedureName { get; init; }
     public string DatabaseName { get; init; }
-    public string Keyword { get; init; }
+    public string FilterKeyword { get; init; }
 }

@@ -13,8 +13,8 @@ public class PackagesCommandValidator : AbstractValidator<PackagesCommand>
         RuleFor(x => x.MaxItems)
             .InclusiveBetween(1, 5000);
         
-        RuleFor(x => x.Keyword)
+        RuleFor(x => x.FilterKeyword)
             .MinimumLength(3)
-            .When(x => x.Keyword is not null);
+            .When(x => x.FilterKeyword is not null);
     }
 }

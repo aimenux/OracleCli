@@ -5,12 +5,12 @@ using McMaster.Extensions.CommandLineUtils;
 
 namespace App.Commands;
 
-[Command("Package", "Packages", FullName = "List oracle packages", Description = "List oracle packages.")]
-public class PackagesCommand : AbstractCommand
+[Command("Object", "Objects", FullName = "List oracle objects", Description = "List oracle objects.")]
+public class ObjectsCommand : AbstractCommand
 {
     private readonly IOracleService _oracleService;
 
-    public PackagesCommand(IConsoleService consoleService, IOracleService oracleService) : base(consoleService)
+    public ObjectsCommand(IConsoleService consoleService, IOracleService oracleService) : base(consoleService)
     {
         _oracleService = oracleService ?? throw new ArgumentNullException(nameof(oracleService));
     }
@@ -33,8 +33,8 @@ public class PackagesCommand : AbstractCommand
 
         await ConsoleService.RenderStatusAsync(async () =>
         {
-            var oraclePackages = await _oracleService.GetOraclePackagesAsync(parameters, cancellationToken);
-            ConsoleService.RenderOraclePackages(oraclePackages, parameters);
+            var oracleObjects = await _oracleService.GetOracleObjectsAsync(parameters, cancellationToken);
+            ConsoleService.RenderOracleObjects(oracleObjects, parameters);
         });
     }
 }

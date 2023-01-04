@@ -18,8 +18,8 @@ public class ProceduresCommand : AbstractCommand
     [Option("-m|--max", "Max items", CommandOptionType.SingleValue)]
     public int MaxItems { get; init; } = Settings.DatabaseMaxItems;
     
-    [Option("-k|--keyword", "Keyword search", CommandOptionType.SingleValue)]
-    public string Keyword { get; init; }
+    [Option("-f|--filter", "Filter keyword", CommandOptionType.SingleValue)]
+    public string FilterKeyword { get; init; }
 
     protected override async Task ExecuteAsync(CommandLineApplication app, CancellationToken cancellationToken = default)
     {
@@ -28,7 +28,7 @@ public class ProceduresCommand : AbstractCommand
             DatabaseName = DatabaseName,
             OwnerName = OwnerName,
             MaxItems = MaxItems,
-            Keyword = Keyword
+            FilterKeyword = FilterKeyword
         };
 
         await ConsoleService.RenderStatusAsync(async () =>

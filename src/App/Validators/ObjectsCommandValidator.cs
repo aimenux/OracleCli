@@ -1,11 +1,11 @@
-﻿using App.Commands;
+using App.Commands;
 using FluentValidation;
 
 namespace App.Validators;
 
-public class ProceduresCommandValidator : AbstractValidator<ProceduresCommand>
+public class ObjectsCommandValidator : AbstractValidator<ObjectsCommand>
 {
-    public ProceduresCommandValidator()
+    public ObjectsCommandValidator()
     {
         RuleFor(x => x.DatabaseName)
             .NotEmpty();
