@@ -5,7 +5,7 @@
         <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <UserSecretsId>OracleCli-UserSecrets</UserSecretsId>
-	    <Version>0.0.3-alpha</Version>
+	    <Version>0.0.4-alpha</Version>
 	    <Authors>Aymen TROUDI</Authors>
 	    <PackAsTool>true</PackAsTool>
 	    <PackageId>OracleCli</PackageId>
