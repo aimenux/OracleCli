@@ -16,45 +16,6 @@ public class OracleService : IOracleService
         _settings = options?.Value ?? throw new ArgumentNullException(nameof(options));
     }
 
-    public async Task<IEnumerable<OracleObject>> GetOracleObjectsAsync(OracleParameters parameters, CancellationToken cancellationToken = default)
-    {
-        var sqlBuilder = new StringBuilder
-        (
-            """
-                  SELECT 
-                    AO.OWNER AS OwnerName, AO.OBJECT_NAME AS ObjectName, AO.OBJECT_TYPE AS ObjectType, AO.CREATED AS CreationDate 
-                  FROM ALL_OBJECTS AO
-                  WHERE 1 = 1 
-                    AND UPPER(AO.OBJECT_TYPE) IN ('FUNCTION', 'PROCEDURE', 'PACKAGE')
-                    AND ROWNUM <= :max
-            """
-        );
-
-        if (!string.IsNullOrWhiteSpace(parameters.OwnerName))
-        {
-            sqlBuilder.AppendLine(" AND UPPER(AO.OWNER) = :owner");
-        }
-        
-        if (!string.IsNullOrWhiteSpace(parameters.FilterKeyword))
-        {
-            sqlBuilder.AppendLine($" AND ({HasKeyWord("AO.OWNER")} OR {HasKeyWord("AO.OBJECT_NAME")} OR {HasKeyWord("AO.OBJECT_TYPE")})");
-        }
-
-        sqlBuilder.AppendLine(" ORDER BY AO.OWNER, AO.OBJECT_NAME, AO.OBJECT_TYPE ASC");
-        
-        var sql = sqlBuilder.ToString();
-        var sqlParameters = new
-        {
-            max = parameters.MaxItems + 1,
-            owner = parameters.OwnerName?.ToUpper(),
-            keyword = parameters.FilterKeyword?.ToUpper()
-        };
-        
-        await using var connection = CreateOracleConnection(parameters);
-        var oracleObjects = await connection.QueryAsync<OracleObject>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
-        return oracleObjects;
-    }
-
     public async Task<IEnumerable<OraclePackage>> GetOraclePackagesAsync(OracleParameters parameters, CancellationToken cancellationToken)
     {
         var sqlBuilder = new StringBuilder
@@ -96,47 +57,6 @@ public class OracleService : IOracleService
         await using var connection = CreateOracleConnection(parameters);
         var oraclePackages = await connection.QueryAsync<OraclePackage>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
         return oraclePackages;
-    }
-
-    public async Task<IEnumerable<OracleArgument>> GetOracleArgumentsAsync(OracleParameters parameters, CancellationToken cancellationToken)
-    {
-        var sqlBuilder = new StringBuilder
-        (
-            """
-                  SELECT
-                    AA.ARGUMENT_NAME AS Name, AA.POSITION AS Position, AA.DATA_TYPE AS DataType, AA.IN_OUT AS Direction
-                  FROM ALL_ARGUMENTS AA
-                  WHERE 1 = 1  
-            """
-        );
-        
-        if (!string.IsNullOrWhiteSpace(parameters.OwnerName))
-        {
-            sqlBuilder.AppendLine(" AND UPPER(AA.OWNER) = :owner");
-        }
-
-        if (!string.IsNullOrWhiteSpace(parameters.ProcedureName))
-        {
-            sqlBuilder.AppendLine(" AND UPPER(AA.OBJECT_NAME) = :procedure");
-        }
-        
-        sqlBuilder.AppendLine(string.IsNullOrWhiteSpace(parameters.PackageName)
-            ? " AND AA.PACKAGE_NAME IS NULL"
-            : " AND UPPER(AA.PACKAGE_NAME) = :package");
-        
-        sqlBuilder.AppendLine(" ORDER BY AA.POSITION ASC");
-        
-        var sql = sqlBuilder.ToString();
-        var sqlParameters = new
-        {
-            owner = parameters.OwnerName?.ToUpper(),
-            package = parameters.PackageName?.ToUpper(),
-            procedure = parameters.ProcedureName?.ToUpper()
-        };
-        
-        await using var connection = CreateOracleConnection(parameters);
-        var oracleArguments = await connection.QueryAsync<OracleArgument>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
-        return oracleArguments;
     }
 
     public async Task<IEnumerable<OracleFunction>> GetOracleFunctionsAsync(OracleParameters parameters, CancellationToken cancellationToken = default)
@@ -256,6 +176,157 @@ public class OracleService : IOracleService
         await using var connection = CreateOracleConnection(parameters);
         var oracleProcedures = await connection.QueryAsync<OracleProcedure>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
         return oracleProcedures;
+    }
+    
+    public async Task<IEnumerable<OracleArgument>> GetOracleArgumentsAsync(OracleParameters parameters, CancellationToken cancellationToken)
+    {
+        var sqlBuilder = new StringBuilder
+        (
+            """
+                  SELECT
+                    AA.ARGUMENT_NAME AS Name, AA.POSITION AS Position, AA.DATA_TYPE AS DataType, AA.IN_OUT AS Direction
+                  FROM ALL_ARGUMENTS AA
+                  WHERE 1 = 1  
+            """
+        );
+        
+        if (!string.IsNullOrWhiteSpace(parameters.OwnerName))
+        {
+            sqlBuilder.AppendLine(" AND UPPER(AA.OWNER) = :owner");
+        }
+
+        if (!string.IsNullOrWhiteSpace(parameters.ProcedureName))
+        {
+            sqlBuilder.AppendLine(" AND UPPER(AA.OBJECT_NAME) = :procedure");
+        }
+        
+        sqlBuilder.AppendLine(string.IsNullOrWhiteSpace(parameters.PackageName)
+            ? " AND AA.PACKAGE_NAME IS NULL"
+            : " AND UPPER(AA.PACKAGE_NAME) = :package");
+        
+        sqlBuilder.AppendLine(" ORDER BY AA.POSITION ASC");
+        
+        var sql = sqlBuilder.ToString();
+        var sqlParameters = new
+        {
+            owner = parameters.OwnerName?.ToUpper(),
+            package = parameters.PackageName?.ToUpper(),
+            procedure = parameters.ProcedureName?.ToUpper()
+        };
+        
+        await using var connection = CreateOracleConnection(parameters);
+        var oracleArguments = await connection.QueryAsync<OracleArgument>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
+        return oracleArguments;
+    }
+    
+    public async Task<IEnumerable<OracleObject>> GetOracleObjectsAsync(OracleParameters parameters, CancellationToken cancellationToken = default)
+    {
+        var getFromAllObjectsSourceTask = GetOracleObjectsFromAllObjectsSourceAsync(parameters, cancellationToken);
+        var getPackagesFromAllProceduresSourceTask = GetOraclePackagesAsync(parameters, cancellationToken);
+        var getProceduresFromAllProceduresSourceTask = GetOracleProceduresAsync(parameters, cancellationToken);
+        var getFunctionsFromAllProceduresSourceTask = GetOracleFunctionsAsync(parameters, cancellationToken);
+        
+        await Task.WhenAll(
+            getFromAllObjectsSourceTask,
+            getPackagesFromAllProceduresSourceTask,
+            getProceduresFromAllProceduresSourceTask,
+            getFunctionsFromAllProceduresSourceTask);
+        
+        var objectsFromAllObjectsSource = (await getFromAllObjectsSourceTask)
+            .Select(x => new OracleObject
+            {
+                OwnerName = x.OwnerName,
+                ObjectName = x.ObjectName,
+                ObjectType = x.ObjectType,
+                CreationDate = x.CreationDate,
+                Source = OracleSource.AllObjectsTable
+            })
+            .ToList();
+        
+        var packagesFromAllProceduresSource = (await getPackagesFromAllProceduresSourceTask)
+            .Select(x => new OracleObject
+            {
+                OwnerName = x.OwnerName,
+                ObjectName = x.PackageName,
+                ObjectType = "PACKAGE",
+                CreationDate = x.CreationDate,
+                Source = OracleSource.AllProceduresTable
+            })
+            .ToList();
+        
+        var proceduresFromAllProceduresSource = (await getProceduresFromAllProceduresSourceTask)
+            .Select(x => new OracleObject
+            {
+                OwnerName = x.OwnerName,
+                ObjectName = string.IsNullOrWhiteSpace(x.ProcedureName) ? x.PackageName : x.ProcedureName,
+                ObjectType = string.IsNullOrWhiteSpace(x.ProcedureName) ? "PACKAGE" : "PROCEDURE",
+                CreationDate = x.CreationDate,
+                Source = OracleSource.AllProceduresTable
+            })
+            .ToList();
+        
+        var functionsFromAllProceduresSource = (await getFunctionsFromAllProceduresSourceTask)
+            .Select(x => new OracleObject
+            {
+                OwnerName = x.OwnerName,
+                ObjectName = x.FunctionName,
+                ObjectType = "FUNCTION",
+                CreationDate = x.CreationDate,
+                Source = OracleSource.AllProceduresTable
+            })
+            .ToList();
+
+        var objects = objectsFromAllObjectsSource
+            .Union(packagesFromAllProceduresSource)
+            .Union(proceduresFromAllProceduresSource)
+            .Union(functionsFromAllProceduresSource)
+            .Distinct()
+            .OrderBy(x => x.OwnerName)
+            .ThenBy(x => x.ObjectName)
+            .ThenBy(x => x.ObjectType)
+            .Take(parameters.MaxItems)
+            .ToList();
+
+        return objects;
+    }
+    
+    private async Task<IEnumerable<OracleObject>> GetOracleObjectsFromAllObjectsSourceAsync(OracleParameters parameters, CancellationToken cancellationToken = default)
+    {
+        var sqlBuilder = new StringBuilder
+        (
+            """
+                  SELECT 
+                    AO.OWNER AS OwnerName, AO.OBJECT_NAME AS ObjectName, AO.OBJECT_TYPE AS ObjectType, AO.CREATED AS CreationDate 
+                  FROM ALL_OBJECTS AO
+                  WHERE 1 = 1 
+                    AND UPPER(AO.OBJECT_TYPE) IN ('FUNCTION', 'PROCEDURE', 'PACKAGE')
+                    AND ROWNUM <= :max
+            """
+        );
+
+        if (!string.IsNullOrWhiteSpace(parameters.OwnerName))
+        {
+            sqlBuilder.AppendLine(" AND UPPER(AO.OWNER) = :owner");
+        }
+        
+        if (!string.IsNullOrWhiteSpace(parameters.FilterKeyword))
+        {
+            sqlBuilder.AppendLine($" AND ({HasKeyWord("AO.OWNER")} OR {HasKeyWord("AO.OBJECT_NAME")} OR {HasKeyWord("AO.OBJECT_TYPE")})");
+        }
+
+        sqlBuilder.AppendLine(" ORDER BY AO.OWNER, AO.OBJECT_NAME, AO.OBJECT_TYPE ASC");
+        
+        var sql = sqlBuilder.ToString();
+        var sqlParameters = new
+        {
+            max = parameters.MaxItems + 1,
+            owner = parameters.OwnerName?.ToUpper(),
+            keyword = parameters.FilterKeyword?.ToUpper()
+        };
+        
+        await using var connection = CreateOracleConnection(parameters);
+        var oracleObjects = await connection.QueryAsync<OracleObject>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
+        return oracleObjects;
     }
 
     private OracleConnection CreateOracleConnection(OracleParameters parameters)
