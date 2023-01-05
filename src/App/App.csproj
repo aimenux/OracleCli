@@ -5,7 +5,7 @@
         <TargetFramework>net7.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <UserSecretsId>OracleCli-UserSecrets</UserSecretsId>
-	    <Version>0.0.2-alpha</Version>
+	    <Version>0.0.3-alpha</Version>
 	    <Authors>Aymen TROUDI</Authors>
 	    <PackAsTool>true</PackAsTool>
 	    <PackageId>OracleCli</PackageId>
@@ -13,7 +13,7 @@
 	    <PackageReadmeFile>README.md</PackageReadmeFile>
 	    <ToolCommandName>Oracle</ToolCommandName>
 	    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-	    <Description>A net global tool helping to retrieve package(s), function(s), procedure(s) and argument(s) infos from oracle</Description>
+	    <Description>A net global tool helping to retrieve infos (packages, functions, procedures, etc.) from oracle</Description>
 	    <PackageTags>dotnet, global tools, cli, oracle</PackageTags>
 	    <RepositoryType>git</RepositoryType>
 	    <PackageProjectUrl>https://github.com/aimenux/OracleCli</PackageProjectUrl>

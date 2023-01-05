@@ -6,6 +6,7 @@ namespace App.Services.Console;
 public interface IConsoleService
 {
     void RenderTitle(string text);
+    void RenderText(string text, string color = Colors.White);
     Task RenderStatusAsync(Func<Task> action);
     void RenderSettingsFile(string filepath);
     void RenderException(Exception exception);

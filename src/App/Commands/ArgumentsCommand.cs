@@ -32,8 +32,21 @@ public class ArgumentsCommand : AbstractCommand
 
         await ConsoleService.RenderStatusAsync(async () =>
         {
+            var count = await CountOracleProceduresAsync(parameters, cancellationToken);
+            if (count is 0 or > 1)
+            {
+                ConsoleService.RenderText($"Found {count} procedure(s) matching name '{parameters.ProcedureName}'");
+                return;
+            }
+            
             var oracleArguments = await _oracleService.GetOracleArgumentsAsync(parameters, cancellationToken);
             ConsoleService.RenderOracleArguments(oracleArguments, parameters);
         });
+    }
+
+    private async Task<int> CountOracleProceduresAsync(OracleParameters parameters, CancellationToken cancellationToken)
+    {
+        var oracleProcedures = await _oracleService.FindOracleProceduresAsync(parameters, cancellationToken);
+        return oracleProcedures.Count();
     }
 }

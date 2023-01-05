@@ -114,16 +114,15 @@ public class OracleService : IOracleService
         {
             sqlBuilder.AppendLine(" AND UPPER(AA.OWNER) = :owner");
         }
-        
-        if (!string.IsNullOrWhiteSpace(parameters.PackageName))
-        {
-            sqlBuilder.AppendLine(" AND UPPER(AA.PACKAGE_NAME) = :package");
-        }
-        
+
         if (!string.IsNullOrWhiteSpace(parameters.ProcedureName))
         {
             sqlBuilder.AppendLine(" AND UPPER(AA.OBJECT_NAME) = :procedure");
         }
+        
+        sqlBuilder.AppendLine(string.IsNullOrWhiteSpace(parameters.PackageName)
+            ? " AND AA.PACKAGE_NAME IS NULL"
+            : " AND UPPER(AA.PACKAGE_NAME) = :package");
         
         sqlBuilder.AppendLine(" ORDER BY AA.POSITION ASC");
         
@@ -216,6 +215,42 @@ public class OracleService : IOracleService
             max = parameters.MaxItems + 1,
             owner = parameters.OwnerName?.ToUpper(),
             keyword = parameters.FilterKeyword?.ToUpper()
+        };
+        
+        await using var connection = CreateOracleConnection(parameters);
+        var oracleProcedures = await connection.QueryAsync<OracleProcedure>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
+        return oracleProcedures;
+    }
+
+    public async Task<IEnumerable<OracleProcedure>> FindOracleProceduresAsync(OracleParameters parameters, CancellationToken cancellationToken = default)
+    {
+        var sqlBuilder = new StringBuilder
+        (
+            """
+                  SELECT    
+                    AP.OWNER AS OwnerName, 
+                    (CASE WHEN AP.PROCEDURE_NAME IS NULL THEN '' ELSE AP.OBJECT_NAME END) AS PackageName, 
+                    (CASE WHEN AP.PROCEDURE_NAME IS NULL THEN AP.OBJECT_NAME ELSE AP.PROCEDURE_NAME END) AS ProcedureName, 
+                    AO.CREATED AS CreationDate
+                  FROM ALL_PROCEDURES AP
+                  INNER JOIN ALL_OBJECTS AO ON AP.OBJECT_ID = AO.OBJECT_ID
+                  WHERE 1 = 1 
+                    AND ((UPPER(AO.OBJECT_TYPE) = 'PROCEDURE' AND UPPER(AP.OBJECT_NAME) = :name) OR (UPPER(AO.OBJECT_TYPE) = 'PACKAGE' AND UPPER(AP.PROCEDURE_NAME) = :name))
+                    AND ROWNUM <= :max
+            """
+        );
+        
+        if (!string.IsNullOrWhiteSpace(parameters.OwnerName))
+        {
+            sqlBuilder.AppendLine(" AND UPPER(AP.OWNER) = :owner");
+        }
+        
+        var sql = sqlBuilder.ToString();
+        var sqlParameters = new
+        {
+            max = parameters.MaxItems + 1,
+            owner = parameters.OwnerName?.ToUpper(),
+            name = parameters.ProcedureName?.ToUpper()
         };
         
         await using var connection = CreateOracleConnection(parameters);

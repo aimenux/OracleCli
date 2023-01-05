@@ -9,10 +9,7 @@ public class ArgumentsCommandValidator : AbstractValidator<ArgumentsCommand>
     {
         RuleFor(x => x.DatabaseName)
             .NotEmpty();
-        
-        RuleFor(x => x.PackageName)
-            .NotEmpty();
-        
+
         RuleFor(x => x.ProcedureName)
             .NotEmpty();
     }

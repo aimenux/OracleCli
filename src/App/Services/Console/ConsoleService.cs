@@ -20,6 +20,14 @@ public class ConsoleService : IConsoleService
         AnsiConsole.Write(new FigletText(text).LeftAligned());
         AnsiConsole.WriteLine();
     }
+    
+    public void RenderText(string text, string color)
+    {
+        AnsiConsole.WriteLine();
+        AnsiConsole.Write(new Markup($"[bold {color}]{text}[/]"));
+        AnsiConsole.WriteLine();
+        AnsiConsole.WriteLine();
+    }
 
     public async Task RenderStatusAsync(Func<Task> action)
     {
