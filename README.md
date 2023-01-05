@@ -37,4 +37,4 @@ A net global tool helping to retrieve some infos (packages, functions, procedure
 >
 >
 
-**`Tools`** : vs22, net 7.0, command-line, spectre-console, dapper, xunit, fluent-assertions, test-containers
+**`Tools`** : vs22, net 6.0, net 7.0, command-line, spectre-console, dapper, xunit, fluent-assertions, test-containers
