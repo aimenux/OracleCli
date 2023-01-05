@@ -2,10 +2,11 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net7.0</TargetFramework>
+        <LangVersion>preview</LangVersion>
+        <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <UserSecretsId>OracleCli-UserSecrets</UserSecretsId>
-	    <Version>0.0.4-alpha</Version>
+	    <Version>0.0.5-alpha</Version>
 	    <Authors>Aymen TROUDI</Authors>
 	    <PackAsTool>true</PackAsTool>
 	    <PackageId>OracleCli</PackageId>

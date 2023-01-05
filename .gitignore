@@ -348,5 +348,4 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
-/.idea/.idea.OracleCli/.idea/.gitignore
-/.idea/.idea.OracleCli/.idea/indexLayout.xml
+.idea/*
