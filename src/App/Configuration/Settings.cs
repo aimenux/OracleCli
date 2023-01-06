@@ -4,7 +4,7 @@ public sealed class Settings
 {
     public static class Cli
     {
-        public const string UsageName = @"Oracle";
+        public const string UsageName = @"OracleCli";
         public const string FriendlyName = @"OracleCli";
     }
     

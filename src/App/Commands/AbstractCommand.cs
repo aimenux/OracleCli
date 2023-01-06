@@ -17,7 +17,7 @@ public abstract class AbstractCommand
     [Option("-d|--db", "Database name", CommandOptionType.SingleValue)]
     public string DatabaseName { get; init; }
     
-    [Option("-o|--owner", "Owner name", CommandOptionType.SingleValue)]
+    [Option("-o|--owner", "Owner/Schema name", CommandOptionType.SingleValue)]
     public string OwnerName { get; init; }
 
     public async Task<int> OnExecuteAsync(CommandLineApplication app, CancellationToken cancellationToken = default)

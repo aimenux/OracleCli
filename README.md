@@ -16,13 +16,13 @@ A net global tool helping to retrieve some infos (packages, functions, procedure
 
 >
 > To run the tool, type commands :
-> - `Oracle -h` to show help
-> - `Oracle -s` to show settings
-> - `Oracle Object -d [db-name]` to list objects from oracle
-> - `Oracle Package -d [db-name]` to list packages from oracle
-> - `Oracle Function -d [db-name]` to list functions from oracle
-> - `Oracle Procedure -d [db-name]` to list procedures from oracle
-> - `Oracle Argument -d [db-name] -p [pkg-name] -s [spc-name]` to list procedure arguments from oracle
+> - `OracleCli -h` to show help
+> - `OracleCli -s` to show settings
+> - `OracleCli Object -d [db-name]` to list objects from oracle
+> - `OracleCli Package -d [db-name]` to list packages from oracle
+> - `OracleCli Function -d [db-name]` to list functions from oracle
+> - `OracleCli Procedure -d [db-name]` to list procedures from oracle
+> - `OracleCli Argument -d [db-name] -p [pkg-name] -s [spc-name]` to list procedure arguments from oracle
 >
 >
 > To install global tool from a local source path, type commands :

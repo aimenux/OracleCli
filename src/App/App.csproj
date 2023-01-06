@@ -6,13 +6,13 @@
         <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <UserSecretsId>OracleCli-UserSecrets</UserSecretsId>
-	    <Version>0.0.5-alpha</Version>
+	    <Version>0.0.1-beta</Version>
 	    <Authors>Aymen TROUDI</Authors>
 	    <PackAsTool>true</PackAsTool>
 	    <PackageId>OracleCli</PackageId>
 	    <PackageOutputPath>../../nugets</PackageOutputPath>
 	    <PackageReadmeFile>README.md</PackageReadmeFile>
-	    <ToolCommandName>Oracle</ToolCommandName>
+	    <ToolCommandName>OracleCli</ToolCommandName>
 	    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	    <Description>A net global tool helping to retrieve infos (packages, functions, procedures, etc.) from oracle</Description>
 	    <PackageTags>dotnet, global tools, cli, oracle</PackageTags>
