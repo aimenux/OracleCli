@@ -6,6 +6,7 @@ public sealed class Settings
     {
         public const string UsageName = @"OracleCli";
         public const string FriendlyName = @"OracleCli";
+        public const string Description = @"A net global tool helping to retrieve package(s), function(s), procedure(s) and argument(s) infos from oracle.";
     }
     
     public static class ExitCode
@@ -17,5 +18,8 @@ public sealed class Settings
     public const int DatabaseMaxItems = 30;
 
     public const int DatabaseTimeoutInSeconds = 300;
+    
+    public string DefaultDatabaseToUse { get; init; }
+    public string DefaultSchemaToUse { get; init; }
     public ICollection<Database> Databases { get; init; }
 }

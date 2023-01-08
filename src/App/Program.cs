@@ -2,6 +2,7 @@
 using App.Configuration;
 using App.Extensions;
 using App.Services.Console;
+using App.Services.Exporters;
 using App.Services.Oracle;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -44,6 +45,7 @@ public static class Program
                 services.AddTransient<ToolCommand>();
                 services.AddTransient<IOracleService, OracleService>();
                 services.AddTransient<IConsoleService, ConsoleService>();
+                services.AddTransient<ICSharpExporter, CSharpExporter>();
                 services.Configure<Settings>(hostingContext.Configuration.GetSection(nameof(Settings)));
             })
             .AddSerilog();

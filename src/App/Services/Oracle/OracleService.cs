@@ -16,7 +16,7 @@ public class OracleService : IOracleService
         _settings = options?.Value ?? throw new ArgumentNullException(nameof(options));
     }
 
-    public async Task<IEnumerable<OraclePackage>> GetOraclePackagesAsync(OracleParameters parameters, CancellationToken cancellationToken)
+    public async Task<ICollection<OraclePackage>> GetOraclePackagesAsync(OracleParameters parameters, CancellationToken cancellationToken)
     {
         var sqlBuilder = new StringBuilder
         (
@@ -56,10 +56,10 @@ public class OracleService : IOracleService
         
         await using var connection = CreateOracleConnection(parameters);
         var oraclePackages = await connection.QueryAsync<OraclePackage>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
-        return oraclePackages;
+        return oraclePackages.ToList();
     }
 
-    public async Task<IEnumerable<OracleFunction>> GetOracleFunctionsAsync(OracleParameters parameters, CancellationToken cancellationToken = default)
+    public async Task<ICollection<OracleFunction>> GetOracleFunctionsAsync(OracleParameters parameters, CancellationToken cancellationToken = default)
     {
         var sqlBuilder = new StringBuilder
         (
@@ -96,10 +96,10 @@ public class OracleService : IOracleService
         
         await using var connection = CreateOracleConnection(parameters);
         var oracleFunctions = await connection.QueryAsync<OracleFunction>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
-        return oracleFunctions;
+        return oracleFunctions.ToList();
     }
 
-    public async Task<IEnumerable<OracleProcedure>> GetOracleProceduresAsync(OracleParameters parameters, CancellationToken cancellationToken)
+    public async Task<ICollection<OracleProcedure>> GetOracleProceduresAsync(OracleParameters parameters, CancellationToken cancellationToken)
     {
         var sqlBuilder = new StringBuilder
         (
@@ -139,10 +139,10 @@ public class OracleService : IOracleService
         
         await using var connection = CreateOracleConnection(parameters);
         var oracleProcedures = await connection.QueryAsync<OracleProcedure>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
-        return oracleProcedures;
+        return oracleProcedures.ToList();
     }
 
-    public async Task<IEnumerable<OracleProcedure>> FindOracleProceduresAsync(OracleParameters parameters, CancellationToken cancellationToken = default)
+    public async Task<ICollection<OracleProcedure>> FindOracleProceduresAsync(OracleParameters parameters, CancellationToken cancellationToken = default)
     {
         var sqlBuilder = new StringBuilder
         (
@@ -175,10 +175,10 @@ public class OracleService : IOracleService
         
         await using var connection = CreateOracleConnection(parameters);
         var oracleProcedures = await connection.QueryAsync<OracleProcedure>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
-        return oracleProcedures;
+        return oracleProcedures.ToList();
     }
     
-    public async Task<IEnumerable<OracleArgument>> GetOracleArgumentsAsync(OracleParameters parameters, CancellationToken cancellationToken)
+    public async Task<ICollection<OracleArgument>> GetOracleArgumentsAsync(OracleParameters parameters, CancellationToken cancellationToken)
     {
         var sqlBuilder = new StringBuilder
         (
@@ -216,10 +216,10 @@ public class OracleService : IOracleService
         
         await using var connection = CreateOracleConnection(parameters);
         var oracleArguments = await connection.QueryAsync<OracleArgument>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
-        return oracleArguments;
+        return oracleArguments.ToList();
     }
     
-    public async Task<IEnumerable<OracleObject>> GetOracleObjectsAsync(OracleParameters parameters, CancellationToken cancellationToken = default)
+    public async Task<ICollection<OracleObject>> GetOracleObjectsAsync(OracleParameters parameters, CancellationToken cancellationToken = default)
     {
         var getFromAllObjectsSourceTask = GetOracleObjectsFromAllObjectsSourceAsync(parameters, cancellationToken);
         var getPackagesFromAllProceduresSourceTask = GetOraclePackagesAsync(parameters, cancellationToken);
@@ -337,7 +337,7 @@ public class OracleService : IOracleService
 
         if (string.IsNullOrWhiteSpace(connectionString))
         {
-            throw new ArgumentException($"ConnectionString not found for database name {parameters.DatabaseName}");
+            throw new ArgumentException($"ConnectionString not found for database name '{parameters.DatabaseName}'");
         }
 
         return new OracleConnection(connectionString);

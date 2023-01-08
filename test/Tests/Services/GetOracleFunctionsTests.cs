@@ -1,9 +1,8 @@
-using App.Configuration;
 using App.Services.Oracle;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 
-namespace Tests;
+namespace Tests.Services;
 
 [Collection(Collections.OracleCollectionName)]
 public class GetOracleFunctionsTests
@@ -20,18 +19,13 @@ public class GetOracleFunctionsTests
     {
         // arrange
         const string databaseName = "oracle-for-tests";
+        var connectionString = _oracleFixture.ConnectionString;
         
-        var options = Options.Create(new Settings
-        {
-            Databases = new List<Database>
-            {
-                new()
-                {
-                    DatabaseName = databaseName,
-                    ConnectionString = _oracleFixture.ConnectionString
-                }
-            }
-        });
+        var settings = new SettingsBuilder()
+            .WithDatabase(databaseName, connectionString)
+            .Build();
+        
+        var options = Options.Create(settings);
 
         var parameters = new OracleParameters
         {

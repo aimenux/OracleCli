@@ -2,23 +2,20 @@
 using App.Services.Console;
 using App.Validators;
 using McMaster.Extensions.CommandLineUtils;
+using Microsoft.Extensions.Options;
 
 namespace App.Commands;
 
 public abstract class AbstractCommand
 {
     protected readonly IConsoleService ConsoleService;
+    protected readonly Settings Settings;
 
-    protected AbstractCommand(IConsoleService consoleService)
+    protected AbstractCommand(IConsoleService consoleService, IOptions<Settings> options)
     {
         ConsoleService = consoleService ?? throw new ArgumentNullException(nameof(consoleService));
+        Settings = options?.Value ?? throw new ArgumentNullException(nameof(options));
     }
-    
-    [Option("-d|--db", "Database name", CommandOptionType.SingleValue)]
-    public string DatabaseName { get; init; }
-    
-    [Option("-o|--owner", "Owner/Schema name", CommandOptionType.SingleValue)]
-    public string OwnerName { get; init; }
 
     public async Task<int> OnExecuteAsync(CommandLineApplication app, CancellationToken cancellationToken = default)
     {

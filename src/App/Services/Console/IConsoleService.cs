@@ -5,15 +5,17 @@ namespace App.Services.Console;
 
 public interface IConsoleService
 {
+    void CopyTextToClipboard(string text);
     void RenderTitle(string text);
     void RenderText(string text, string color = Colors.White);
     Task RenderStatusAsync(Func<Task> action);
     void RenderSettingsFile(string filepath);
     void RenderException(Exception exception);
     void RenderValidationErrors(ValidationErrors validationErrors);
-    void RenderOracleObjects(IEnumerable<OracleObject> oracleObjects, OracleParameters parameters);
-    void RenderOraclePackages(IEnumerable<OraclePackage> oraclePackages, OracleParameters parameters);
-    void RenderOracleArguments(IEnumerable<OracleArgument> oracleArguments, OracleParameters parameters);
-    void RenderOracleFunctions(IEnumerable<OracleFunction> oracleFunctions, OracleParameters parameters);
-    void RenderOracleProcedures(IEnumerable<OracleProcedure> oracleProcedures, OracleParameters parameters);
+    void RenderOracleObjects(ICollection<OracleObject> oracleObjects, OracleParameters parameters);
+    void RenderOraclePackages(ICollection<OraclePackage> oraclePackages, OracleParameters parameters);
+    void RenderOracleArguments(ICollection<OracleArgument> oracleArguments, OracleParameters parameters);
+    void RenderOracleFunctions(ICollection<OracleFunction> oracleFunctions, OracleParameters parameters);
+    void RenderOracleProcedures(ICollection<OracleProcedure> oracleProcedures, OracleParameters parameters);
+    void CopyOracleArgumentsToClipboard(ICollection<OracleArgument> oracleArguments, OracleParameters parameters);
 }

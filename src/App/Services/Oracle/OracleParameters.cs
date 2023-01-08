@@ -9,3 +9,19 @@ public sealed class OracleParameters
     public string DatabaseName { get; init; }
     public string FilterKeyword { get; init; }
 }
+
+public static class OracleParametersExtensions
+{
+    public static OracleParameters With(this OracleParameters parameters, string packageName, string procedureName)
+    {
+        return new OracleParameters
+        {
+            DatabaseName = parameters.DatabaseName,
+            OwnerName = parameters.OwnerName,
+            PackageName = packageName,
+            ProcedureName = procedureName,
+            MaxItems = parameters.MaxItems,
+            FilterKeyword = parameters.FilterKeyword
+        };
+    }
+}

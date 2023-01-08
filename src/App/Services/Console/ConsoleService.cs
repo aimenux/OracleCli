@@ -1,17 +1,28 @@
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
+using App.Services.Exporters;
 using App.Services.Oracle;
 using App.Validators;
 using Spectre.Console;
+using TextCopy;
 
 namespace App.Services.Console;
 
 public class ConsoleService : IConsoleService
 {
-    public ConsoleService()
+    private readonly ICSharpExporter _cSharpExporter;
+    
+    public ConsoleService(ICSharpExporter cSharpExporter)
     {
         System.Console.OutputEncoding = Encoding.UTF8;
+        _cSharpExporter = cSharpExporter ?? throw new ArgumentNullException(nameof(cSharpExporter));
+    }
+    
+    public void CopyTextToClipboard(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return;
+        ClipboardService.SetText(text);
     }
 
     public void RenderTitle(string text)
@@ -96,13 +107,12 @@ public class ConsoleService : IConsoleService
         AnsiConsole.WriteLine();
     }
 
-    public void RenderOracleObjects(IEnumerable<OracleObject> oracleObjects, OracleParameters parameters)
+    public void RenderOracleObjects(ICollection<OracleObject> oracleObjects, OracleParameters parameters)
     {
         var databaseName = parameters.DatabaseName.ToUpper();
-        var results = oracleObjects.ToList();
-        var title = results.Count > parameters.MaxItems
+        var title = oracleObjects.Count > parameters.MaxItems
             ? $"[yellow][bold]Found more than {parameters.MaxItems} object(s)[/][/]"
-            : $"[yellow][bold]Found {results.Count} object(s)[/][/]";
+            : $"[yellow][bold]Found {oracleObjects.Count} object(s)[/][/]";
         var table = new Table()
             .BorderColor(Color.White)
             .Border(TableBorder.Square)
@@ -115,8 +125,8 @@ public class ConsoleService : IConsoleService
             .Caption($"[yellow][bold]{databaseName}[/][/]");
 
         var index = 1;
-        var count = Math.Min(results.Count, parameters.MaxItems);
-        foreach (var result in results.Take(count))
+        var count = Math.Min(oracleObjects.Count, parameters.MaxItems);
+        foreach (var result in oracleObjects.Take(count))
         {
             table.AddRow(IndexMarkup(index++), ToMarkup(result.OwnerName), ToMarkup(result.ObjectName), ToMarkup(result.ObjectType), ToMarkup(result.CreationDate.ToString("g")));
         }
@@ -126,13 +136,12 @@ public class ConsoleService : IConsoleService
         AnsiConsole.WriteLine();
     }
 
-    public void RenderOraclePackages(IEnumerable<OraclePackage> oraclePackages, OracleParameters parameters)
+    public void RenderOraclePackages(ICollection<OraclePackage> oraclePackages, OracleParameters parameters)
     {
         var databaseName = parameters.DatabaseName.ToUpper();
-        var results = oraclePackages.ToList();
-        var title = results.Count > parameters.MaxItems
+        var title = oraclePackages.Count > parameters.MaxItems
             ? $"[yellow][bold]Found more than {parameters.MaxItems} package(s)[/][/]"
-            : $"[yellow][bold]Found {results.Count} package(s)[/][/]";
+            : $"[yellow][bold]Found {oraclePackages.Count} package(s)[/][/]";
         var table = new Table()
             .BorderColor(Color.White)
             .Border(TableBorder.Square)
@@ -145,8 +154,8 @@ public class ConsoleService : IConsoleService
             .Caption($"[yellow][bold]{databaseName}[/][/]");
         
         var index = 1;
-        var count = Math.Min(results.Count, parameters.MaxItems);
-        foreach (var result in results.Take(count))
+        var count = Math.Min(oraclePackages.Count, parameters.MaxItems);
+        foreach (var result in oraclePackages.Take(count))
         {
             table.AddRow(IndexMarkup(index++), ToMarkup(result.OwnerName), ToMarkup(result.PackageName), ToMarkup(result.CreationDate.ToString("g")), ToMarkup($"{result.ProceduresCount}"));
         }
@@ -156,21 +165,20 @@ public class ConsoleService : IConsoleService
         AnsiConsole.WriteLine();
     }
 
-    public void RenderOracleArguments(IEnumerable<OracleArgument> oracleArguments, OracleParameters parameters)
+    public void RenderOracleArguments(ICollection<OracleArgument> oracleArguments, OracleParameters parameters)
     {
         var databaseName = parameters.DatabaseName.ToUpper();
-        var results = oracleArguments.ToList();
         var table = new Table()
             .BorderColor(Color.White)
             .Border(TableBorder.Square)
-            .Title($"[yellow][bold]Found {results.Count} argument(s)[/][/]")
+            .Title($"[yellow][bold]Found {oracleArguments.Count} argument(s)[/][/]")
             .AddColumn(new TableColumn("[u]Position[/]").Centered())
             .AddColumn(new TableColumn("[u]Name[/]").Centered())
             .AddColumn(new TableColumn("[u]DataType[/]").Centered())
             .AddColumn(new TableColumn("[u]Direction[/]").Centered())
             .Caption($"[yellow][bold]{databaseName}[/][/]");
         
-        foreach (var result in results)
+        foreach (var result in oracleArguments)
         {
             table.AddRow(ToMarkup($"{result.Position}"), ToMarkup(result.Name), ToMarkup(result.DataType), ToMarkup(result.Direction));
         }
@@ -180,13 +188,12 @@ public class ConsoleService : IConsoleService
         AnsiConsole.WriteLine();
     }
 
-    public void RenderOracleFunctions(IEnumerable<OracleFunction> oracleFunctions, OracleParameters parameters)
+    public void RenderOracleFunctions(ICollection<OracleFunction> oracleFunctions, OracleParameters parameters)
     {
         var databaseName = parameters.DatabaseName.ToUpper();
-        var results = oracleFunctions.ToList();
-        var title = results.Count > parameters.MaxItems
+        var title = oracleFunctions.Count > parameters.MaxItems
             ? $"[yellow][bold]Found more than {parameters.MaxItems} function(s)[/][/]"
-            : $"[yellow][bold]Found {results.Count} function(s)[/][/]";
+            : $"[yellow][bold]Found {oracleFunctions.Count} function(s)[/][/]";
         var table = new Table()
             .BorderColor(Color.White)
             .Border(TableBorder.Square)
@@ -198,8 +205,8 @@ public class ConsoleService : IConsoleService
             .Caption($"[yellow][bold]{databaseName}[/][/]");
 
         var index = 1;
-        var count = Math.Min(results.Count, parameters.MaxItems);
-        foreach (var result in results.Take(count))
+        var count = Math.Min(oracleFunctions.Count, parameters.MaxItems);
+        foreach (var result in oracleFunctions.Take(count))
         {
             table.AddRow(IndexMarkup(index++), ToMarkup(result.OwnerName), ToMarkup(result.FunctionName), ToMarkup(result.CreationDate.ToString("g")));
         }
@@ -209,13 +216,12 @@ public class ConsoleService : IConsoleService
         AnsiConsole.WriteLine();
     }
 
-    public void RenderOracleProcedures(IEnumerable<OracleProcedure> oracleProcedures, OracleParameters parameters)
+    public void RenderOracleProcedures(ICollection<OracleProcedure> oracleProcedures, OracleParameters parameters)
     {
         var databaseName = parameters.DatabaseName.ToUpper();
-        var results = oracleProcedures.ToList();
-        var title = results.Count > parameters.MaxItems
+        var title = oracleProcedures.Count > parameters.MaxItems
             ? $"[yellow][bold]Found more than {parameters.MaxItems} procedure(s)[/][/]"
-            : $"[yellow][bold]Found {results.Count} procedure(s)[/][/]";
+            : $"[yellow][bold]Found {oracleProcedures.Count} procedure(s)[/][/]";
         var table = new Table()
             .BorderColor(Color.White)
             .Border(TableBorder.Square)
@@ -228,8 +234,8 @@ public class ConsoleService : IConsoleService
             .Caption($"[yellow][bold]{databaseName}[/][/]");
 
         var index = 1;
-        var count = Math.Min(results.Count, parameters.MaxItems);
-        foreach (var result in results.Take(count))
+        var count = Math.Min(oracleProcedures.Count, parameters.MaxItems);
+        foreach (var result in oracleProcedures.Take(count))
         {
             table.AddRow(IndexMarkup(index++), ToMarkup(result.OwnerName), ToMarkup(result.PackageName), ToMarkup(result.ProcedureName), ToMarkup(result.CreationDate.ToString("g")));
         }
@@ -237,6 +243,12 @@ public class ConsoleService : IConsoleService
         AnsiConsole.WriteLine();
         AnsiConsole.Write(table);
         AnsiConsole.WriteLine();
+    }
+
+    public void CopyOracleArgumentsToClipboard(ICollection<OracleArgument> oracleArguments, OracleParameters parameters)
+    {
+        var csharp = _cSharpExporter.ExportOracleArguments(oracleArguments, parameters);
+        CopyTextToClipboard(csharp);
     }
 
     private static string GetFormattedJson(string json)
