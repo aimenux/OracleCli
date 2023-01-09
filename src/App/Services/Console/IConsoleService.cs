@@ -13,6 +13,7 @@ public interface IConsoleService
     void RenderException(Exception exception);
     void RenderValidationErrors(ValidationErrors validationErrors);
     void RenderOracleObjects(ICollection<OracleObject> oracleObjects, OracleParameters parameters);
+    void RenderOracleSchemas(ICollection<OracleSchema> oracleSchemas, OracleParameters parameters);
     void RenderOraclePackages(ICollection<OraclePackage> oraclePackages, OracleParameters parameters);
     void RenderOracleArguments(ICollection<OracleArgument> oracleArguments, OracleParameters parameters);
     void RenderOracleFunctions(ICollection<OracleFunction> oracleFunctions, OracleParameters parameters);

@@ -11,6 +11,7 @@ public static class ToolCommandValidator
         {
             ToolCommand _ => ValidationErrors.New<ToolCommand>(),
             ObjectsCommand objectsCommand => Validate(new ObjectsCommandValidator(), objectsCommand),
+            SchemasCommand schemasCommand => Validate(new SchemasCommandValidator(), schemasCommand),
             ArgumentsCommand argumentsCommand => Validate(new ArgumentsCommandValidator(), argumentsCommand),
             FunctionsCommand functionsCommand => Validate(new FunctionsCommandValidator(), functionsCommand),
             ProceduresCommand proceduresCommand => Validate(new ProceduresCommandValidator(), proceduresCommand),

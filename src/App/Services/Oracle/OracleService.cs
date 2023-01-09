@@ -289,7 +289,39 @@ public class OracleService : IOracleService
 
         return objects;
     }
-    
+
+    public async Task<ICollection<OracleSchema>> GetOracleSchemasAsync(OracleParameters parameters, CancellationToken cancellationToken = default)
+    {
+        var sqlBuilder = new StringBuilder
+        (
+            """
+                  SELECT 
+                    AU.USERNAME AS SchemaName, AU.CREATED AS CreationDate 
+                  FROM ALL_USERS AU
+                  WHERE 1 = 1 
+                    AND ROWNUM <= :max
+            """
+        );
+
+        if (!string.IsNullOrWhiteSpace(parameters.FilterKeyword))
+        {
+            sqlBuilder.AppendLine($" AND {HasKeyWord("AU.USERNAME")}");
+        }
+
+        sqlBuilder.AppendLine(" ORDER BY AU.USERNAME ASC");
+        
+        var sql = sqlBuilder.ToString();
+        var sqlParameters = new
+        {
+            max = parameters.MaxItems + 1,
+            keyword = parameters.FilterKeyword?.ToUpper()
+        };
+        
+        await using var connection = CreateOracleConnection(parameters);
+        var oracleSchemas = await connection.QueryAsync<OracleSchema>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
+        return oracleSchemas.ToList();;
+    }
+
     private async Task<IEnumerable<OracleObject>> GetOracleObjectsFromAllObjectsSourceAsync(OracleParameters parameters, CancellationToken cancellationToken = default)
     {
         var sqlBuilder = new StringBuilder

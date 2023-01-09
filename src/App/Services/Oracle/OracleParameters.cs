@@ -12,12 +12,12 @@ public sealed class OracleParameters
 
 public static class OracleParametersExtensions
 {
-    public static OracleParameters With(this OracleParameters parameters, string packageName, string procedureName)
+    public static OracleParameters With(this OracleParameters parameters, string ownerName, string packageName, string procedureName)
     {
         return new OracleParameters
         {
             DatabaseName = parameters.DatabaseName,
-            OwnerName = parameters.OwnerName,
+            OwnerName = ownerName,
             PackageName = packageName,
             ProcedureName = procedureName,
             MaxItems = parameters.MaxItems,

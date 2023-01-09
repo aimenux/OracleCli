@@ -88,7 +88,11 @@ public class CSharpExporter : ICSharpExporter
 
     private static string GetCSharpName(OracleArgument oracleArgument)
     {
-        return oracleArgument.Name.Transform(To.LowerCase).Pascalize();
+        var name = string.IsNullOrWhiteSpace(oracleArgument.Name)
+            ? $"{oracleArgument.Direction}{oracleArgument.Position}"
+            : oracleArgument.Name;
+        
+        return name.Transform(To.LowerCase).Pascalize();
     }
 
     private static string GetCSharpType(OracleArgument oracleArgument)

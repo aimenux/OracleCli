@@ -55,7 +55,7 @@ public class ArgumentsCommand : AbstractCommand
             else
             {
                 var oracleProcedure = oracleProcedures.Single();
-                parameters = parameters.With(oracleProcedure.PackageName, oracleProcedure.ProcedureName);
+                parameters = parameters.With(oracleProcedure.OwnerName, oracleProcedure.PackageName, oracleProcedure.ProcedureName);
                 var oracleArguments = await _oracleService.GetOracleArgumentsAsync(parameters, cancellationToken);
                 ConsoleService.RenderOracleArguments(oracleArguments, parameters);
                 ConsoleService.CopyOracleArgumentsToClipboard(oracleArguments, parameters);

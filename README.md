@@ -9,6 +9,7 @@ A net global tool helping to retrieve some infos (packages, functions, procedure
 >
 > The tool is based on multiple sub commmands :
 > - Use sub command `Object` or `Objects` to list objects from oracle
+> - Use sub command `Schema` or `Schemas` to list schemas from oracle
 > - Use sub command `Package` or `Packages` to list packages from oracle
 > - Use sub command `Function` or `Functions` to list functions from oracle
 > - Use sub command `Procedure` or `Procedures` to list procedures from oracle
@@ -18,11 +19,12 @@ A net global tool helping to retrieve some infos (packages, functions, procedure
 > To run the tool, type commands :
 > - `OracleCli -h` to show help
 > - `OracleCli -s` to show settings
-> - `OracleCli Object -d [db-name]` to list objects from oracle
-> - `OracleCli Package -d [db-name]` to list packages from oracle
-> - `OracleCli Function -d [db-name]` to list functions from oracle
-> - `OracleCli Procedure -d [db-name]` to list procedures from oracle
-> - `OracleCli Argument -d [db-name] -p [pkg-name] -s [spc-name]` to list procedure arguments from oracle
+> - `OracleCli Objects -d [db-name]` to list objects from oracle
+> - `OracleCli Schemas -d [db-name]` to list schemas from oracle
+> - `OracleCli Packages -d [db-name]` to list packages from oracle
+> - `OracleCli Functions -d [db-name]` to list functions from oracle
+> - `OracleCli Procedures -d [db-name]` to list procedures from oracle
+> - `OracleCli Arguments -d [db-name] -p [pkg-name] -s [spc-name]` to list procedure arguments from oracle
 >
 >
 > To install global tool from a local source path, type commands :
@@ -37,4 +39,4 @@ A net global tool helping to retrieve some infos (packages, functions, procedure
 >
 >
 
-**`Tools`** : vs22, net 6.0, net 7.0, command-line, spectre-console, dapper, xunit, fluent-assertions, test-containers
+**`Tools`** : vs22, net 6.0, net 7.0, command-line, spectre-console, text-copy, fluent-validation, dapper, xunit, fluent-assertions, test-containers 

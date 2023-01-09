@@ -136,6 +136,33 @@ public class ConsoleService : IConsoleService
         AnsiConsole.WriteLine();
     }
 
+    public void RenderOracleSchemas(ICollection<OracleSchema> oracleSchemas, OracleParameters parameters)
+    {
+        var databaseName = parameters.DatabaseName.ToUpper();
+        var title = oracleSchemas.Count > parameters.MaxItems
+            ? $"[yellow][bold]Found more than {parameters.MaxItems} schema(s)[/][/]"
+            : $"[yellow][bold]Found {oracleSchemas.Count} schema(s)[/][/]";
+        var table = new Table()
+            .BorderColor(Color.White)
+            .Border(TableBorder.Square)
+            .Title(title)
+            .AddColumn(new TableColumn("[u]#[/]").Centered())
+            .AddColumn(new TableColumn("[u]SchemaName[/]").Centered())
+            .AddColumn(new TableColumn("[u]CreationDate[/]").Centered())
+            .Caption($"[yellow][bold]{databaseName}[/][/]");
+
+        var index = 1;
+        var count = Math.Min(oracleSchemas.Count, parameters.MaxItems);
+        foreach (var result in oracleSchemas.Take(count))
+        {
+            table.AddRow(IndexMarkup(index++), ToMarkup(result.SchemaName), ToMarkup(result.CreationDate.ToString("g")));
+        }
+
+        AnsiConsole.WriteLine();
+        AnsiConsole.Write(table);
+        AnsiConsole.WriteLine();
+    }
+
     public void RenderOraclePackages(ICollection<OraclePackage> oraclePackages, OracleParameters parameters)
     {
         var databaseName = parameters.DatabaseName.ToUpper();

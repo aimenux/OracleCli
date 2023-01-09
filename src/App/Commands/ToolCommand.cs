@@ -8,7 +8,7 @@ using static App.Extensions.PathExtensions;
 namespace App.Commands;
 
 [Command(Name = Settings.Cli.UsageName, FullName = $"\n{Settings.Cli.FriendlyName}", Description = Settings.Cli.Description)]
-[Subcommand(typeof(ObjectsCommand), typeof(PackagesCommand), typeof(ProceduresCommand), typeof(FunctionsCommand), typeof(ArgumentsCommand))]
+[Subcommand(typeof(ObjectsCommand), typeof(SchemasCommand), typeof(PackagesCommand), typeof(ProceduresCommand), typeof(FunctionsCommand), typeof(ArgumentsCommand))]
 [VersionOptionFromMember(MemberName = nameof(GetVersion))]
 public class ToolCommand : AbstractCommand
 {
