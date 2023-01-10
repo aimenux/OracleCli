@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 
 namespace App.Commands;
 
-[Command("Schema", "Schemas", "Owner", "Owners", FullName = "List oracle schema", Description = "List oracle objects.")]
+[Command("Schema", "Schemas", "Owner", "Owners", FullName = "List oracle schema", Description = "List oracle schemas.")]
 public class SchemasCommand : AbstractCommand
 {
     private readonly IOracleService _oracleService;
