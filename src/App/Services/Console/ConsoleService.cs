@@ -12,13 +12,13 @@ namespace App.Services.Console;
 public class ConsoleService : IConsoleService
 {
     private readonly ICSharpExporter _cSharpExporter;
-    
+
     public ConsoleService(ICSharpExporter cSharpExporter)
     {
         System.Console.OutputEncoding = Encoding.UTF8;
         _cSharpExporter = cSharpExporter ?? throw new ArgumentNullException(nameof(cSharpExporter));
     }
-    
+
     public void CopyTextToClipboard(string text)
     {
         if (string.IsNullOrWhiteSpace(text)) return;
@@ -31,25 +31,13 @@ public class ConsoleService : IConsoleService
         AnsiConsole.Write(new FigletText(text).LeftAligned());
         AnsiConsole.WriteLine();
     }
-    
+
     public void RenderText(string text, string color)
     {
         AnsiConsole.WriteLine();
         AnsiConsole.Write(new Markup($"[bold {color}]{text}[/]"));
         AnsiConsole.WriteLine();
         AnsiConsole.WriteLine();
-    }
-
-    public async Task RenderStatusAsync(Func<Task> action)
-    {
-        var spinner = RandomSpinner();
-
-        await AnsiConsole.Status()
-            .StartAsync("Work is in progress ...", async ctx =>
-            {
-                ctx.Spinner(spinner);
-                await action.Invoke();
-            });
     }
 
     public void RenderSettingsFile(string filepath)
@@ -80,6 +68,30 @@ public class ConsoleService : IConsoleService
         AnsiConsole.WriteLine();
         AnsiConsole.WriteException(exception, formats);
         AnsiConsole.WriteLine();
+    }
+
+    public async Task RenderStatusAsync(Func<Task> action)
+    {
+        var spinner = RandomSpinner();
+
+        await AnsiConsole.Status()
+            .StartAsync("Work is in progress ...", async ctx =>
+            {
+                ctx.Spinner(spinner);
+                await action.Invoke();
+            });
+    }
+
+    public async Task<T> RenderStatusAsync<T>(Func<Task<T>> func)
+    {
+        var spinner = RandomSpinner();
+
+        return await AnsiConsole.Status()
+            .StartAsync("Work is in progress ...", async ctx =>
+            {
+                ctx.Spinner(spinner);
+                return await func.Invoke();
+            });
     }
 
     public void RenderValidationErrors(ValidationErrors validationErrors)
@@ -179,7 +191,7 @@ public class ConsoleService : IConsoleService
             .AddColumn(new TableColumn("[u]CreationDate[/]").Centered())
             .AddColumn(new TableColumn("[u]ProceduresCount[/]").Centered())
             .Caption($"[yellow][bold]{databaseName}[/][/]");
-        
+
         var index = 1;
         var count = Math.Min(oraclePackages.Count, parameters.MaxItems);
         foreach (var result in oraclePackages.Take(count))
@@ -204,7 +216,7 @@ public class ConsoleService : IConsoleService
             .AddColumn(new TableColumn("[u]DataType[/]").Centered())
             .AddColumn(new TableColumn("[u]Direction[/]").Centered())
             .Caption($"[yellow][bold]{databaseName}[/][/]");
-        
+
         foreach (var result in oracleArguments)
         {
             table.AddRow(ToMarkup($"{result.Position}"), ToMarkup(result.Name), ToMarkup(result.DataType), ToMarkup(result.Direction));

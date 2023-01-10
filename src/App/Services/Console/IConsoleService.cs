@@ -8,9 +8,10 @@ public interface IConsoleService
     void CopyTextToClipboard(string text);
     void RenderTitle(string text);
     void RenderText(string text, string color = Colors.White);
-    Task RenderStatusAsync(Func<Task> action);
     void RenderSettingsFile(string filepath);
     void RenderException(Exception exception);
+    Task RenderStatusAsync(Func<Task> action);
+    Task<T> RenderStatusAsync<T>(Func<Task<T>> func);
     void RenderValidationErrors(ValidationErrors validationErrors);
     void RenderOracleObjects(ICollection<OracleObject> oracleObjects, OracleParameters parameters);
     void RenderOracleSchemas(ICollection<OracleSchema> oracleSchemas, OracleParameters parameters);

@@ -22,16 +22,16 @@ public class ArgumentsCommand : AbstractCommand
         DatabaseName = Settings.DefaultDatabaseToUse;
         OwnerName = Settings.DefaultSchemaToUse;
     }
-    
+
     [Option("-d|--db", "Database name", CommandOptionType.SingleValue)]
     public string DatabaseName { get; init; }
-    
+
     [Option("-o|--owner", "Owner/Schema name", CommandOptionType.SingleValue)]
     public string OwnerName { get; init; }
 
     [Option("-p|--pkg", "Package name", CommandOptionType.SingleValue)]
     public string PackageName { get; init; }
-    
+
     [Option("-s|--spc", "Procedure name", CommandOptionType.SingleValue)]
     public string ProcedureName { get; init; }
 
@@ -50,7 +50,7 @@ public class ArgumentsCommand : AbstractCommand
             var oracleProcedures = await FindOracleProceduresAsync(parameters, cancellationToken);
             if (oracleProcedures.Count is 0 or > 1)
             {
-                ConsoleService.RenderText($"Found {oracleProcedures.Count} procedure(s) matching name '{parameters.ProcedureName}'");
+                ConsoleService.RenderText($"Found {oracleProcedures.Count} procedure(s) matching name '{parameters.ProcedureName}'", Colors.Red);
             }
             else
             {

@@ -37,15 +37,15 @@ public class OracleService : IOracleService
         {
             sqlBuilder.AppendLine(" AND UPPER(AP.OWNER) = :owner");
         }
-        
+
         if (!string.IsNullOrWhiteSpace(parameters.FilterKeyword))
         {
             sqlBuilder.AppendLine($" AND ({HasKeyWord("AP.OWNER")} OR {HasKeyWord("AP.OBJECT_NAME")} OR {HasKeyWord("AP.PROCEDURE_NAME")})");
         }
-        
+
         sqlBuilder.AppendLine(" GROUP BY AP.OWNER, AP.OBJECT_NAME, AO.CREATED");
         sqlBuilder.AppendLine(" ORDER BY AP.OWNER, AP.OBJECT_NAME, AO.CREATED ASC");
-        
+
         var sql = $"WITH RWS AS ( {sqlBuilder} ) SELECT * FROM RWS WHERE ROWNUM <= :max";
         var sqlParameters = new
         {
@@ -53,7 +53,7 @@ public class OracleService : IOracleService
             owner = parameters.OwnerName?.ToUpper(),
             keyword = parameters.FilterKeyword?.ToUpper()
         };
-        
+
         await using var connection = CreateOracleConnection(parameters);
         var oraclePackages = await connection.QueryAsync<OraclePackage>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
         return oraclePackages.ToList();
@@ -78,14 +78,14 @@ public class OracleService : IOracleService
         {
             sqlBuilder.AppendLine(" AND UPPER(AP.OWNER) = :owner");
         }
-        
+
         if (!string.IsNullOrWhiteSpace(parameters.FilterKeyword))
         {
             sqlBuilder.AppendLine($" AND ({HasKeyWord("AP.OWNER")} OR {HasKeyWord("AP.OBJECT_NAME")})");
         }
 
         sqlBuilder.AppendLine(" ORDER BY AP.OWNER, AP.OBJECT_NAME ASC");
-        
+
         var sql = sqlBuilder.ToString();
         var sqlParameters = new
         {
@@ -93,7 +93,7 @@ public class OracleService : IOracleService
             owner = parameters.OwnerName?.ToUpper(),
             keyword = parameters.FilterKeyword?.ToUpper()
         };
-        
+
         await using var connection = CreateOracleConnection(parameters);
         var oracleFunctions = await connection.QueryAsync<OracleFunction>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
         return oracleFunctions.ToList();
@@ -121,14 +121,14 @@ public class OracleService : IOracleService
         {
             sqlBuilder.AppendLine(" AND UPPER(AP.OWNER) = :owner");
         }
-        
+
         if (!string.IsNullOrWhiteSpace(parameters.FilterKeyword))
         {
             sqlBuilder.AppendLine($" AND ({HasKeyWord("AP.OWNER")} OR {HasKeyWord("AP.OBJECT_NAME")} OR {HasKeyWord("AP.PROCEDURE_NAME")})");
         }
 
         sqlBuilder.AppendLine(" ORDER BY AP.OWNER, AP.OBJECT_NAME, AP.PROCEDURE_NAME ASC");
-        
+
         var sql = sqlBuilder.ToString();
         var sqlParameters = new
         {
@@ -136,7 +136,7 @@ public class OracleService : IOracleService
             owner = parameters.OwnerName?.ToUpper(),
             keyword = parameters.FilterKeyword?.ToUpper()
         };
-        
+
         await using var connection = CreateOracleConnection(parameters);
         var oracleProcedures = await connection.QueryAsync<OracleProcedure>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
         return oracleProcedures.ToList();
@@ -155,29 +155,35 @@ public class OracleService : IOracleService
                   FROM ALL_PROCEDURES AP
                   INNER JOIN ALL_OBJECTS AO ON AP.OBJECT_ID = AO.OBJECT_ID
                   WHERE 1 = 1 
-                    AND ((UPPER(AO.OBJECT_TYPE) = 'PROCEDURE' AND UPPER(AP.OBJECT_NAME) = :name) OR (UPPER(AO.OBJECT_TYPE) = 'PACKAGE' AND UPPER(AP.PROCEDURE_NAME) = :name))
+                    AND ((UPPER(AO.OBJECT_TYPE) = 'PROCEDURE' AND UPPER(AP.OBJECT_NAME) = :spcName) OR (UPPER(AO.OBJECT_TYPE) = 'PACKAGE' AND UPPER(AP.PROCEDURE_NAME) = :spcName))
                     AND ROWNUM <= :max
             """
         );
-        
+
         if (!string.IsNullOrWhiteSpace(parameters.OwnerName))
         {
             sqlBuilder.AppendLine(" AND UPPER(AP.OWNER) = :owner");
         }
-        
+
+        if (!string.IsNullOrWhiteSpace(parameters.PackageName))
+        {
+            sqlBuilder.AppendLine(" AND UPPER(AP.OBJECT_NAME) = :pkgName");
+        }
+
         var sql = sqlBuilder.ToString();
         var sqlParameters = new
         {
             max = parameters.MaxItems + 1,
             owner = parameters.OwnerName?.ToUpper(),
-            name = parameters.ProcedureName?.ToUpper()
+            spcName = parameters.ProcedureName?.ToUpper(),
+            pkgName = parameters.PackageName?.ToUpper()
         };
-        
+
         await using var connection = CreateOracleConnection(parameters);
         var oracleProcedures = await connection.QueryAsync<OracleProcedure>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
         return oracleProcedures.ToList();
     }
-    
+
     public async Task<ICollection<OracleArgument>> GetOracleArgumentsAsync(OracleParameters parameters, CancellationToken cancellationToken)
     {
         var sqlBuilder = new StringBuilder
@@ -189,7 +195,7 @@ public class OracleService : IOracleService
                   WHERE 1 = 1  
             """
         );
-        
+
         if (!string.IsNullOrWhiteSpace(parameters.OwnerName))
         {
             sqlBuilder.AppendLine(" AND UPPER(AA.OWNER) = :owner");
@@ -199,13 +205,13 @@ public class OracleService : IOracleService
         {
             sqlBuilder.AppendLine(" AND UPPER(AA.OBJECT_NAME) = :procedure");
         }
-        
+
         sqlBuilder.AppendLine(string.IsNullOrWhiteSpace(parameters.PackageName)
             ? " AND AA.PACKAGE_NAME IS NULL"
             : " AND UPPER(AA.PACKAGE_NAME) = :package");
-        
+
         sqlBuilder.AppendLine(" ORDER BY AA.POSITION ASC");
-        
+
         var sql = sqlBuilder.ToString();
         var sqlParameters = new
         {
@@ -213,25 +219,25 @@ public class OracleService : IOracleService
             package = parameters.PackageName?.ToUpper(),
             procedure = parameters.ProcedureName?.ToUpper()
         };
-        
+
         await using var connection = CreateOracleConnection(parameters);
         var oracleArguments = await connection.QueryAsync<OracleArgument>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
         return oracleArguments.ToList();
     }
-    
+
     public async Task<ICollection<OracleObject>> GetOracleObjectsAsync(OracleParameters parameters, CancellationToken cancellationToken = default)
     {
         var getFromAllObjectsSourceTask = GetOracleObjectsFromAllObjectsSourceAsync(parameters, cancellationToken);
         var getPackagesFromAllProceduresSourceTask = GetOraclePackagesAsync(parameters, cancellationToken);
         var getProceduresFromAllProceduresSourceTask = GetOracleProceduresAsync(parameters, cancellationToken);
         var getFunctionsFromAllProceduresSourceTask = GetOracleFunctionsAsync(parameters, cancellationToken);
-        
+
         await Task.WhenAll(
             getFromAllObjectsSourceTask,
             getPackagesFromAllProceduresSourceTask,
             getProceduresFromAllProceduresSourceTask,
             getFunctionsFromAllProceduresSourceTask);
-        
+
         var objectsFromAllObjectsSource = (await getFromAllObjectsSourceTask)
             .Select(x => new OracleObject
             {
@@ -242,7 +248,7 @@ public class OracleService : IOracleService
                 Source = OracleSource.AllObjectsTable
             })
             .ToList();
-        
+
         var packagesFromAllProceduresSource = (await getPackagesFromAllProceduresSourceTask)
             .Select(x => new OracleObject
             {
@@ -253,7 +259,7 @@ public class OracleService : IOracleService
                 Source = OracleSource.AllProceduresTable
             })
             .ToList();
-        
+
         var proceduresFromAllProceduresSource = (await getProceduresFromAllProceduresSourceTask)
             .Select(x => new OracleObject
             {
@@ -264,7 +270,7 @@ public class OracleService : IOracleService
                 Source = OracleSource.AllProceduresTable
             })
             .ToList();
-        
+
         var functionsFromAllProceduresSource = (await getFunctionsFromAllProceduresSourceTask)
             .Select(x => new OracleObject
             {
@@ -309,17 +315,17 @@ public class OracleService : IOracleService
         }
 
         sqlBuilder.AppendLine(" ORDER BY AU.USERNAME ASC");
-        
+
         var sql = sqlBuilder.ToString();
         var sqlParameters = new
         {
             max = parameters.MaxItems + 1,
             keyword = parameters.FilterKeyword?.ToUpper()
         };
-        
+
         await using var connection = CreateOracleConnection(parameters);
         var oracleSchemas = await connection.QueryAsync<OracleSchema>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
-        return oracleSchemas.ToList();;
+        return oracleSchemas.ToList();
     }
 
     private async Task<IEnumerable<OracleObject>> GetOracleObjectsFromAllObjectsSourceAsync(OracleParameters parameters, CancellationToken cancellationToken = default)
@@ -340,14 +346,14 @@ public class OracleService : IOracleService
         {
             sqlBuilder.AppendLine(" AND UPPER(AO.OWNER) = :owner");
         }
-        
+
         if (!string.IsNullOrWhiteSpace(parameters.FilterKeyword))
         {
             sqlBuilder.AppendLine($" AND ({HasKeyWord("AO.OWNER")} OR {HasKeyWord("AO.OBJECT_NAME")} OR {HasKeyWord("AO.OBJECT_TYPE")})");
         }
 
         sqlBuilder.AppendLine(" ORDER BY AO.OWNER, AO.OBJECT_NAME, AO.OBJECT_TYPE ASC");
-        
+
         var sql = sqlBuilder.ToString();
         var sqlParameters = new
         {
@@ -355,7 +361,7 @@ public class OracleService : IOracleService
             owner = parameters.OwnerName?.ToUpper(),
             keyword = parameters.FilterKeyword?.ToUpper()
         };
-        
+
         await using var connection = CreateOracleConnection(parameters);
         var oracleObjects = await connection.QueryAsync<OracleObject>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
         return oracleObjects;
@@ -374,6 +380,6 @@ public class OracleService : IOracleService
 
         return new OracleConnection(connectionString);
     }
-    
+
     private static string HasKeyWord(string fieldName) => $"UPPER({fieldName}) LIKE '%' || :keyword || '%'";
 }
