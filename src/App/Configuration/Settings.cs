@@ -1,4 +1,7 @@
-﻿namespace App.Configuration;
+﻿using System.Reflection;
+using App.Commands;
+
+namespace App.Configuration;
 
 public sealed class Settings
 {
@@ -7,6 +10,15 @@ public sealed class Settings
         public const string UsageName = @"OracleCli";
         public const string FriendlyName = @"OracleCli";
         public const string Description = @"A net global tool helping to retrieve package(s), function(s), procedure(s) and argument(s) infos from oracle.";
+        public static readonly string Version = GetInformationalVersion().Split("+").FirstOrDefault();
+        
+        private static string GetInformationalVersion()
+        {
+            return typeof(ToolCommand)
+                .Assembly
+                .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
+                .InformationalVersion;
+        }
     }
     
     public static class ExitCode

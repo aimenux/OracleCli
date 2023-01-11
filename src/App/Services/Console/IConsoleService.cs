@@ -7,6 +7,7 @@ public interface IConsoleService
 {
     void CopyTextToClipboard(string text);
     void RenderTitle(string text);
+    void RenderVersion(string version);
     void RenderText(string text, string color = Colors.White);
     void RenderSettingsFile(string filepath);
     void RenderException(Exception exception);

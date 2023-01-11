@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using App.Configuration;
+﻿using App.Configuration;
 using App.Services.Console;
 using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Options;
@@ -7,9 +6,8 @@ using static App.Extensions.PathExtensions;
 
 namespace App.Commands;
 
-[Command(Name = Settings.Cli.UsageName, FullName = $"\n{Settings.Cli.FriendlyName}", Description = Settings.Cli.Description)]
+[Command(Name = Settings.Cli.UsageName, Description = $"\n{Settings.Cli.Description}")]
 [Subcommand(typeof(ObjectsCommand), typeof(SchemasCommand), typeof(PackagesCommand), typeof(ProceduresCommand), typeof(FunctionsCommand), typeof(ArgumentsCommand))]
-[VersionOptionFromMember(MemberName = nameof(GetVersion))]
 public class ToolCommand : AbstractCommand
 {
     public ToolCommand(IConsoleService consoleService, IOptions<Settings> options) : base(consoleService, options)
@@ -18,6 +16,9 @@ public class ToolCommand : AbstractCommand
 
     [Option("-s|--settings", "Show settings information.", CommandOptionType.NoValue)]
     public bool ShowSettings { get; init; }
+    
+    [Option("-v|--version", "Show version information.", CommandOptionType.NoValue)]
+    public bool ShowVersion { get; init; }
 
     protected override Task ExecuteAsync(CommandLineApplication app, CancellationToken cancellationToken = default)
     {
@@ -26,6 +27,10 @@ public class ToolCommand : AbstractCommand
             var filepath = GetSettingFilePath();
             ConsoleService.RenderSettingsFile(filepath);
         }
+        else if (ShowVersion)
+        {
+            ConsoleService.RenderVersion(Settings.Cli.Version);
+        }
         else
         {
             ConsoleService.RenderTitle(Settings.Cli.FriendlyName);
@@ -33,15 +38,5 @@ public class ToolCommand : AbstractCommand
         }
 
         return Task.CompletedTask;
-    }
-
-    private static string GetVersion()
-    {
-        var version = typeof(ToolCommand)
-            .Assembly
-            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
-            .InformationalVersion;
-        
-        return $"V{version}";
     }
 }

@@ -1,9 +1,11 @@
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
+using App.Configuration;
 using App.Services.Exporters;
 using App.Services.Oracle;
 using App.Validators;
+using Dapper;
 using Spectre.Console;
 using TextCopy;
 
@@ -30,6 +32,12 @@ public class ConsoleService : IConsoleService
         AnsiConsole.WriteLine();
         AnsiConsole.Write(new FigletText(text).LeftAligned());
         AnsiConsole.WriteLine();
+    }
+
+    public void RenderVersion(string version)
+    {
+        var text = $"{Settings.Cli.FriendlyName} V{version}";
+        RenderText(text, Colors.White);
     }
 
     public void RenderText(string text, string color)
