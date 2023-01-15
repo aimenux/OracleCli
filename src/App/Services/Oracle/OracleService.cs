@@ -25,6 +25,7 @@ public class OracleService : IOracleService
                     AP.OWNER AS OwnerName, 
                     AP.OBJECT_NAME AS PackageName, 
                     AO.CREATED AS CreationDate, 
+                    AO.LAST_DDL_TIME AS ModificationDate,
                     SUM(CASE WHEN AP.PROCEDURE_NAME IS NULL THEN 0 ELSE 1 END) AS ProceduresCount
                   FROM ALL_PROCEDURES AP
                   INNER JOIN ALL_OBJECTS AO ON AP.OBJECT_ID = AO.OBJECT_ID
@@ -43,8 +44,8 @@ public class OracleService : IOracleService
             sqlBuilder.AppendLine($" AND ({HasKeyWord("AP.OWNER")} OR {HasKeyWord("AP.OBJECT_NAME")} OR {HasKeyWord("AP.PROCEDURE_NAME")})");
         }
 
-        sqlBuilder.AppendLine(" GROUP BY AP.OWNER, AP.OBJECT_NAME, AO.CREATED");
-        sqlBuilder.AppendLine(" ORDER BY AP.OWNER, AP.OBJECT_NAME, AO.CREATED ASC");
+        sqlBuilder.AppendLine(" GROUP BY AP.OWNER, AP.OBJECT_NAME, AO.CREATED, AO.LAST_DDL_TIME");
+        sqlBuilder.AppendLine(" ORDER BY AP.OWNER, AP.OBJECT_NAME, AO.CREATED, AO.LAST_DDL_TIME ASC");
 
         var sql = $"WITH RWS AS ( {sqlBuilder} ) SELECT * FROM RWS WHERE ROWNUM <= :max";
         var sqlParameters = new
@@ -65,7 +66,10 @@ public class OracleService : IOracleService
         (
             """
                   SELECT
-                    AP.OWNER AS OwnerName, AP.OBJECT_NAME AS FunctionName, AO.CREATED AS CreationDate
+                    AP.OWNER AS OwnerName, 
+                    AP.OBJECT_NAME AS FunctionName, 
+                    AO.CREATED AS CreationDate,
+                    AO.LAST_DDL_TIME AS ModificationDate
                   FROM ALL_PROCEDURES AP
                   INNER JOIN ALL_OBJECTS AO ON AP.OBJECT_ID = AO.OBJECT_ID
                   WHERE 1 = 1 
@@ -108,7 +112,8 @@ public class OracleService : IOracleService
                     AP.OWNER AS OwnerName, 
                     (CASE WHEN AP.PROCEDURE_NAME IS NULL THEN '' ELSE AP.OBJECT_NAME END) AS PackageName, 
                     (CASE WHEN AP.PROCEDURE_NAME IS NULL THEN AP.OBJECT_NAME ELSE AP.PROCEDURE_NAME END) AS ProcedureName, 
-                    AO.CREATED AS CreationDate
+                    AO.CREATED AS CreationDate,
+                    AO.LAST_DDL_TIME AS ModificationDate
                   FROM ALL_PROCEDURES AP
                   INNER JOIN ALL_OBJECTS AO ON AP.OBJECT_ID = AO.OBJECT_ID
                   WHERE 1 = 1 
@@ -151,7 +156,8 @@ public class OracleService : IOracleService
                     AP.OWNER AS OwnerName, 
                     (CASE WHEN AP.PROCEDURE_NAME IS NULL THEN '' ELSE AP.OBJECT_NAME END) AS PackageName, 
                     (CASE WHEN AP.PROCEDURE_NAME IS NULL THEN AP.OBJECT_NAME ELSE AP.PROCEDURE_NAME END) AS ProcedureName, 
-                    AO.CREATED AS CreationDate
+                    AO.CREATED AS CreationDate,
+                    AO.LAST_DDL_TIME AS ModificationDate
                   FROM ALL_PROCEDURES AP
                   INNER JOIN ALL_OBJECTS AO ON AP.OBJECT_ID = AO.OBJECT_ID
                   WHERE 1 = 1 
@@ -192,7 +198,7 @@ public class OracleService : IOracleService
                   SELECT
                     AA.ARGUMENT_NAME AS Name, AA.POSITION AS Position, AA.DATA_TYPE AS DataType, AA.IN_OUT AS Direction
                   FROM ALL_ARGUMENTS AA
-                  WHERE 1 = 1  
+                  WHERE 1 = 1
             """
         );
 
@@ -225,6 +231,64 @@ public class OracleService : IOracleService
         return oracleArguments.ToList();
     }
 
+    public async Task<ICollection<OracleSource>> GetOracleSourcesAsync(OracleParameters parameters, CancellationToken cancellationToken = default)
+    {
+        var hasOwnerName = !string.IsNullOrWhiteSpace(parameters.OwnerName)
+            ? "UPPER(OWNER) = :owner"
+            : "1 = 1";
+        
+        var sqlBuilder = new StringBuilder
+        (
+            $"""
+                  WITH FIRST_LINE AS 
+                  (
+                      SELECT 
+                        LINE,
+                        TEXT
+                      FROM ALL_SOURCE
+                      WHERE {hasOwnerName}
+                        AND UPPER(NAME) = :package
+                        AND UPPER(TYPE) = 'PACKAGE BODY'
+                        AND INSTR(UPPER(TEXT), :procedure) > 0
+                        AND INSTR(UPPER(TEXT), 'PROCEDURE') > 0
+                      ORDER BY LINE ASC
+                  ),
+                  LAST_LINE AS 
+                  (
+                      SELECT
+                        LINE,
+                        TEXT
+                      FROM ALL_SOURCE
+                      WHERE {hasOwnerName}
+                        AND UPPER(NAME) = :package
+                        AND UPPER(TYPE) = 'PACKAGE BODY'
+                        AND INSTR(UPPER(TEXT), :procedure) > 0
+                        AND INSTR(UPPER(TEXT), 'END') > 0
+                      ORDER BY LINE ASC
+                  )
+                  SELECT AC.LINE AS Line, AC.TEXT AS Text
+                    FROM ALL_SOURCE AC
+                  WHERE {hasOwnerName}
+                    AND UPPER(AC.NAME) = :package
+                    AND UPPER(AC.TYPE) = 'PACKAGE BODY'
+                    AND AC.LINE BETWEEN (SELECT LINE from FIRST_LINE) AND (SELECT LINE from LAST_LINE)
+                  ORDER BY AC.LINE ASC
+            """
+        );
+
+        var sql = sqlBuilder.ToString();
+        var sqlParameters = new
+        {
+            owner = parameters.OwnerName?.ToUpper(),
+            package = parameters.PackageName?.ToUpper(),
+            procedure = parameters.ProcedureName?.ToUpper()
+        };
+
+        await using var connection = CreateOracleConnection(parameters);
+        var oracleSources = await connection.QueryAsync<OracleSource>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
+        return oracleSources.ToList();
+    }
+
     public async Task<ICollection<OracleObject>> GetOracleObjectsAsync(OracleParameters parameters, CancellationToken cancellationToken = default)
     {
         var getFromAllObjectsSourceTask = GetOracleObjectsFromAllObjectsSourceAsync(parameters, cancellationToken);
@@ -245,7 +309,7 @@ public class OracleService : IOracleService
                 ObjectName = x.ObjectName,
                 ObjectType = x.ObjectType,
                 CreationDate = x.CreationDate,
-                Source = OracleSource.AllObjectsTable
+                ModificationDate = x.ModificationDate
             })
             .ToList();
 
@@ -256,7 +320,7 @@ public class OracleService : IOracleService
                 ObjectName = x.PackageName,
                 ObjectType = "PACKAGE",
                 CreationDate = x.CreationDate,
-                Source = OracleSource.AllProceduresTable
+                ModificationDate = x.ModificationDate
             })
             .ToList();
 
@@ -267,7 +331,7 @@ public class OracleService : IOracleService
                 ObjectName = string.IsNullOrWhiteSpace(x.ProcedureName) ? x.PackageName : x.ProcedureName,
                 ObjectType = string.IsNullOrWhiteSpace(x.ProcedureName) ? "PACKAGE" : "PROCEDURE",
                 CreationDate = x.CreationDate,
-                Source = OracleSource.AllProceduresTable
+                ModificationDate = x.ModificationDate
             })
             .ToList();
 
@@ -278,7 +342,7 @@ public class OracleService : IOracleService
                 ObjectName = x.FunctionName,
                 ObjectType = "FUNCTION",
                 CreationDate = x.CreationDate,
-                Source = OracleSource.AllProceduresTable
+                ModificationDate = x.ModificationDate
             })
             .ToList();
 
@@ -334,7 +398,11 @@ public class OracleService : IOracleService
         (
             """
                   SELECT 
-                    AO.OWNER AS OwnerName, AO.OBJECT_NAME AS ObjectName, AO.OBJECT_TYPE AS ObjectType, AO.CREATED AS CreationDate 
+                    AO.OWNER AS OwnerName, 
+                    AO.OBJECT_NAME AS ObjectName, 
+                    AO.OBJECT_TYPE AS ObjectType, 
+                    AO.CREATED AS CreationDate,
+                    AO.LAST_DDL_TIME AS ModificationDate
                   FROM ALL_OBJECTS AO
                   WHERE 1 = 1 
                     AND UPPER(AO.OBJECT_TYPE) IN ('FUNCTION', 'PROCEDURE', 'PACKAGE')

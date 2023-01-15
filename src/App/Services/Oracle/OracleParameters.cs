@@ -9,6 +9,9 @@ public sealed class OracleParameters
     public string ProcedureName { get; init; }
     public string DatabaseName { get; init; }
     public string FilterKeyword { get; init; }
+    public string OutputDirectory { get; init; }
+    public string OutputFile { get; init; }
+    public string ErrorsFile { get; init; }
     public int MaxItems { get; init; } = Settings.DatabaseMaxItems;
 }
 
@@ -23,7 +26,10 @@ public static class OracleParametersExtensions
             PackageName = packageName,
             ProcedureName = procedureName,
             MaxItems = parameters.MaxItems,
-            FilterKeyword = parameters.FilterKeyword
+            FilterKeyword = parameters.FilterKeyword,
+            OutputDirectory = parameters.OutputDirectory,
+            OutputFile = parameters.OutputFile,
+            ErrorsFile = parameters.ErrorsFile
         };
     }
 }

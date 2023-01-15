@@ -5,7 +5,6 @@ namespace App.Services.Console;
 
 public interface IConsoleService
 {
-    void CopyTextToClipboard(string text);
     void RenderTitle(string text);
     void RenderVersion(string version);
     void RenderText(string text, string color = Colors.White);
@@ -16,9 +15,11 @@ public interface IConsoleService
     void RenderValidationErrors(ValidationErrors validationErrors);
     void RenderOracleObjects(ICollection<OracleObject> oracleObjects, OracleParameters parameters);
     void RenderOracleSchemas(ICollection<OracleSchema> oracleSchemas, OracleParameters parameters);
+    void RenderOracleSources(ICollection<OracleSource> oracleSources, OracleParameters parameters);
     void RenderOraclePackages(ICollection<OraclePackage> oraclePackages, OracleParameters parameters);
     void RenderOracleArguments(ICollection<OracleArgument> oracleArguments, OracleParameters parameters);
     void RenderOracleFunctions(ICollection<OracleFunction> oracleFunctions, OracleParameters parameters);
     void RenderOracleProcedures(ICollection<OracleProcedure> oracleProcedures, OracleParameters parameters);
+    void CopyOracleSourcesToFile(ICollection<OracleSource> oracleSources, OracleParameters parameters);
     void CopyOracleArgumentsToClipboard(ICollection<OracleArgument> oracleArguments, OracleParameters parameters);
 }

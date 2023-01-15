@@ -26,6 +26,12 @@ public sealed class Settings
         public const int Ok = 0;
         public const int Ko = -1;
     }
+    
+    public static string GetDefaultWorkingDirectory()
+    {
+        const string workDir = @"C:\Logs";
+        return Directory.Exists(workDir) ? workDir : "./";
+    }
 
     public const int DatabaseMaxItems = 30;
 

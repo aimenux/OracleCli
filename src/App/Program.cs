@@ -46,6 +46,7 @@ public static class Program
                 services.AddTransient<IOracleService, OracleService>();
                 services.AddTransient<IConsoleService, ConsoleService>();
                 services.AddTransient<ICSharpExporter, CSharpExporter>();
+                services.AddTransient<ISqlExporter, SqlExporter>();
                 services.Configure<Settings>(hostingContext.Configuration.GetSection(nameof(Settings)));
             })
             .AddSerilog();

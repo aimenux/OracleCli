@@ -1,11 +1,11 @@
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using App.Configuration;
 using App.Services.Exporters;
 using App.Services.Oracle;
 using App.Validators;
-using Dapper;
 using Spectre.Console;
 using TextCopy;
 
@@ -14,17 +14,13 @@ namespace App.Services.Console;
 public class ConsoleService : IConsoleService
 {
     private readonly ICSharpExporter _cSharpExporter;
+    private readonly ISqlExporter _sqlExporter;
 
-    public ConsoleService(ICSharpExporter cSharpExporter)
+    public ConsoleService(ICSharpExporter cSharpExporter, ISqlExporter sqlExporter)
     {
         System.Console.OutputEncoding = Encoding.UTF8;
         _cSharpExporter = cSharpExporter ?? throw new ArgumentNullException(nameof(cSharpExporter));
-    }
-
-    public void CopyTextToClipboard(string text)
-    {
-        if (string.IsNullOrWhiteSpace(text)) return;
-        ClipboardService.SetText(text);
+        _sqlExporter = sqlExporter ?? throw new ArgumentNullException(nameof(sqlExporter));
     }
 
     public void RenderTitle(string text)
@@ -142,13 +138,20 @@ public class ConsoleService : IConsoleService
             .AddColumn(new TableColumn("[u]ObjectName[/]").Centered())
             .AddColumn(new TableColumn("[u]ObjectType[/]").Centered())
             .AddColumn(new TableColumn("[u]CreationDate[/]").Centered())
+            .AddColumn(new TableColumn("[u]ModificationDate[/]").Centered())
             .Caption($"[yellow][bold]{databaseName}[/][/]");
 
         var index = 1;
         var count = Math.Min(oracleObjects.Count, parameters.MaxItems);
         foreach (var result in oracleObjects.Take(count))
         {
-            table.AddRow(IndexMarkup(index++), ToMarkup(result.OwnerName), ToMarkup(result.ObjectName), ToMarkup(result.ObjectType), ToMarkup(result.CreationDate.ToString("g")));
+            table.AddRow(
+                IndexMarkup(index++),
+                ToMarkup(result.OwnerName),
+                ToMarkup(result.ObjectName),
+                ToMarkup(result.ObjectType),
+                ToMarkup(result.CreationDate.ToString("g")),
+                ToMarkup(result.ModificationDate.ToString("g")));
         }
 
         AnsiConsole.WriteLine();
@@ -175,8 +178,32 @@ public class ConsoleService : IConsoleService
         var count = Math.Min(oracleSchemas.Count, parameters.MaxItems);
         foreach (var result in oracleSchemas.Take(count))
         {
-            table.AddRow(IndexMarkup(index++), ToMarkup(result.SchemaName), ToMarkup(result.CreationDate.ToString("g")));
+            table.AddRow(
+                IndexMarkup(index++),
+                ToMarkup(result.SchemaName),
+                ToMarkup(result.CreationDate.ToString("g")));
         }
+
+        AnsiConsole.WriteLine();
+        AnsiConsole.Write(table);
+        AnsiConsole.WriteLine();
+    }
+
+    public void RenderOracleSources(ICollection<OracleSource> oracleSources, OracleParameters parameters)
+    {
+        var databaseName = parameters.DatabaseName.ToUpper();
+        var lines = oracleSources.Count(x => !string.IsNullOrWhiteSpace(x.Text));
+        var table = new Table()
+            .BorderColor(Color.White)
+            .Border(TableBorder.Square)
+            .Title($"[yellow][bold]Found {lines} line(s)[/][/]")
+            .AddColumn(new TableColumn("[u]PackageName[/]").Centered())
+            .AddColumn(new TableColumn("[u]ProcedureName[/]").Centered())
+            .AddColumn(new TableColumn("[u]OutputFile[/]").Centered())
+            .AddColumn(new TableColumn("[u]ErrorsFile[/]").Centered())
+            .Caption($"[yellow][bold]{databaseName}[/][/]");
+
+        table.AddRow(ToMarkup(parameters.PackageName), ToMarkup(parameters.ProcedureName), ToMarkupLink(parameters.OutputFile), ToMarkupLink(parameters.ErrorsFile));
 
         AnsiConsole.WriteLine();
         AnsiConsole.Write(table);
@@ -197,6 +224,7 @@ public class ConsoleService : IConsoleService
             .AddColumn(new TableColumn("[u]OwnerName[/]").Centered())
             .AddColumn(new TableColumn("[u]PackageName[/]").Centered())
             .AddColumn(new TableColumn("[u]CreationDate[/]").Centered())
+            .AddColumn(new TableColumn("[u]ModificationDate[/]").Centered())
             .AddColumn(new TableColumn("[u]ProceduresCount[/]").Centered())
             .Caption($"[yellow][bold]{databaseName}[/][/]");
 
@@ -204,7 +232,13 @@ public class ConsoleService : IConsoleService
         var count = Math.Min(oraclePackages.Count, parameters.MaxItems);
         foreach (var result in oraclePackages.Take(count))
         {
-            table.AddRow(IndexMarkup(index++), ToMarkup(result.OwnerName), ToMarkup(result.PackageName), ToMarkup(result.CreationDate.ToString("g")), ToMarkup($"{result.ProceduresCount}"));
+            table.AddRow(
+                IndexMarkup(index++),
+                ToMarkup(result.OwnerName),
+                ToMarkup(result.PackageName),
+                ToMarkup(result.CreationDate.ToString("g")),
+                ToMarkup(result.ModificationDate.ToString("g")),
+                ToMarkup($"{result.ProceduresCount}"));
         }
 
         AnsiConsole.WriteLine();
@@ -227,7 +261,11 @@ public class ConsoleService : IConsoleService
 
         foreach (var result in oracleArguments)
         {
-            table.AddRow(ToMarkup($"{result.Position}"), ToMarkup(result.Name), ToMarkup(result.DataType), ToMarkup(result.Direction));
+            table.AddRow(
+                ToMarkup($"{result.Position}"),
+                ToMarkup(result.Name),
+                ToMarkup(result.DataType),
+                ToMarkup(result.Direction));
         }
 
         AnsiConsole.WriteLine();
@@ -249,13 +287,19 @@ public class ConsoleService : IConsoleService
             .AddColumn(new TableColumn("[u]OwnerName[/]").Centered())
             .AddColumn(new TableColumn("[u]FunctionName[/]").Centered())
             .AddColumn(new TableColumn("[u]CreationDate[/]").Centered())
+            .AddColumn(new TableColumn("[u]ModificationDate[/]").Centered())
             .Caption($"[yellow][bold]{databaseName}[/][/]");
 
         var index = 1;
         var count = Math.Min(oracleFunctions.Count, parameters.MaxItems);
         foreach (var result in oracleFunctions.Take(count))
         {
-            table.AddRow(IndexMarkup(index++), ToMarkup(result.OwnerName), ToMarkup(result.FunctionName), ToMarkup(result.CreationDate.ToString("g")));
+            table.AddRow(
+                IndexMarkup(index++),
+                ToMarkup(result.OwnerName),
+                ToMarkup(result.FunctionName),
+                ToMarkup(result.CreationDate.ToString("g")),
+                ToMarkup(result.ModificationDate.ToString("g")));
         }
 
         AnsiConsole.WriteLine();
@@ -278,13 +322,20 @@ public class ConsoleService : IConsoleService
             .AddColumn(new TableColumn("[u]PackageName[/]").Centered())
             .AddColumn(new TableColumn("[u]ProcedureName[/]").Centered())
             .AddColumn(new TableColumn("[u]CreationDate[/]").Centered())
+            .AddColumn(new TableColumn("[u]ModificationDate[/]").Centered())
             .Caption($"[yellow][bold]{databaseName}[/][/]");
 
         var index = 1;
         var count = Math.Min(oracleProcedures.Count, parameters.MaxItems);
         foreach (var result in oracleProcedures.Take(count))
         {
-            table.AddRow(IndexMarkup(index++), ToMarkup(result.OwnerName), ToMarkup(result.PackageName), ToMarkup(result.ProcedureName), ToMarkup(result.CreationDate.ToString("g")));
+            table.AddRow(
+                IndexMarkup(index++),
+                ToMarkup(result.OwnerName),
+                ToMarkup(result.PackageName),
+                ToMarkup(result.ProcedureName),
+                ToMarkup(result.CreationDate.ToString("g")),
+                ToMarkup(result.ModificationDate.ToString("g")));
         }
 
         AnsiConsole.WriteLine();
@@ -292,10 +343,24 @@ public class ConsoleService : IConsoleService
         AnsiConsole.WriteLine();
     }
 
+    public void CopyOracleSourcesToFile(ICollection<OracleSource> oracleSources, OracleParameters parameters)
+    {
+        var sql = _sqlExporter.ExportOracleSources(oracleSources, parameters);
+        File.WriteAllText(parameters.OutputFile, sql);
+        var errors = _sqlExporter.ExportOracleSourcesErrors(oracleSources, parameters);
+        File.WriteAllText(parameters.ErrorsFile, errors);
+    }
+
     public void CopyOracleArgumentsToClipboard(ICollection<OracleArgument> oracleArguments, OracleParameters parameters)
     {
         var csharp = _cSharpExporter.ExportOracleArguments(oracleArguments, parameters);
         CopyTextToClipboard(csharp);
+    }
+    
+    private static void CopyTextToClipboard(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return;
+        ClipboardService.SetText(text);
     }
 
     private static string GetFormattedJson(string json)
@@ -333,4 +398,10 @@ public class ConsoleService : IConsoleService
     private static readonly Markup ErrorMarkup = new(Emoji.Known.CrossMark);
 
     private static Markup IndexMarkup(int index) => ToMarkup($"[dim]{index:D4}[/]");
+    
+    private static Markup ToMarkupLink(string text)
+    {
+        var link = $"[green][link={text}]{text}[/][/]";
+        return ToMarkup(link);
+    }
 }
