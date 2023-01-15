@@ -10,19 +10,19 @@ using NSubstitute;
 
 namespace Tests.Commands;
 
-public class ArgumentsCommandTests
+public class SourcesCommandTests
 {
     [Fact]
-    public async Task Should_ArgumentsCommand_Return_Ok()
+    public async Task Should_SourcesCommand_Return_Ok()
     {
         // arrange
         var app = new CommandLineApplication();
         var consoleService = Substitute.For<IConsoleService>();
         var oracleService = Substitute.For<IOracleService>();
-        var exportService = Substitute.For<ICSharpExportService>();
+        var exportService = Substitute.For<ISqlExportService>();
         var settings = new SettingsBuilder().Build();
         var options = Options.Create(settings);
-        var command = new ArgumentsCommand(consoleService, oracleService, exportService, options)
+        var command = new SourcesCommand(consoleService, oracleService, exportService, options)
         {
             DatabaseName = "oracle-for-tests",
             ProcedureName = "oracle-spc",
@@ -37,18 +37,18 @@ public class ArgumentsCommandTests
     }
     
     [Fact]
-    public async Task Should_ArgumentsCommand_Return_Also_Ok()
+    public async Task Should_SourcesCommand_Return_Also_Ok()
     {
         // arrange
         var app = new CommandLineApplication();
         var consoleService = Substitute.For<IConsoleService>();
         var oracleService = Substitute.For<IOracleService>();
-        var exportService = Substitute.For<ICSharpExportService>();
+        var exportService = Substitute.For<ISqlExportService>();
         var settings = new SettingsBuilder()
             .WithDefaultDatabaseToUse("oracle-for-tests")
             .Build();
         var options = Options.Create(settings);
-        var command = new ArgumentsCommand(consoleService, oracleService, exportService, options)
+        var command = new SourcesCommand(consoleService, oracleService, exportService, options)
         {
             ProcedureName = "oracle-spc",
             PackageName = "oracle-pkg"
@@ -62,16 +62,16 @@ public class ArgumentsCommandTests
     }
     
     [Fact]
-    public async Task Should_ArgumentsCommand_Return_Ko()
+    public async Task Should_SourcesCommand_Return_Ko()
     {
         // arrange
         var app = new CommandLineApplication();
         var consoleService = Substitute.For<IConsoleService>();
         var oracleService = Substitute.For<IOracleService>();
-        var exportService = Substitute.For<ICSharpExportService>();
+        var exportService = Substitute.For<ISqlExportService>();
         var settings = new SettingsBuilder().Build();
         var options = Options.Create(settings);
-        var command = new ArgumentsCommand(consoleService, oracleService, exportService, options)
+        var command = new SourcesCommand(consoleService, oracleService, exportService, options)
         {
             DatabaseName = "oracle-for-tests"
         };

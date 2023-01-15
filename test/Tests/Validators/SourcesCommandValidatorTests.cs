@@ -9,14 +9,14 @@ using NSubstitute;
 
 namespace Tests.Validators;
 
-public class ArgumentsCommandValidatorTests
+public class SourcesCommandValidatorTests
 {
     [Theory]
     [ClassData(typeof(ValidOracleTestCases))]
-    public void ArgumentsCommand_Should_Be_Valid(ArgumentsCommand command)
+    public void SourcesCommand_Should_Be_Valid(SourcesCommand command)
     {
         // arrange
-        var validator = new ArgumentsCommandValidator();
+        var validator = new SourcesCommandValidator();
 
         // act
         var result = validator.Validate(command);
@@ -27,10 +27,10 @@ public class ArgumentsCommandValidatorTests
     
     [Theory]
     [ClassData(typeof(NotValidOracleTestCases))]
-    public void ArgumentsCommand_Should_Not_Be_Valid(ArgumentsCommand command)
+    public void SourcesCommand_Should_Not_Be_Valid(SourcesCommand command)
     {
         // arrange
-        var validator = new ArgumentsCommandValidator();
+        var validator = new SourcesCommandValidator();
 
         // act
         var result = validator.Validate(command);
@@ -39,17 +39,17 @@ public class ArgumentsCommandValidatorTests
         result.IsValid.Should().BeFalse();
     }
     
-    private class ValidOracleTestCases : TheoryData<ArgumentsCommand>
+    private class ValidOracleTestCases : TheoryData<SourcesCommand>
     {
         public ValidOracleTestCases()
         {
             var consoleService = Substitute.For<IConsoleService>();
             var oracleService = Substitute.For<IOracleService>();
-            var exportService = Substitute.For<ICSharpExportService>();
+            var exportService = Substitute.For<ISqlExportService>();
             var settings = new SettingsBuilder().Build();
             var options = Options.Create(settings);
 
-            Add(new ArgumentsCommand(consoleService, oracleService, exportService, options)
+            Add(new SourcesCommand(consoleService, oracleService, exportService, options)
             {
                 DatabaseName = "oracle-for-tests",
                 ProcedureName = "oracle-spc",
@@ -57,14 +57,14 @@ public class ArgumentsCommandValidatorTests
                 OwnerName = "owner"
             });
             
-            Add(new ArgumentsCommand(consoleService, oracleService, exportService, options)
+            Add(new SourcesCommand(consoleService, oracleService, exportService, options)
             {
                 DatabaseName = "oracle-for-tests",
                 ProcedureName = "oracle-spc",
                 PackageName = "oracle-pkg"
             });
             
-            Add(new ArgumentsCommand(consoleService, oracleService, exportService, options)
+            Add(new SourcesCommand(consoleService, oracleService, exportService, options)
             {
                 DatabaseName = "oracle-for-tests",
                 ProcedureName = "oracle-spc"
@@ -72,32 +72,39 @@ public class ArgumentsCommandValidatorTests
         }
     }
     
-    private class NotValidOracleTestCases : TheoryData<ArgumentsCommand>
+    private class NotValidOracleTestCases : TheoryData<SourcesCommand>
     {
         public NotValidOracleTestCases()
         {
             var consoleService = Substitute.For<IConsoleService>();
             var oracleService = Substitute.For<IOracleService>();
-            var exportService = Substitute.For<ICSharpExportService>();
+            var exportService = Substitute.For<ISqlExportService>();
             var settings = new SettingsBuilder().Build();
             var options = Options.Create(settings);
             
-            Add(new ArgumentsCommand(consoleService, oracleService, exportService, options)
+            Add(new SourcesCommand(consoleService, oracleService, exportService, options)
             {
                 DatabaseName = "oracle-for-tests",
                 ProcedureName = null,
             });
             
-            Add(new ArgumentsCommand(consoleService, oracleService, exportService, options)
+            Add(new SourcesCommand(consoleService, oracleService, exportService, options)
             {
                 DatabaseName = null,
                 ProcedureName = "oracle-spc",
             });
             
-            Add(new ArgumentsCommand(consoleService, oracleService, exportService, options)
+            Add(new SourcesCommand(consoleService, oracleService, exportService, options)
             {
                 DatabaseName = null,
                 ProcedureName = null,
+            });
+            
+            Add(new SourcesCommand(consoleService, oracleService, exportService, options)
+            {
+                DatabaseName = "oracle-for-tests",
+                ProcedureName = "oracle-spc",
+                OutputDirectory = null
             });
         }
     }

@@ -13,6 +13,7 @@ public interface IConsoleService
     Task RenderStatusAsync(Func<Task> action);
     Task<T> RenderStatusAsync<T>(Func<Task<T>> func);
     void RenderValidationErrors(ValidationErrors validationErrors);
+    Task CopyTextToClipboardAsync(string text, CancellationToken cancellationToken);
     void RenderOracleObjects(ICollection<OracleObject> oracleObjects, OracleParameters parameters);
     void RenderOracleSchemas(ICollection<OracleSchema> oracleSchemas, OracleParameters parameters);
     void RenderOracleSources(ICollection<OracleSource> oracleSources, OracleParameters parameters);
@@ -20,6 +21,4 @@ public interface IConsoleService
     void RenderOracleArguments(ICollection<OracleArgument> oracleArguments, OracleParameters parameters);
     void RenderOracleFunctions(ICollection<OracleFunction> oracleFunctions, OracleParameters parameters);
     void RenderOracleProcedures(ICollection<OracleProcedure> oracleProcedures, OracleParameters parameters);
-    void CopyOracleSourcesToFile(ICollection<OracleSource> oracleSources, OracleParameters parameters);
-    void CopyOracleArgumentsToClipboard(ICollection<OracleArgument> oracleArguments, OracleParameters parameters);
 }

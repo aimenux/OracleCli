@@ -12,5 +12,9 @@ public class SourcesCommandValidator : AbstractValidator<SourcesCommand>
 
         RuleFor(x => x.ProcedureName)
             .NotEmpty();
+
+        RuleFor(x => x.OutputDirectory)
+            .NotEmpty()
+            .Must(Directory.Exists);
     }
 }

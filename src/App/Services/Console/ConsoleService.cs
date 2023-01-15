@@ -1,9 +1,7 @@
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using App.Configuration;
-using App.Services.Exporters;
 using App.Services.Oracle;
 using App.Validators;
 using Spectre.Console;
@@ -13,14 +11,9 @@ namespace App.Services.Console;
 
 public class ConsoleService : IConsoleService
 {
-    private readonly ICSharpExporter _cSharpExporter;
-    private readonly ISqlExporter _sqlExporter;
-
-    public ConsoleService(ICSharpExporter cSharpExporter, ISqlExporter sqlExporter)
+    public ConsoleService()
     {
         System.Console.OutputEncoding = Encoding.UTF8;
-        _cSharpExporter = cSharpExporter ?? throw new ArgumentNullException(nameof(cSharpExporter));
-        _sqlExporter = sqlExporter ?? throw new ArgumentNullException(nameof(sqlExporter));
     }
 
     public void RenderTitle(string text)
@@ -123,6 +116,14 @@ public class ConsoleService : IConsoleService
         AnsiConsole.WriteLine();
     }
 
+    public async Task CopyTextToClipboardAsync(string text, CancellationToken cancellationToken)
+    {
+        if (!string.IsNullOrWhiteSpace(text))
+        {
+            await ClipboardService.SetTextAsync(text, cancellationToken);            
+        }
+    }
+
     public void RenderOracleObjects(ICollection<OracleObject> oracleObjects, OracleParameters parameters)
     {
         var databaseName = parameters.DatabaseName.ToUpper();
@@ -192,18 +193,39 @@ public class ConsoleService : IConsoleService
     public void RenderOracleSources(ICollection<OracleSource> oracleSources, OracleParameters parameters)
     {
         var databaseName = parameters.DatabaseName.ToUpper();
+        var errors = CountOracleSourcesErrors(parameters.ErrorsFile);
         var lines = oracleSources.Count(x => !string.IsNullOrWhiteSpace(x.Text));
-        var table = new Table()
-            .BorderColor(Color.White)
-            .Border(TableBorder.Square)
-            .Title($"[yellow][bold]Found {lines} line(s)[/][/]")
-            .AddColumn(new TableColumn("[u]PackageName[/]").Centered())
-            .AddColumn(new TableColumn("[u]ProcedureName[/]").Centered())
-            .AddColumn(new TableColumn("[u]OutputFile[/]").Centered())
-            .AddColumn(new TableColumn("[u]ErrorsFile[/]").Centered())
-            .Caption($"[yellow][bold]{databaseName}[/][/]");
+        var table = new Table().BorderColor(Color.White).Border(TableBorder.Square);
+        if (errors > 0)
+        {
+            table = table
+                .Title($"[yellow][bold]Found {lines} line(s) and {errors} error(s)[/][/]")
+                .AddColumn(new TableColumn("[u]PackageName[/]").Centered())
+                .AddColumn(new TableColumn("[u]ProcedureName[/]").Centered())
+                .AddColumn(new TableColumn("[u]OutputFile[/]").Centered())
+                .AddColumn(new TableColumn("[u]ErrorsFile[/]").Centered())
+                .Caption($"[yellow][bold]{databaseName}[/][/]");
 
-        table.AddRow(ToMarkup(parameters.PackageName), ToMarkup(parameters.ProcedureName), ToMarkupLink(parameters.OutputFile), ToMarkupLink(parameters.ErrorsFile));
+            table.AddRow(
+                ToMarkup(parameters.PackageName),
+                ToMarkup(parameters.ProcedureName),
+                ToMarkupLink(parameters.OutputFile),
+                ToMarkupLink(parameters.ErrorsFile));
+        }
+        else
+        {
+            table = table
+                .Title($"[yellow][bold]Found {lines} line(s)[/][/]")
+                .AddColumn(new TableColumn("[u]PackageName[/]").Centered())
+                .AddColumn(new TableColumn("[u]ProcedureName[/]").Centered())
+                .AddColumn(new TableColumn("[u]OutputFile[/]").Centered())
+                .Caption($"[yellow][bold]{databaseName}[/][/]");
+
+            table.AddRow(
+                ToMarkup(parameters.PackageName),
+                ToMarkup(parameters.ProcedureName),
+                ToMarkupLink(parameters.OutputFile));
+        }
 
         AnsiConsole.WriteLine();
         AnsiConsole.Write(table);
@@ -343,24 +365,14 @@ public class ConsoleService : IConsoleService
         AnsiConsole.WriteLine();
     }
 
-    public void CopyOracleSourcesToFile(ICollection<OracleSource> oracleSources, OracleParameters parameters)
+    private static int CountOracleSourcesErrors(string errorsFile)
     {
-        var sql = _sqlExporter.ExportOracleSources(oracleSources, parameters);
-        File.WriteAllText(parameters.OutputFile, sql);
-        var errors = _sqlExporter.ExportOracleSourcesErrors(oracleSources, parameters);
-        File.WriteAllText(parameters.ErrorsFile, errors);
-    }
-
-    public void CopyOracleArgumentsToClipboard(ICollection<OracleArgument> oracleArguments, OracleParameters parameters)
-    {
-        var csharp = _cSharpExporter.ExportOracleArguments(oracleArguments, parameters);
-        CopyTextToClipboard(csharp);
-    }
-    
-    private static void CopyTextToClipboard(string text)
-    {
-        if (string.IsNullOrWhiteSpace(text)) return;
-        ClipboardService.SetText(text);
+        if (!File.Exists(errorsFile)) return 0;
+        var count = File.ReadAllLines(errorsFile)
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Distinct()
+            .Count();
+        return count;
     }
 
     private static string GetFormattedJson(string json)

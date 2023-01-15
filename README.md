@@ -14,6 +14,7 @@ A net global tool helping to retrieve some infos (packages, functions, procedure
 > - Use sub command `Function` or `Functions` to list functions from oracle
 > - Use sub command `Procedure` or `Procedures` to list procedures from oracle
 > - Use sub command `Argument` or `Arguments` to list procedure arguments from oracle
+> - Use sub command `Source` or `Sources` to get procedure source code from oracle
 
 >
 > To run the tool, type commands :
@@ -25,6 +26,7 @@ A net global tool helping to retrieve some infos (packages, functions, procedure
 > - `OracleCli Functions -d [db-name]` to list functions from oracle
 > - `OracleCli Procedures -d [db-name]` to list procedures from oracle
 > - `OracleCli Arguments -d [db-name] -p [pkg-name] -s [spc-name]` to list procedure arguments from oracle
+> - `OracleCli Sources -d [db-name] -p [pkg-name] -s [spc-name]` to get procedure source code from oracle
 >
 >
 > To install global tool from a local source path, type commands :

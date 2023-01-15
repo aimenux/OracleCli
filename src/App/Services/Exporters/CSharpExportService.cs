@@ -1,12 +1,13 @@
 using System.Text;
 using App.Services.Oracle;
 using Humanizer;
+using TextCopy;
 
 namespace App.Services.Exporters;
 
-public class CSharpExporter : ICSharpExporter
+public class CSharpExportService : ICSharpExportService
 {
-    public string ExportOracleArguments(ICollection<OracleArgument> oracleArguments, OracleParameters parameters)
+    public async Task ExportOracleArgumentsAsync(ICollection<OracleArgument> oracleArguments, OracleParameters parameters, CancellationToken cancellationToken)
     {
         var fullname = GetCSharpProcedureFullName(parameters);
         var csharpBuilder = new StringBuilder
@@ -40,7 +41,8 @@ public class CSharpExporter : ICSharpExporter
             """
         );
 
-        return csharpBuilder.ToString();
+        var csharpText = csharpBuilder.ToString();
+        await ClipboardService.SetTextAsync(csharpText, cancellationToken);
     }
     
     private static string GetCSharpCursorClasses(IEnumerable<OracleArgument> oracleArguments)

@@ -1,6 +1,7 @@
 using App.Configuration;
 using App.Extensions;
 using App.Services.Console;
+using App.Services.Exporters;
 using App.Services.Oracle;
 using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Options;
@@ -11,15 +12,18 @@ namespace App.Commands;
 public class SourcesCommand : AbstractCommand
 {
     private readonly IOracleService _oracleService;
+    private readonly ISqlExportService _exportService;
 
     public SourcesCommand(
         IConsoleService consoleService,
         IOracleService oracleService,
+        ISqlExportService exportService,
         IOptions<Settings> options) : base(
         consoleService,
         options)
     {
         _oracleService = oracleService ?? throw new ArgumentNullException(nameof(oracleService));
+        _exportService = exportService ?? throw new ArgumentNullException(nameof(exportService));
         DatabaseName = Settings.DefaultDatabaseToUse;
         OwnerName = Settings.DefaultSchemaToUse;
     }
@@ -64,7 +68,7 @@ public class SourcesCommand : AbstractCommand
                 var oracleProcedure = oracleProcedures.Single();
                 parameters = parameters.With(oracleProcedure.OwnerName, oracleProcedure.PackageName, oracleProcedure.ProcedureName);
                 var oracleSources = await _oracleService.GetOracleSourcesAsync(parameters, cancellationToken);
-                ConsoleService.CopyOracleSourcesToFile(oracleSources, parameters);
+                await _exportService.ExportOracleSourcesAsync(oracleSources, parameters, cancellationToken);
                 ConsoleService.RenderOracleSources(oracleSources, parameters);
             }
         });
