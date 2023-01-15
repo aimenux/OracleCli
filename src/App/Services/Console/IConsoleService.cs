@@ -1,5 +1,6 @@
 using App.Services.Oracle;
 using App.Validators;
+using Spectre.Console;
 
 namespace App.Services.Console;
 
@@ -7,7 +8,8 @@ public interface IConsoleService
 {
     void RenderTitle(string text);
     void RenderVersion(string version);
-    void RenderText(string text, string color = Colors.White);
+    void RenderProblem(string text);
+    void RenderText(string text, Color color);
     void RenderSettingsFile(string filepath);
     void RenderException(Exception exception);
     Task RenderStatusAsync(Func<Task> action);
@@ -21,4 +23,5 @@ public interface IConsoleService
     void RenderOracleArguments(ICollection<OracleArgument> oracleArguments, OracleParameters parameters);
     void RenderOracleFunctions(ICollection<OracleFunction> oracleFunctions, OracleParameters parameters);
     void RenderOracleProcedures(ICollection<OracleProcedure> oracleProcedures, OracleParameters parameters);
+    void RenderFoundOracleProcedures(ICollection<OracleProcedure> oracleProcedures, OracleParameters parameters);
 }

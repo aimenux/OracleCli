@@ -55,23 +55,23 @@ public class SourcesCommand : AbstractCommand
             OutputFile = OutputDirectory.GenerateFileName(ProcedureName),
             ErrorsFile = OutputDirectory.GenerateFileName($"{ProcedureName}-Errors")
         };
-
-        await ConsoleService.RenderStatusAsync(async () =>
+        
+        var oracleProcedures = await ConsoleService.RenderStatusAsync(() => FindOracleProceduresAsync(parameters, cancellationToken));
+        if (oracleProcedures.Count is 0 or > 1)
         {
-            var oracleProcedures = await FindOracleProceduresAsync(parameters, cancellationToken);
-            if (oracleProcedures.Count is 0 or > 1)
-            {
-                ConsoleService.RenderText($"Found {oracleProcedures.Count} procedure(s) matching name '{parameters.ProcedureName}'", Colors.Red);
-            }
-            else
+            ConsoleService.RenderFoundOracleProcedures(oracleProcedures, parameters);
+        }
+        else
+        {
+            await ConsoleService.RenderStatusAsync(async () =>
             {
                 var oracleProcedure = oracleProcedures.Single();
                 parameters = parameters.With(oracleProcedure.OwnerName, oracleProcedure.PackageName, oracleProcedure.ProcedureName);
                 var oracleSources = await _oracleService.GetOracleSourcesAsync(parameters, cancellationToken);
                 await _exportService.ExportOracleSourcesAsync(oracleSources, parameters, cancellationToken);
                 ConsoleService.RenderOracleSources(oracleSources, parameters);
-            }
-        });
+            });
+        }
     }
 
     private async Task<ICollection<OracleProcedure>> FindOracleProceduresAsync(OracleParameters parameters, CancellationToken cancellationToken)

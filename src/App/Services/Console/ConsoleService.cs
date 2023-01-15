@@ -26,10 +26,12 @@ public class ConsoleService : IConsoleService
     public void RenderVersion(string version)
     {
         var text = $"{Settings.Cli.FriendlyName} V{version}";
-        RenderText(text, Colors.White);
+        RenderText(text, Color.White);
     }
 
-    public void RenderText(string text, string color)
+    public void RenderProblem(string text) => RenderText(text, Color.Red);
+
+    public void RenderText(string text, Color color)
     {
         AnsiConsole.WriteLine();
         AnsiConsole.Write(new Markup($"[bold {color}]{text}[/]"));
@@ -363,6 +365,20 @@ public class ConsoleService : IConsoleService
         AnsiConsole.WriteLine();
         AnsiConsole.Write(table);
         AnsiConsole.WriteLine();
+    }
+
+    public void RenderFoundOracleProcedures(ICollection<OracleProcedure> oracleProcedures, OracleParameters parameters)
+    {
+        RenderProblem($"Found {oracleProcedures.Count} procedure(s) matching name '{parameters.ProcedureName}'");
+        if (oracleProcedures.Count == 0) return;
+        if (!AnsiConsole.Confirm("Do you want to [u]display found procedure(s) on console screen[/] ?"))
+        {
+            AnsiConsole.WriteLine();
+        }
+        else
+        {
+            RenderOracleProcedures(oracleProcedures, parameters);            
+        }
     }
 
     private static int CountOracleSourcesErrors(string errorsFile)
