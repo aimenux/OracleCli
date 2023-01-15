@@ -47,7 +47,7 @@
       <PackageReference Include="Serilog.Extensions.Hosting" Version="5.0.1" />
       <PackageReference Include="Serilog.Settings.Configuration" Version="3.4.0" />
       <PackageReference Include="Serilog.Sinks.Console" Version="4.1.0" />
-      <PackageReference Include="Spectre.Console" Version="0.45.0" />
+      <PackageReference Include="Spectre.Console" Version="0.46.0" />
       <PackageReference Include="TextCopy" Version="6.2.1" />
     </ItemGroup>
 

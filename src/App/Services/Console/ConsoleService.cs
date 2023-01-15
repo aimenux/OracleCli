@@ -19,7 +19,7 @@ public class ConsoleService : IConsoleService
     public void RenderTitle(string text)
     {
         AnsiConsole.WriteLine();
-        AnsiConsole.Write(new FigletText(text).LeftAligned());
+        AnsiConsole.Write(new FigletText(text));
         AnsiConsole.WriteLine();
     }
 
