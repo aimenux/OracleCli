@@ -251,6 +251,7 @@ public class OracleService : IOracleService
                         AND UPPER(TYPE) = 'PACKAGE BODY'
                         AND INSTR(UPPER(TEXT), :procedure) > 0
                         AND INSTR(UPPER(TEXT), 'PROCEDURE') > 0
+                        AND REGEXP_LIKE (UPPER(TEXT), :regex)
                       ORDER BY LINE ASC
                   ),
                   LAST_LINE AS 
@@ -264,6 +265,7 @@ public class OracleService : IOracleService
                         AND UPPER(TYPE) = 'PACKAGE BODY'
                         AND INSTR(UPPER(TEXT), :procedure) > 0
                         AND INSTR(UPPER(TEXT), 'END') > 0
+                        AND REGEXP_LIKE (UPPER(TEXT), :regex)
                       ORDER BY LINE ASC
                   )
                   SELECT AC.LINE AS Line, AC.TEXT AS Text
@@ -281,7 +283,8 @@ public class OracleService : IOracleService
         {
             owner = parameters.OwnerName?.ToUpper(),
             package = parameters.PackageName?.ToUpper(),
-            procedure = parameters.ProcedureName?.ToUpper()
+            procedure = parameters.ProcedureName?.ToUpper(),
+            regex = $@"{parameters.ProcedureName?.ToUpper()}(;|\(|\s)+"
         };
 
         await using var connection = CreateOracleConnection(parameters);
@@ -392,7 +395,7 @@ public class OracleService : IOracleService
         return oracleSchemas.ToList();
     }
 
-    private async Task<IEnumerable<OracleObject>> GetOracleObjectsFromAllObjectsSourceAsync(OracleParameters parameters, CancellationToken cancellationToken = default)
+    private async Task<ICollection<OracleObject>> GetOracleObjectsFromAllObjectsSourceAsync(OracleParameters parameters, CancellationToken cancellationToken = default)
     {
         var sqlBuilder = new StringBuilder
         (
@@ -432,7 +435,7 @@ public class OracleService : IOracleService
 
         await using var connection = CreateOracleConnection(parameters);
         var oracleObjects = await connection.QueryAsync<OracleObject>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
-        return oracleObjects;
+        return oracleObjects.ToList();
     }
 
     private OracleConnection CreateOracleConnection(OracleParameters parameters)
