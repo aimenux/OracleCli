@@ -11,7 +11,6 @@ public sealed class OracleParameters
     public string FilterKeyword { get; init; }
     public string OutputDirectory { get; init; }
     public string OutputFile { get; init; }
-    public string ErrorsFile { get; init; }
     public int MaxItems { get; init; } = Settings.DatabaseMaxItems;
 }
 
@@ -28,8 +27,7 @@ public static class OracleParametersExtensions
             MaxItems = parameters.MaxItems,
             FilterKeyword = parameters.FilterKeyword,
             OutputDirectory = parameters.OutputDirectory,
-            OutputFile = parameters.OutputFile,
-            ErrorsFile = parameters.ErrorsFile
+            OutputFile = parameters.OutputFile
         };
     }
 }

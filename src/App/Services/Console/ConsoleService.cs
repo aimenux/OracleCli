@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
@@ -194,41 +195,28 @@ public class ConsoleService : IConsoleService
 
     public void RenderOracleSources(ICollection<OracleSource> oracleSources, OracleParameters parameters)
     {
+        if (oracleSources.Count == 0)
+        {
+            RenderProblem($"Code source is not found for procedure '{parameters.ProcedureName}'");
+            return;
+        }
+
         var databaseName = parameters.DatabaseName.ToUpper();
-        var errors = CountOracleSourcesErrors(parameters.ErrorsFile);
         var lines = oracleSources.Count(x => !string.IsNullOrWhiteSpace(x.Text));
-        var table = new Table().BorderColor(Color.White).Border(TableBorder.Square);
-        if (errors > 0)
-        {
-            table = table
-                .Title($"[yellow][bold]Found {lines} line(s) and {errors} error(s)[/][/]")
-                .AddColumn(new TableColumn("[u]PackageName[/]").Centered())
-                .AddColumn(new TableColumn("[u]ProcedureName[/]").Centered())
-                .AddColumn(new TableColumn("[u]OutputFile[/]").Centered())
-                .AddColumn(new TableColumn("[u]ErrorsFile[/]").Centered())
-                .Caption($"[yellow][bold]{databaseName}[/][/]");
-
-            table.AddRow(
-                ToMarkup(parameters.PackageName),
-                ToMarkup(parameters.ProcedureName),
-                ToMarkupLink(parameters.OutputFile),
-                ToMarkupLink(parameters.ErrorsFile));
-        }
-        else
-        {
-            table = table
-                .Title($"[yellow][bold]Found {lines} line(s)[/][/]")
-                .AddColumn(new TableColumn("[u]PackageName[/]").Centered())
-                .AddColumn(new TableColumn("[u]ProcedureName[/]").Centered())
-                .AddColumn(new TableColumn("[u]OutputFile[/]").Centered())
-                .Caption($"[yellow][bold]{databaseName}[/][/]");
-
-            table.AddRow(
-                ToMarkup(parameters.PackageName),
-                ToMarkup(parameters.ProcedureName),
-                ToMarkupLink(parameters.OutputFile));
-        }
-
+        var table = new Table()
+            .BorderColor(Color.White)
+            .Border(TableBorder.Square)
+            .Title($"[yellow][bold]Found {lines} line(s)[/][/]")
+            .AddColumn(new TableColumn("[u]PackageName[/]").Centered())
+            .AddColumn(new TableColumn("[u]ProcedureName[/]").Centered())
+            .AddColumn(new TableColumn("[u]OutputFile[/]").Centered())
+            .Caption($"[yellow][bold]{databaseName}[/][/]");
+        
+        table.AddRow(
+            ToMarkup(parameters.PackageName),
+            ToMarkup(parameters.ProcedureName),
+            ToMarkupLink(parameters.OutputFile));
+        
         AnsiConsole.WriteLine();
         AnsiConsole.Write(table);
         AnsiConsole.WriteLine();

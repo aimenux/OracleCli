@@ -233,63 +233,14 @@ public class OracleService : IOracleService
 
     public async Task<ICollection<OracleSource>> GetOracleSourcesAsync(OracleParameters parameters, CancellationToken cancellationToken = default)
     {
-        var hasOwnerName = !string.IsNullOrWhiteSpace(parameters.OwnerName)
-            ? "UPPER(OWNER) = :owner"
-            : "1 = 1";
-        
-        var sqlBuilder = new StringBuilder
-        (
-            $"""
-                  WITH FIRST_LINE AS 
-                  (
-                      SELECT 
-                        LINE,
-                        TEXT
-                      FROM ALL_SOURCE
-                      WHERE {hasOwnerName}
-                        AND UPPER(NAME) = :package
-                        AND UPPER(TYPE) = 'PACKAGE BODY'
-                        AND INSTR(UPPER(TEXT), :procedure) > 0
-                        AND INSTR(UPPER(TEXT), 'PROCEDURE') > 0
-                        AND REGEXP_LIKE (UPPER(TEXT), :regex)
-                      ORDER BY LINE ASC
-                  ),
-                  LAST_LINE AS 
-                  (
-                      SELECT
-                        LINE,
-                        TEXT
-                      FROM ALL_SOURCE
-                      WHERE {hasOwnerName}
-                        AND UPPER(NAME) = :package
-                        AND UPPER(TYPE) = 'PACKAGE BODY'
-                        AND INSTR(UPPER(TEXT), :procedure) > 0
-                        AND INSTR(UPPER(TEXT), 'END') > 0
-                        AND REGEXP_LIKE (UPPER(TEXT), :regex)
-                      ORDER BY LINE ASC
-                  )
-                  SELECT AC.LINE AS Line, AC.TEXT AS Text
-                    FROM ALL_SOURCE AC
-                  WHERE {hasOwnerName}
-                    AND UPPER(AC.NAME) = :package
-                    AND UPPER(AC.TYPE) = 'PACKAGE BODY'
-                    AND AC.LINE BETWEEN (SELECT LINE from FIRST_LINE) AND (SELECT LINE from LAST_LINE)
-                  ORDER BY AC.LINE ASC
-            """
-        );
-
-        var sql = sqlBuilder.ToString();
-        var sqlParameters = new
+        var unwrappedOracleSources = await GetUnwrappedOracleSourcesAsync(parameters, cancellationToken);
+        if (unwrappedOracleSources.Any())
         {
-            owner = parameters.OwnerName?.ToUpper(),
-            package = parameters.PackageName?.ToUpper(),
-            procedure = parameters.ProcedureName?.ToUpper(),
-            regex = $@"{parameters.ProcedureName?.ToUpper()}(;|\(|\s)+"
-        };
+            return unwrappedOracleSources;
+        }
 
-        await using var connection = CreateOracleConnection(parameters);
-        var oracleSources = await connection.QueryAsync<OracleSource>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
-        return oracleSources.ToList();
+        var wrappedOracleSources = await GetWrappedOracleSourcesAsync(parameters, cancellationToken);
+        return wrappedOracleSources;
     }
 
     public async Task<ICollection<OracleObject>> GetOracleObjectsAsync(OracleParameters parameters, CancellationToken cancellationToken = default)
@@ -393,6 +344,96 @@ public class OracleService : IOracleService
         await using var connection = CreateOracleConnection(parameters);
         var oracleSchemas = await connection.QueryAsync<OracleSchema>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
         return oracleSchemas.ToList();
+    }
+    
+    private async Task<ICollection<OracleSource>> GetUnwrappedOracleSourcesAsync(OracleParameters parameters, CancellationToken cancellationToken = default)
+    {
+        var hasOwnerName = !string.IsNullOrWhiteSpace(parameters.OwnerName)
+            ? "UPPER(OWNER) = :owner"
+            : "1 = 1";
+        
+        var sqlBuilder = new StringBuilder
+        (
+            $"""
+                  WITH FIRST_LINE AS 
+                  (
+                      SELECT 
+                        LINE,
+                        TEXT
+                      FROM ALL_SOURCE
+                      WHERE {hasOwnerName}
+                        AND UPPER(NAME) = :package
+                        AND UPPER(TYPE) = 'PACKAGE BODY'
+                        AND INSTR(UPPER(TEXT), :procedure) > 0
+                        AND INSTR(UPPER(TEXT), 'PROCEDURE') > 0
+                        AND REGEXP_LIKE (UPPER(TEXT), :regex)
+                      ORDER BY LINE ASC
+                  ),
+                  LAST_LINE AS 
+                  (
+                      SELECT
+                        LINE,
+                        TEXT
+                      FROM ALL_SOURCE
+                      WHERE {hasOwnerName}
+                        AND UPPER(NAME) = :package
+                        AND UPPER(TYPE) = 'PACKAGE BODY'
+                        AND INSTR(UPPER(TEXT), :procedure) > 0
+                        AND INSTR(UPPER(TEXT), 'END') > 0
+                        AND REGEXP_LIKE (UPPER(TEXT), :regex)
+                      ORDER BY LINE ASC
+                  )
+                  SELECT AC.LINE AS Line, AC.TEXT AS Text
+                    FROM ALL_SOURCE AC
+                  WHERE {hasOwnerName}
+                    AND UPPER(AC.NAME) = :package
+                    AND UPPER(AC.TYPE) = 'PACKAGE BODY'
+                    AND AC.LINE BETWEEN (SELECT LINE from FIRST_LINE) AND (SELECT LINE from LAST_LINE)
+                  ORDER BY AC.LINE ASC
+            """
+        );
+
+        var sql = sqlBuilder.ToString();
+        var sqlParameters = new
+        {
+            owner = parameters.OwnerName?.ToUpper(),
+            package = parameters.PackageName?.ToUpper(),
+            procedure = parameters.ProcedureName?.ToUpper(),
+            regex = $@"{parameters.ProcedureName?.ToUpper()}(;|\(|\s)+"
+        };
+
+        await using var connection = CreateOracleConnection(parameters);
+        var oracleSources = await connection.QueryAsync<OracleSource>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
+        return oracleSources.ToList();
+    }
+    
+    private async Task<ICollection<OracleSource>> GetWrappedOracleSourcesAsync(OracleParameters parameters, CancellationToken cancellationToken = default)
+    {
+        var hasOwnerName = !string.IsNullOrWhiteSpace(parameters.OwnerName)
+            ? "UPPER(OWNER) = :owner"
+            : "1 = 1";
+        
+        var sqlBuilder = new StringBuilder
+        (
+            $"""
+                SELECT AC.LINE AS Line, AC.TEXT AS Text
+                  FROM ALL_SOURCE AC
+                WHERE {hasOwnerName}
+                  AND UPPER(AC.NAME) = :package
+                  AND UPPER(AC.TYPE) = 'PACKAGE BODY'
+            """
+        );
+
+        var sql = sqlBuilder.ToString();
+        var sqlParameters = new
+        {
+            owner = parameters.OwnerName?.ToUpper(),
+            package = parameters.PackageName?.ToUpper()
+        };
+
+        await using var connection = CreateOracleConnection(parameters);
+        var oracleSources = await connection.QueryAsync<OracleSource>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
+        return oracleSources.ToList();
     }
 
     private async Task<ICollection<OracleObject>> GetOracleObjectsFromAllObjectsSourceAsync(OracleParameters parameters, CancellationToken cancellationToken = default)

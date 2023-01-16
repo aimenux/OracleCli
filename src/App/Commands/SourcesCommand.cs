@@ -52,8 +52,7 @@ public class SourcesCommand : AbstractCommand
             PackageName = PackageName,
             ProcedureName = ProcedureName,
             OutputDirectory = OutputDirectory,
-            OutputFile = OutputDirectory.GenerateFileName(ProcedureName),
-            ErrorsFile = OutputDirectory.GenerateFileName($"{ProcedureName}-Errors")
+            OutputFile = OutputDirectory.GenerateFileName(ProcedureName)
         };
         
         var oracleProcedures = await ConsoleService.RenderStatusAsync(() => FindOracleProceduresAsync(parameters, cancellationToken));
