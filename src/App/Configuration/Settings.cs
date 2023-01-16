@@ -29,8 +29,11 @@ public sealed class Settings
     
     public static string GetDefaultWorkingDirectory()
     {
-        const string workDir = @"C:\Logs";
-        return Directory.Exists(workDir) ? workDir : "./";
+        const string defaultDirectory = @"C:\Logs";
+        var directory = Directory.Exists(defaultDirectory) 
+            ? defaultDirectory 
+            : "./";
+        return Path.GetFullPath(directory);
     }
 
     public const int DatabaseMaxItems = 30;
