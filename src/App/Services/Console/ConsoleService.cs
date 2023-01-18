@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
@@ -368,17 +367,7 @@ public class ConsoleService : IConsoleService
             RenderOracleProcedures(oracleProcedures, parameters);            
         }
     }
-
-    private static int CountOracleSourcesErrors(string errorsFile)
-    {
-        if (!File.Exists(errorsFile)) return 0;
-        var count = File.ReadAllLines(errorsFile)
-            .Where(x => !string.IsNullOrWhiteSpace(x))
-            .Distinct()
-            .Count();
-        return count;
-    }
-
+    
     private static string GetFormattedJson(string json)
     {
         var options = new JsonSerializerOptions { WriteIndented = true };
