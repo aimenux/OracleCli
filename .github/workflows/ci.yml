@@ -57,7 +57,7 @@ jobs:
                                --collect:"XPlat Code Coverage" 
                                -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
           sonarBeginArguments: /d:sonar.cs.opencover.reportsPaths="**/**/TestResults/**/coverage.opencover.xml"
-                               /d:sonar.coverage.exclusions=”**Program.cs”
+                               /d:sonar.coverage.exclusions=”**Program.cs, **ConsoleService.cs”
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} 
