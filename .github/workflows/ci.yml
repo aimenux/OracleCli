@@ -53,8 +53,11 @@ jobs:
           sonarProjectName:  OracleCli
           sonarProjectKey: OracleCli-Key
           sonarOrganization: aimenux-sonar-cloud-key
-          dotnetTestArguments: -f net7.0 --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
-          sonarBeginArguments: /d:sonar.cs.opencover.reportsPaths="**/**/TestResults/**/coverage.opencover.xml" /d:sonar.coverage.exclusions=”Program.cs, ConsoleService.cs”
+          dotnetTestArguments: -f net7.0 
+                               --collect:"XPlat Code Coverage" 
+                               -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+          sonarBeginArguments: /d:sonar.cs.opencover.reportsPaths="**/**/TestResults/**/coverage.opencover.xml"
+                               /d:sonar.coverage.exclusions=”**Program.cs”
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} 
