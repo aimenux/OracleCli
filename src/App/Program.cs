@@ -1,4 +1,5 @@
-﻿using App.Commands;
+﻿using System.Diagnostics.CodeAnalysis;
+using App.Commands;
 using App.Configuration;
 using App.Extensions;
 using App.Services.Console;
@@ -11,6 +12,7 @@ using Microsoft.Extensions.Logging;
 
 namespace App;
 
+[ExcludeFromCodeCoverage]
 public static class Program
 {
     public static async Task<int> Main(string[] args)

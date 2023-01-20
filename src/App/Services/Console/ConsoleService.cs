@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
@@ -9,6 +10,7 @@ using TextCopy;
 
 namespace App.Services.Console;
 
+[ExcludeFromCodeCoverage]
 public class ConsoleService : IConsoleService
 {
     public ConsoleService()
