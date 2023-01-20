@@ -1,9 +1,11 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Configuration;
 using Serilog.Events;
 using static App.Extensions.PathExtensions;
 
 namespace App.Extensions;
 
+[ExcludeFromCodeCoverage]
 public static class ConfigurationExtensions
 {
     public static void AddJsonFile(this IConfigurationBuilder configurationBuilder)

@@ -1,4 +1,5 @@
-﻿using App.Configuration;
+﻿using System.Diagnostics.CodeAnalysis;
+using App.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -8,6 +9,7 @@ using static App.Extensions.PathExtensions;
 
 namespace App.Extensions;
 
+[ExcludeFromCodeCoverage]
 public static class LoggingExtensions
 {
     public static void AddDefaultLogger(this ILoggingBuilder loggingBuilder)
