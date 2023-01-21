@@ -10,48 +10,42 @@ using NSubstitute;
 
 namespace Tests.Commands;
 
+[Collection(Collections.OracleCollectionName)]
 public class ArgumentsCommandTests
 {
-    [Fact]
-    public async Task Should_ArgumentsCommand_Return_Ok()
+    private readonly OracleFixture _oracleFixture;
+    
+    private const string DatabaseName = "oracle-for-tests";
+
+    public ArgumentsCommandTests(OracleFixture oracleFixture)
     {
-        // arrange
-        var app = new CommandLineApplication();
-        var consoleService = Substitute.For<IConsoleService>();
-        var oracleService = Substitute.For<IOracleService>();
-        var exportService = Substitute.For<ICSharpExportService>();
-        var settings = new SettingsBuilder().Build();
-        var options = Options.Create(settings);
-        var command = new ArgumentsCommand(consoleService, oracleService, exportService, options)
-        {
-            DatabaseName = "oracle-for-tests",
-            ProcedureName = "oracle-spc",
-            PackageName = "oracle-pkg"
-        };
-
-        // act
-        var result = await command.OnExecuteAsync(app);
-
-        // assert
-        result.Should().Be(Settings.ExitCode.Ok);
+        _oracleFixture = oracleFixture;
     }
     
-    [Fact]
-    public async Task Should_ArgumentsCommand_Return_Also_Ok()
+    [Theory]
+    [InlineData("SYS", "RMJVM", "RUN")]
+    [InlineData("SYS", "RMJVM", "STRIP")]
+    public async Task Should_ArgumentsCommand_Return_Ok(string ownerName, string packageName, string procedureName)
     {
         // arrange
-        var app = new CommandLineApplication();
-        var consoleService = Substitute.For<IConsoleService>();
-        var oracleService = Substitute.For<IOracleService>();
-        var exportService = Substitute.For<ICSharpExportService>();
+        var connectionString = _oracleFixture.ConnectionString;
+        
         var settings = new SettingsBuilder()
-            .WithDefaultDatabaseToUse("oracle-for-tests")
+            .WithDatabase(DatabaseName, connectionString)
             .Build();
+        
         var options = Options.Create(settings);
+        
+        var app = new CommandLineApplication();
+        var consoleService = Substitute.For<IConsoleService>();
+        var oracleService = new OracleService(options);
+        var exportService = Substitute.For<ICSharpExportService>();
         var command = new ArgumentsCommand(consoleService, oracleService, exportService, options)
         {
-            ProcedureName = "oracle-spc",
-            PackageName = "oracle-pkg"
+            DatabaseName = DatabaseName,
+            OwnerName = ownerName,
+            PackageName = packageName,
+            ProcedureName = procedureName
         };
 
         // act
@@ -61,19 +55,30 @@ public class ArgumentsCommandTests
         result.Should().Be(Settings.ExitCode.Ok);
     }
     
-    [Fact]
-    public async Task Should_ArgumentsCommand_Return_Ko()
+    [Theory]
+    [InlineData("SYS", "RMJVM", null)]
+    [InlineData("SYS", "RMJVM", "")]
+    public async Task Should_ArgumentsCommand_Return_Ko(string ownerName, string packageName, string procedureName)
     {
         // arrange
+        var connectionString = _oracleFixture.ConnectionString;
+        
+        var settings = new SettingsBuilder()
+            .WithDatabase(DatabaseName, connectionString)
+            .Build();
+        
+        var options = Options.Create(settings);
+        
         var app = new CommandLineApplication();
         var consoleService = Substitute.For<IConsoleService>();
-        var oracleService = Substitute.For<IOracleService>();
+        var oracleService = new OracleService(options);
         var exportService = Substitute.For<ICSharpExportService>();
-        var settings = new SettingsBuilder().Build();
-        var options = Options.Create(settings);
         var command = new ArgumentsCommand(consoleService, oracleService, exportService, options)
         {
-            DatabaseName = "oracle-for-tests"
+            DatabaseName = DatabaseName,
+            OwnerName = ownerName,
+            PackageName = packageName,
+            ProcedureName = procedureName
         };
 
         // act

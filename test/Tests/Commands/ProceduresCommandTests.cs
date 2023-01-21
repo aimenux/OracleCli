@@ -9,20 +9,42 @@ using NSubstitute;
 
 namespace Tests.Commands;
 
+[Collection(Collections.OracleCollectionName)]
 public class ProceduresCommandTests
 {
-    [Fact]
-    public async Task Should_ProceduresCommand_Return_Ok()
+    private readonly OracleFixture _oracleFixture;
+    
+    private const string DatabaseName = "oracle-for-tests";
+
+    public ProceduresCommandTests(OracleFixture oracleFixture)
+    {
+        _oracleFixture = oracleFixture;
+    }
+    
+    [Theory]
+    [InlineData(null, null, 5)]
+    [InlineData(null, "GET", 5)]
+    [InlineData("SYS", "SET", 5)]
+    public async Task Should_ProceduresCommand_Return_Ok(string ownerName, string filterKeyword, int maxItems)
     {
         // arrange
+        var connectionString = _oracleFixture.ConnectionString;
+        
+        var settings = new SettingsBuilder()
+            .WithDatabase(DatabaseName, connectionString)
+            .Build();
+        
+        var options = Options.Create(settings);
+        
         var app = new CommandLineApplication();
         var consoleService = Substitute.For<IConsoleService>();
-        var oracleService = Substitute.For<IOracleService>();
-        var settings = new SettingsBuilder().Build();
-        var options = Options.Create(settings);
+        var oracleService = new OracleService(options);
         var command = new ProceduresCommand(consoleService, oracleService, options)
         {
-            DatabaseName = "oracle-for-tests"
+            DatabaseName = DatabaseName,
+            FilterKeyword = filterKeyword,
+            OwnerName = ownerName,
+            MaxItems = maxItems
         };
 
         // act
@@ -32,39 +54,30 @@ public class ProceduresCommandTests
         result.Should().Be(Settings.ExitCode.Ok);
     }
     
-    [Fact]
-    public async Task Should_ProceduresCommand_Return_Also_Ok()
+    [Theory]
+    [InlineData(null, "*", 5)]
+    [InlineData(null, null, 0)]
+    [InlineData(null, null, 5001)]
+    public async Task Should_ProceduresCommand_Return_Ko(string ownerName, string filterKeyword, int maxItems)
     {
         // arrange
-        var app = new CommandLineApplication();
-        var consoleService = Substitute.For<IConsoleService>();
-        var oracleService = Substitute.For<IOracleService>();
+        var connectionString = _oracleFixture.ConnectionString;
+        
         var settings = new SettingsBuilder()
-            .WithDefaultDatabaseToUse("oracle-for-tests")
+            .WithDatabase(DatabaseName, connectionString)
             .Build();
+        
         var options = Options.Create(settings);
-        var command = new ProceduresCommand(consoleService, oracleService, options);
-
-        // act
-        var result = await command.OnExecuteAsync(app);
-
-        // assert
-        result.Should().Be(Settings.ExitCode.Ok);
-    }
-    
-    [Fact]
-    public async Task Should_ProceduresCommand_Return_Ko()
-    {
-        // arrange
+        
         var app = new CommandLineApplication();
         var consoleService = Substitute.For<IConsoleService>();
-        var oracleService = Substitute.For<IOracleService>();
-        var settings = new SettingsBuilder().Build();
-        var options = Options.Create(settings);
+        var oracleService = new OracleService(options);
         var command = new ProceduresCommand(consoleService, oracleService, options)
         {
-            DatabaseName = "oracle-for-tests",
-            FilterKeyword = "#"
+            DatabaseName = DatabaseName,
+            FilterKeyword = filterKeyword,
+            OwnerName = ownerName,
+            MaxItems = maxItems
         };
 
         // act
