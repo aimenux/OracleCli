@@ -60,7 +60,7 @@ public class OracleService : IOracleService
         return oraclePackages.ToList();
     }
 
-    public async Task<ICollection<OracleFunction>> GetOracleFunctionsAsync(OracleParameters parameters, CancellationToken cancellationToken = default)
+    public async Task<ICollection<OracleFunction>> GetOracleFunctionsAsync(OracleParameters parameters, CancellationToken cancellationToken)
     {
         var sqlBuilder = new StringBuilder
         (
@@ -147,7 +147,7 @@ public class OracleService : IOracleService
         return oracleProcedures.ToList();
     }
 
-    public async Task<ICollection<OracleProcedure>> FindOracleProceduresAsync(OracleParameters parameters, CancellationToken cancellationToken = default)
+    public async Task<ICollection<OracleProcedure>> FindOracleProceduresAsync(OracleParameters parameters, CancellationToken cancellationToken)
     {
         var sqlBuilder = new StringBuilder
         (
@@ -231,7 +231,7 @@ public class OracleService : IOracleService
         return oracleArguments.ToList();
     }
 
-    public async Task<ICollection<OracleSource>> GetOracleSourcesAsync(OracleParameters parameters, CancellationToken cancellationToken = default)
+    public async Task<ICollection<OracleSource>> GetOracleSourcesAsync(OracleParameters parameters, CancellationToken cancellationToken)
     {
         var unwrappedOracleSources = await GetUnwrappedOracleSourcesAsync(parameters, cancellationToken);
         if (unwrappedOracleSources.Any())
@@ -243,7 +243,7 @@ public class OracleService : IOracleService
         return wrappedOracleSources;
     }
 
-    public async Task<ICollection<OracleObject>> GetOracleObjectsAsync(OracleParameters parameters, CancellationToken cancellationToken = default)
+    public async Task<ICollection<OracleObject>> GetOracleObjectsAsync(OracleParameters parameters, CancellationToken cancellationToken)
     {
         var getFromAllObjectsSourceTask = GetOracleObjectsFromAllObjectsSourceAsync(parameters, cancellationToken);
         var getPackagesFromAllProceduresSourceTask = GetOraclePackagesAsync(parameters, cancellationToken);
@@ -314,7 +314,7 @@ public class OracleService : IOracleService
         return objects;
     }
 
-    public async Task<ICollection<OracleSchema>> GetOracleSchemasAsync(OracleParameters parameters, CancellationToken cancellationToken = default)
+    public async Task<ICollection<OracleSchema>> GetOracleSchemasAsync(OracleParameters parameters, CancellationToken cancellationToken)
     {
         var sqlBuilder = new StringBuilder
         (
@@ -346,7 +346,7 @@ public class OracleService : IOracleService
         return oracleSchemas.ToList();
     }
     
-    private async Task<ICollection<OracleSource>> GetUnwrappedOracleSourcesAsync(OracleParameters parameters, CancellationToken cancellationToken = default)
+    private async Task<ICollection<OracleSource>> GetUnwrappedOracleSourcesAsync(OracleParameters parameters, CancellationToken cancellationToken)
     {
         var hasOwnerName = !string.IsNullOrWhiteSpace(parameters.OwnerName)
             ? "UPPER(OWNER) = :owner"
@@ -436,7 +436,7 @@ public class OracleService : IOracleService
         return oracleSources.ToList();
     }
 
-    private async Task<ICollection<OracleObject>> GetOracleObjectsFromAllObjectsSourceAsync(OracleParameters parameters, CancellationToken cancellationToken = default)
+    private async Task<ICollection<OracleObject>> GetOracleObjectsFromAllObjectsSourceAsync(OracleParameters parameters, CancellationToken cancellationToken)
     {
         var sqlBuilder = new StringBuilder
         (

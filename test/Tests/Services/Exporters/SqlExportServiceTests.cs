@@ -22,6 +22,11 @@ public class SqlExportServiceTests
             {
                 Line = 1,
                 Text = "Procedure GET_INFO;"
+            },
+            new()
+            {
+                Line = 2,
+                Text = "=> 'CUSTOM_ERROR'"
             }
         };
 
