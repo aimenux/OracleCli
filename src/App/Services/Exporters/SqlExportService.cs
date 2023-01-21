@@ -1,7 +1,6 @@
 using System.Text;
 using System.Text.RegularExpressions;
 using App.Services.Oracle;
-using TextCopy;
 using static System.Environment;
 
 namespace App.Services.Exporters;
@@ -42,7 +41,7 @@ public class SqlExportService : ISqlExportService
             }
             sqlBuilder.AppendLine(@"*/");
             sqlBuilder.AppendLine(NewLine);
-            await ClipboardService.SetTextAsync(string.Join(NewLine, errors), cancellationToken);
+            await _textExportService.ExportToClipboardAsync(string.Join(NewLine, errors), cancellationToken);
         }
 
         foreach (var oracleSource in nonEmptyOracleSources)
