@@ -30,4 +30,36 @@ public class OracleSourcesTests
         sourcesEquals.Should().BeTrue();
         objectsEquals.Should().BeTrue();
     }
+    
+    [Fact]
+    public void Should_Get_Distinct_Oracle_Sources()
+    {
+        // arrange
+        var list = new List<OracleSource>
+        {
+            new()
+            {
+                Line = 1,
+                Text = "PROCEDURE ADD_INFOS"
+            },
+            new()
+            {
+                Line = 1,
+                Text = "PROCEDURE ADD_INFOS"
+            },
+            new(),
+            new(),
+            null
+        };
+
+        var hashset = new HashSet<OracleSource>(list);
+
+        // act
+        var hashsetCount = hashset.Count;
+        var listDistinctCount = list.Distinct().Count();
+
+        // assert
+        hashsetCount.Should().Be(3);
+        listDistinctCount.Should().Be(3);
+    }
 }

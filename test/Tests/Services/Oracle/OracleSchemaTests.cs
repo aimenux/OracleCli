@@ -31,4 +31,34 @@ public class OracleSchemaTests
         schemasEquals.Should().BeTrue();
         objectsEquals.Should().BeTrue();
     }
+    
+    [Fact]
+    public void Should_Get_Distinct_Oracle_Schemas()
+    {
+        // arrange
+        var list = new List<OracleSchema>
+        {
+            new()
+            {
+                SchemaName = "schema"
+            },
+            new()
+            {
+                SchemaName = "schema"
+            },
+            new(),
+            new(),
+            null
+        };
+
+        var hashset = new HashSet<OracleSchema>(list);
+
+        // act
+        var hashsetCount = hashset.Count;
+        var listDistinctCount = list.Distinct().Count();
+
+        // assert
+        hashsetCount.Should().Be(3);
+        listDistinctCount.Should().Be(3);
+    }
 }

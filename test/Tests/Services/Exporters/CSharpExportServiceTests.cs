@@ -13,7 +13,7 @@ public class CSharpExportServiceTests
         var textExportService = Substitute.For<ITextExportService>();
         var oracleParameters = new OracleParameters
         {
-            OwnerName = "SYS",
+            OwnerName = "USER",
             ProcedureName = "GET_INFO"
         };
         var oracleArguments = new List<OracleArgument>
@@ -24,6 +24,20 @@ public class CSharpExportServiceTests
                 Direction = "IN",
                 DataType = "VARCHAR",
                 Position = 1
+            },
+            new()
+            {
+                Name = "PI_DATE",
+                Direction = "IN",
+                DataType = "DATE",
+                Position = 2
+            },
+            new()
+            {
+                Name = "PO_RESULTS",
+                Direction = "OUT",
+                DataType = "REF CURSOR",
+                Position = 3
             }
         };
 

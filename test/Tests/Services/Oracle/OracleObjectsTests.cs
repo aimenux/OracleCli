@@ -37,4 +37,38 @@ public class OracleObjectsTests
         equals.Should().BeTrue();
         objectsEquals.Should().BeTrue();
     }
+    
+    [Fact]
+    public void Should_Get_Distinct_Oracle_Objects()
+    {
+        // arrange
+        var list = new List<OracleObject>
+        {
+            new()
+            {
+                ObjectName = "name",
+                ObjectType = "type",
+                OwnerName = "owner",
+            },
+            new()
+            {
+                ObjectName = "name",
+                ObjectType = "type",
+                OwnerName = "owner",
+            },
+            new(),
+            new(),
+            null
+        };
+
+        var hashset = new HashSet<OracleObject>(list);
+
+        // act
+        var hashsetCount = hashset.Count;
+        var listDistinctCount = list.Distinct().Count();
+
+        // assert
+        hashsetCount.Should().Be(3);
+        listDistinctCount.Should().Be(3);
+    }
 }
