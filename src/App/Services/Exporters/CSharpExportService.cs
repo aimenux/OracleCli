@@ -1,12 +1,18 @@
 using System.Text;
 using App.Services.Oracle;
 using Humanizer;
-using TextCopy;
 
 namespace App.Services.Exporters;
 
 public class CSharpExportService : ICSharpExportService
 {
+    private readonly ITextExportService _textExportService;
+
+    public CSharpExportService(ITextExportService textExportService)
+    {
+        _textExportService = textExportService ?? throw new ArgumentNullException(nameof(textExportService));
+    }
+
     public async Task ExportOracleArgumentsAsync(ICollection<OracleArgument> oracleArguments, OracleParameters parameters, CancellationToken cancellationToken)
     {
         var fullname = GetCSharpProcedureFullName(parameters);
@@ -42,7 +48,7 @@ public class CSharpExportService : ICSharpExportService
         );
 
         var csharpText = csharpBuilder.ToString();
-        await ClipboardService.SetTextAsync(csharpText, cancellationToken);
+        await _textExportService.ExportToClipboardAsync(csharpText, cancellationToken);
     }
     
     private static string GetCSharpCursorClasses(IEnumerable<OracleArgument> oracleArguments)

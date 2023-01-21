@@ -8,6 +8,13 @@ namespace App.Services.Exporters;
 
 public class SqlExportService : ISqlExportService
 {
+    private readonly ITextExportService _textExportService;
+
+    public SqlExportService(ITextExportService textExportService)
+    {
+        _textExportService = textExportService ?? throw new ArgumentNullException(nameof(textExportService));
+    }
+    
     public async Task ExportOracleSourcesAsync(ICollection<OracleSource> oracleSources, OracleParameters parameters, CancellationToken cancellationToken)
     {
         var nonEmptyOracleSources = oracleSources
@@ -42,8 +49,8 @@ public class SqlExportService : ISqlExportService
         {
             sqlBuilder.Append(oracleSource.Text);
         }
-        
-        await File.WriteAllTextAsync(parameters.OutputFile, sqlBuilder.ToString(), cancellationToken);
+
+        await _textExportService.ExportToFileAsync(sqlBuilder.ToString(), parameters.OutputFile, cancellationToken);
     }
 
     private static ICollection<string> GetCustomOracleErrors(ICollection<OracleSource> oracleSources)

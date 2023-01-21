@@ -2,20 +2,20 @@ using App.Services.Oracle;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 
-namespace Tests.Services;
+namespace Tests.Services.Oracle;
 
 [Collection(Collections.OracleCollectionName)]
-public class FindOracleProceduresTests
+public class GetOracleSourcesTests
 {
     private readonly OracleFixture _oracleFixture;
 
-    public FindOracleProceduresTests(OracleFixture oracleFixture)
+    public GetOracleSourcesTests(OracleFixture oracleFixture)
     {
         _oracleFixture = oracleFixture;
     }
     
     [Fact]
-    public async Task Should_Find_Procedures()
+    public async Task Should_Get_Sources()
     {
         // arrange
         const string databaseName = "oracle-for-tests";
@@ -37,12 +37,9 @@ public class FindOracleProceduresTests
         var service = new OracleService(options);
 
         // act
-        var procedures = await service.FindOracleProceduresAsync(parameters, CancellationToken.None);
+        var arguments = await service.GetOracleSourcesAsync(parameters, CancellationToken.None);
 
         // assert
-        procedures.Should().NotBeEmpty();
-        procedures.Should().HaveCount(1);
-        procedures.Single().PackageName.Should().Be(parameters.PackageName);
-        procedures.Single().ProcedureName.Should().Be(parameters.ProcedureName);
+        arguments.Should().NotBeEmpty();
     }
 }

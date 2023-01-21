@@ -48,6 +48,7 @@ public static class Program
                 services.AddTransient<IOracleService, OracleService>();
                 services.AddTransient<IConsoleService, ConsoleService>();
                 services.AddTransient<ISqlExportService, SqlExportService>();
+                services.AddTransient<ITextExportService, TextExportService>();
                 services.AddTransient<ICSharpExportService, CSharpExportService>();
                 services.Configure<Settings>(hostingContext.Configuration.GetSection(nameof(Settings)));
             })
