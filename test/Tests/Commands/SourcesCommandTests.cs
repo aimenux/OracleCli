@@ -1,10 +1,10 @@
 using App.Commands;
 using App.Configuration;
-using App.Services.Console;
 using App.Services.Exporters;
 using App.Services.Oracle;
 using FluentAssertions;
 using McMaster.Extensions.CommandLineUtils;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 
@@ -24,9 +24,15 @@ public class SourcesCommandTests
 
     [Theory]
     [InlineData(null, null, "RUN")]
+    [InlineData(null, null, "UPPER")]
+    [InlineData(null, null, "LOWER")]
+    [InlineData(null, null, "LENGTH")]
     [InlineData(null, "RMJVM", "RUN")]
-    [InlineData("SYS", "RMJVM", "RUN")]
-    [InlineData("SYS", "RMJVM", "STRIP")]
+    [InlineData("SYS", "DBMS_AW", "RUN")]
+    [InlineData("SYS", null, "GET_TEXT")]
+    [InlineData("SYS", null, "GET_LINE")]
+    [InlineData("SYS", "UTL_TCP", "GET_TEXT")]
+    [InlineData("SYS", "DBMS_OUTPUT", "GET_LINE")]
     public async Task Should_SourcesCommand_Return_Ok(string ownerName, string packageName, string procedureName)
     {
         // arrange
@@ -40,7 +46,8 @@ public class SourcesCommandTests
         
         var app = new CommandLineApplication();
         var consoleService = new FakeConsoleService();
-        var oracleService = new OracleService(options);
+        var logger = NullLogger<OracleService>.Instance;
+        var oracleService = new OracleService(options, logger);
         var exportService = Substitute.For<ISqlExportService>();
         var command = new SourcesCommand(consoleService, oracleService, exportService, options)
         {
@@ -73,7 +80,8 @@ public class SourcesCommandTests
         
         var app = new CommandLineApplication();
         var consoleService = new FakeConsoleService();
-        var oracleService = new OracleService(options);
+        var logger = NullLogger<OracleService>.Instance;
+        var oracleService = new OracleService(options, logger);
         var exportService = Substitute.For<ISqlExportService>();
         var command = new SourcesCommand(consoleService, oracleService, exportService, options)
         {

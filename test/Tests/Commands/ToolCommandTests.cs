@@ -1,12 +1,8 @@
 using App.Commands;
 using App.Configuration;
-using App.Services.Console;
-using App.Services.Exporters;
-using App.Services.Oracle;
 using FluentAssertions;
 using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Options;
-using NSubstitute;
 
 namespace Tests.Commands;
 

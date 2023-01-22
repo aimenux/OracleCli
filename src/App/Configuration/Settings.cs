@@ -40,6 +40,7 @@ public sealed class Settings
 
     public const int DatabaseTimeoutInSeconds = 300;
     
+    public int MaxRetry { get; init; } = 3;
     public string DefaultDatabaseToUse { get; init; }
     public string DefaultSchemaToUse { get; init; }
     public ICollection<Database> Databases { get; init; }

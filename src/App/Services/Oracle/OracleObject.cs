@@ -12,7 +12,11 @@ public sealed class OracleObject : IEquatable<OracleObject>
     {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;
-        return OwnerName == other.OwnerName && ObjectName == other.ObjectName && ObjectType == other.ObjectType && CreationDate.Equals(other.CreationDate);
+        return OwnerName == other.OwnerName &&
+               ObjectName == other.ObjectName &&
+               ObjectType == other.ObjectType &&
+               CreationDate.Equals(other.CreationDate) &&
+               ModificationDate.Equals(other.ModificationDate);
     }
 
     public override bool Equals(object obj)
@@ -22,6 +26,6 @@ public sealed class OracleObject : IEquatable<OracleObject>
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(OwnerName, ObjectName, ObjectType, CreationDate);
+        return HashCode.Combine(OwnerName, ObjectName, ObjectType, CreationDate, ModificationDate);
     }
 }

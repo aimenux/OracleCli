@@ -3,6 +3,7 @@ using App.Configuration;
 using App.Services.Oracle;
 using FluentAssertions;
 using McMaster.Extensions.CommandLineUtils;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 
 namespace Tests.Commands;
@@ -37,7 +38,8 @@ public class SchemasCommandTests
         
         var app = new CommandLineApplication();
         var consoleService = new FakeConsoleService();
-        var oracleService = new OracleService(options);
+        var logger = NullLogger<OracleService>.Instance;
+        var oracleService = new OracleService(options, logger);
         var command = new SchemasCommand(consoleService, oracleService, options)
         {
             DatabaseName = DatabaseName,
@@ -69,7 +71,8 @@ public class SchemasCommandTests
         
         var app = new CommandLineApplication();
         var consoleService = new FakeConsoleService();
-        var oracleService = new OracleService(options);
+        var logger = NullLogger<OracleService>.Instance;
+        var oracleService = new OracleService(options, logger);
         var command = new SchemasCommand(consoleService, oracleService, options)
         {
             DatabaseName = DatabaseName,

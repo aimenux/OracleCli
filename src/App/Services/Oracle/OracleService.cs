@@ -2,18 +2,22 @@ using System.Text;
 using App.Configuration;
 using App.Extensions;
 using Dapper;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Oracle.ManagedDataAccess.Client;
+using Polly;
 
 namespace App.Services.Oracle;
 
 public class OracleService : IOracleService
 {
     private readonly Settings _settings;
+    private readonly ILogger<OracleService> _logger;
 
-    public OracleService(IOptions<Settings> options)
+    public OracleService(IOptions<Settings> options, ILogger<OracleService> logger)
     {
         _settings = options?.Value ?? throw new ArgumentNullException(nameof(options));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public async Task<ICollection<OraclePackage>> GetOraclePackagesAsync(OracleParameters parameters, CancellationToken cancellationToken)
@@ -55,9 +59,13 @@ public class OracleService : IOracleService
             keyword = parameters.FilterKeyword?.ToUpper()
         };
 
-        await using var connection = CreateOracleConnection(parameters);
-        var oraclePackages = await connection.QueryAsync<OraclePackage>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
-        return oraclePackages.ToList();
+        var retryPolicy = GetRetryPolicy<ICollection<OraclePackage>>();
+        return await retryPolicy.ExecuteAsync(async () =>
+        {
+            await using var connection = CreateOracleConnection(parameters);
+            var oraclePackages = await connection.QueryAsync<OraclePackage>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
+            return oraclePackages.ToList();
+        });
     }
 
     public async Task<ICollection<OracleFunction>> GetOracleFunctionsAsync(OracleParameters parameters, CancellationToken cancellationToken)
@@ -98,9 +106,13 @@ public class OracleService : IOracleService
             keyword = parameters.FilterKeyword?.ToUpper()
         };
 
-        await using var connection = CreateOracleConnection(parameters);
-        var oracleFunctions = await connection.QueryAsync<OracleFunction>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
-        return oracleFunctions.ToList();
+        var retryPolicy = GetRetryPolicy<ICollection<OracleFunction>>();
+        return await retryPolicy.ExecuteAsync(async () =>
+        {
+            await using var connection = CreateOracleConnection(parameters);
+            var oracleFunctions = await connection.QueryAsync<OracleFunction>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
+            return oracleFunctions.ToList();
+        });
     }
 
     public async Task<ICollection<OracleProcedure>> GetOracleProceduresAsync(OracleParameters parameters, CancellationToken cancellationToken)
@@ -142,9 +154,13 @@ public class OracleService : IOracleService
             keyword = parameters.FilterKeyword?.ToUpper()
         };
 
-        await using var connection = CreateOracleConnection(parameters);
-        var oracleProcedures = await connection.QueryAsync<OracleProcedure>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
-        return oracleProcedures.ToList();
+        var retryPolicy = GetRetryPolicy<ICollection<OracleProcedure>>();
+        return await retryPolicy.ExecuteAsync(async () =>
+        {
+            await using var connection = CreateOracleConnection(parameters);
+            var oracleProcedures = await connection.QueryAsync<OracleProcedure>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
+            return oracleProcedures.ToList();
+        });
     }
 
     public async Task<ICollection<OracleProcedure>> FindOracleProceduresAsync(OracleParameters parameters, CancellationToken cancellationToken)
@@ -185,9 +201,13 @@ public class OracleService : IOracleService
             pkgName = parameters.PackageName?.ToUpper()
         };
 
-        await using var connection = CreateOracleConnection(parameters);
-        var oracleProcedures = await connection.QueryAsync<OracleProcedure>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
-        return oracleProcedures.ToList();
+        var retryPolicy = GetRetryPolicy<ICollection<OracleProcedure>>();
+        return await retryPolicy.ExecuteAsync(async () =>
+        {
+            await using var connection = CreateOracleConnection(parameters);
+            var oracleProcedures = await connection.QueryAsync<OracleProcedure>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
+            return oracleProcedures.ToList();
+        });
     }
 
     public async Task<ICollection<OracleArgument>> GetOracleArgumentsAsync(OracleParameters parameters, CancellationToken cancellationToken)
@@ -226,9 +246,13 @@ public class OracleService : IOracleService
             procedure = parameters.ProcedureName?.ToUpper()
         };
 
-        await using var connection = CreateOracleConnection(parameters);
-        var oracleArguments = await connection.QueryAsync<OracleArgument>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
-        return oracleArguments.ToList();
+        var retryPolicy = GetRetryPolicy<ICollection<OracleArgument>>();
+        return await retryPolicy.ExecuteAsync(async () =>
+        {
+            await using var connection = CreateOracleConnection(parameters);
+            var oracleArguments = await connection.QueryAsync<OracleArgument>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
+            return oracleArguments.ToList();
+        });
     }
 
     public async Task<ICollection<OracleSource>> GetOracleSourcesAsync(OracleParameters parameters, CancellationToken cancellationToken)
@@ -340,10 +364,14 @@ public class OracleService : IOracleService
             max = parameters.MaxItems + 1,
             keyword = parameters.FilterKeyword?.ToUpper()
         };
-
-        await using var connection = CreateOracleConnection(parameters);
-        var oracleSchemas = await connection.QueryAsync<OracleSchema>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
-        return oracleSchemas.ToList();
+        
+        var retryPolicy = GetRetryPolicy<ICollection<OracleSchema>>();
+        return await retryPolicy.ExecuteAsync(async () =>
+        {
+            await using var connection = CreateOracleConnection(parameters);
+            var oracleSchemas = await connection.QueryAsync<OracleSchema>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
+            return oracleSchemas.ToList();
+        });
     }
     
     private async Task<ICollection<OracleSource>> GetUnwrappedOracleSourcesAsync(OracleParameters parameters, CancellationToken cancellationToken)
@@ -402,9 +430,13 @@ public class OracleService : IOracleService
             regex = $@"{parameters.ProcedureName?.ToUpper()}(;|\(|\s)+"
         };
 
-        await using var connection = CreateOracleConnection(parameters);
-        var oracleSources = await connection.QueryAsync<OracleSource>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
-        return oracleSources.ToList();
+        var retryPolicy = GetRetryPolicy<ICollection<OracleSource>>();
+        return await retryPolicy.ExecuteAsync(async () =>
+        {
+            await using var connection = CreateOracleConnection(parameters);
+            var oracleSources = await connection.QueryAsync<OracleSource>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
+            return oracleSources.ToList();
+        });
     }
     
     private async Task<ICollection<OracleSource>> GetWrappedOracleSourcesAsync(OracleParameters parameters, CancellationToken cancellationToken = default)
@@ -431,9 +463,13 @@ public class OracleService : IOracleService
             package = parameters.PackageName?.ToUpper()
         };
 
-        await using var connection = CreateOracleConnection(parameters);
-        var oracleSources = await connection.QueryAsync<OracleSource>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
-        return oracleSources.ToList();
+        var retryPolicy = GetRetryPolicy<ICollection<OracleSource>>();
+        return await retryPolicy.ExecuteAsync(async () =>
+        {
+            await using var connection = CreateOracleConnection(parameters);
+            var oracleSources = await connection.QueryAsync<OracleSource>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
+            return oracleSources.ToList();
+        });
     }
 
     private async Task<ICollection<OracleObject>> GetOracleObjectsFromAllObjectsSourceAsync(OracleParameters parameters, CancellationToken cancellationToken)
@@ -474,9 +510,13 @@ public class OracleService : IOracleService
             keyword = parameters.FilterKeyword?.ToUpper()
         };
 
-        await using var connection = CreateOracleConnection(parameters);
-        var oracleObjects = await connection.QueryAsync<OracleObject>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
-        return oracleObjects.ToList();
+        var retryPolicy = GetRetryPolicy<ICollection<OracleObject>>();
+        return await retryPolicy.ExecuteAsync(async () =>
+        {
+            await using var connection = CreateOracleConnection(parameters);
+            var oracleObjects = await connection.QueryAsync<OracleObject>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
+            return oracleObjects.ToList();
+        });
     }
 
     private OracleConnection CreateOracleConnection(OracleParameters parameters)
@@ -491,6 +531,39 @@ public class OracleService : IOracleService
         }
 
         return new OracleConnection(connectionString);
+    }
+    
+    private IAsyncPolicy<T> GetRetryPolicy<T>()
+    {
+        var maxRetry = _settings.MaxRetry;
+        var sleepDuration = TimeSpan.FromSeconds(5);
+        var retryPolicy = Policy<T>
+            .Handle<OracleException>()
+            .WaitAndRetryAsync(maxRetry,
+                _ => sleepDuration,
+                (response, _, retryCount, _) =>
+                {
+                    OnRetry(response, retryCount, maxRetry);
+                });
+        return retryPolicy;
+    }
+    
+    private void OnRetry<T>(DelegateResult<T> response, int retryCount, int maxRetry)
+    {
+        var reason = response.Exception?.Message;
+        if (string.IsNullOrWhiteSpace(reason))
+        {
+            _logger.LogTrace("Retry attempt {RetryCount}/{MaxRetry}", 
+                retryCount, 
+                maxRetry);
+        }
+        else
+        {
+            _logger.LogTrace("Retry attempt {RetryCount}/{MaxRetry}: {Reason}",
+                retryCount,
+                maxRetry,
+                reason);
+        }
     }
 
     private static string HasKeyWord(string fieldName) => $"UPPER({fieldName}) LIKE '%' || :keyword || '%'";

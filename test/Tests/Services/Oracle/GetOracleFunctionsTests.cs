@@ -1,5 +1,6 @@
 using App.Services.Oracle;
 using FluentAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 
 namespace Tests.Services.Oracle;
@@ -26,6 +27,7 @@ public class GetOracleFunctionsTests
             .Build();
         
         var options = Options.Create(settings);
+        var logger = NullLogger<OracleService>.Instance;
 
         var parameters = new OracleParameters
         {
@@ -33,7 +35,7 @@ public class GetOracleFunctionsTests
             MaxItems = 5
         };
 
-        var service = new OracleService(options);
+        var service = new OracleService(options, logger);
 
         // act
         var functions = await service.GetOracleFunctionsAsync(parameters, CancellationToken.None);
