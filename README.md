@@ -1,5 +1,6 @@
 [![.NET](https://github.com/aimenux/OracleCli/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/aimenux/OracleCli/actions/workflows/ci.yml)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=OracleCli-Key&metric=coverage)](https://sonarcloud.io/summary/new_code?id=OracleCli-Key)
+[![NuGet](https://img.shields.io/nuget/v/OracleCli)](https://www.nuget.org/packages/OracleCli/)
 
 # OracleCli
 ```
