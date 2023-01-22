@@ -23,6 +23,8 @@ public class SourcesCommandTests
     }
 
     [Theory]
+    [InlineData(null, null, "RUN")]
+    [InlineData(null, "RMJVM", "RUN")]
     [InlineData("SYS", "RMJVM", "RUN")]
     [InlineData("SYS", "RMJVM", "STRIP")]
     public async Task Should_SourcesCommand_Return_Ok(string ownerName, string packageName, string procedureName)
@@ -37,7 +39,7 @@ public class SourcesCommandTests
         var options = Options.Create(settings);
         
         var app = new CommandLineApplication();
-        var consoleService = Substitute.For<IConsoleService>();
+        var consoleService = new FakeConsoleService();
         var oracleService = new OracleService(options);
         var exportService = Substitute.For<ISqlExportService>();
         var command = new SourcesCommand(consoleService, oracleService, exportService, options)
@@ -70,7 +72,7 @@ public class SourcesCommandTests
         var options = Options.Create(settings);
         
         var app = new CommandLineApplication();
-        var consoleService = Substitute.For<IConsoleService>();
+        var consoleService = new FakeConsoleService();
         var oracleService = new OracleService(options);
         var exportService = Substitute.For<ISqlExportService>();
         var command = new SourcesCommand(consoleService, oracleService, exportService, options)

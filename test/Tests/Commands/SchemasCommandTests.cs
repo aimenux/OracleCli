@@ -1,11 +1,9 @@
 using App.Commands;
 using App.Configuration;
-using App.Services.Console;
 using App.Services.Oracle;
 using FluentAssertions;
 using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Options;
-using NSubstitute;
 
 namespace Tests.Commands;
 
@@ -22,6 +20,8 @@ public class SchemasCommandTests
     }
 
     [Theory]
+    [InlineData(null, 5)]
+    [InlineData("XYZ", 5)]
     [InlineData("DIP", 5)]
     [InlineData("SYS", 5)]
     public async Task Should_SchemasCommand_Return_Ok(string filterKeyword, int maxItems)
@@ -36,7 +36,7 @@ public class SchemasCommandTests
         var options = Options.Create(settings);
         
         var app = new CommandLineApplication();
-        var consoleService = Substitute.For<IConsoleService>();
+        var consoleService = new FakeConsoleService();
         var oracleService = new OracleService(options);
         var command = new SchemasCommand(consoleService, oracleService, options)
         {
@@ -68,7 +68,7 @@ public class SchemasCommandTests
         var options = Options.Create(settings);
         
         var app = new CommandLineApplication();
-        var consoleService = Substitute.For<IConsoleService>();
+        var consoleService = new FakeConsoleService();
         var oracleService = new OracleService(options);
         var command = new SchemasCommand(consoleService, oracleService, options)
         {

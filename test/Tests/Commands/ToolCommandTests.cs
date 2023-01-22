@@ -21,7 +21,7 @@ public class ToolCommandTests
     {
         // arrange
         var app = new CommandLineApplication();
-        var consoleService = Substitute.For<IConsoleService>();
+        var consoleService = new FakeConsoleService();
         var settings = new SettingsBuilder().Build();
         var options = Options.Create(settings);
         var command = new ToolCommand(consoleService, options)

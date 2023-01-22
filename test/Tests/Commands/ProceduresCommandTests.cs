@@ -37,7 +37,7 @@ public class ProceduresCommandTests
         var options = Options.Create(settings);
         
         var app = new CommandLineApplication();
-        var consoleService = Substitute.For<IConsoleService>();
+        var consoleService = new FakeConsoleService();
         var oracleService = new OracleService(options);
         var command = new ProceduresCommand(consoleService, oracleService, options)
         {
@@ -70,7 +70,7 @@ public class ProceduresCommandTests
         var options = Options.Create(settings);
         
         var app = new CommandLineApplication();
-        var consoleService = Substitute.For<IConsoleService>();
+        var consoleService = new FakeConsoleService();
         var oracleService = new OracleService(options);
         var command = new ProceduresCommand(consoleService, oracleService, options)
         {

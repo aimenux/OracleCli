@@ -37,7 +37,7 @@ public class FunctionsCommandTests
         var options = Options.Create(settings);
         
         var app = new CommandLineApplication();
-        var consoleService = Substitute.For<IConsoleService>();
+        var consoleService = new FakeConsoleService();
         var oracleService = new OracleService(options);
         var command = new FunctionsCommand(consoleService, oracleService, options)
         {
@@ -70,7 +70,7 @@ public class FunctionsCommandTests
         var options = Options.Create(settings);
         
         var app = new CommandLineApplication();
-        var consoleService = Substitute.For<IConsoleService>();
+        var consoleService = new FakeConsoleService();
         var oracleService = new OracleService(options);
         var command = new FunctionsCommand(consoleService, oracleService, options)
         {
