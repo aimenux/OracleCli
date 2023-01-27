@@ -10,4 +10,6 @@ public interface IOracleService
     Task<ICollection<OracleSource>> GetOracleSourcesAsync(OracleParameters parameters, CancellationToken cancellationToken);
     Task<ICollection<OracleObject>> GetOracleObjectsAsync(OracleParameters parameters, CancellationToken cancellationToken);
     Task<ICollection<OracleSchema>> GetOracleSchemasAsync(OracleParameters parameters, CancellationToken cancellationToken);
+    Task<ICollection<OracleTable>> GetOracleTablesAsync(OracleParameters parameters, CancellationToken cancellationToken);
+    Task<OracleTable> GetOracleTableAsync(OracleParameters parameters, CancellationToken cancellationToken);
 }

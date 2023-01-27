@@ -15,8 +15,12 @@ public class GetOraclePackagesTests
         _oracleFixture = oracleFixture;
     }
     
-    [Fact]
-    public async Task Should_Get_Packages()
+    [Theory]
+    [InlineData(null)]
+    [InlineData("DBMS_SQL")]
+    [InlineData("DBMS_JOB")]
+    [InlineData("DBMS_LOCK")]
+    public async Task Should_Get_Packages(string filterKeyword)
     {
         // arrange
         const string databaseName = "oracle-for-tests";
@@ -32,6 +36,7 @@ public class GetOraclePackagesTests
         var parameters = new OracleParameters
         {
             DatabaseName = databaseName,
+            FilterKeyword = filterKeyword,
             MaxItems = 5
         };
 

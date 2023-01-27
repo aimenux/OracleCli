@@ -28,6 +28,9 @@ public class FunctionsCommand : AbstractCommand
     
     [Option("-o|--owner", "Owner/Schema name", CommandOptionType.SingleValue)]
     public string OwnerName { get; init; }
+    
+    [Option("-p|--pkg", "Package name", CommandOptionType.SingleValue)]
+    public string PackageName { get; init; }
 
     [Option("-f|--filter", "Filter keyword", CommandOptionType.SingleValue)]
     public string FilterKeyword { get; init; }
@@ -40,6 +43,7 @@ public class FunctionsCommand : AbstractCommand
         var parameters = new OracleParameters
         {
             DatabaseName = DatabaseName,
+            PackageName = PackageName,
             OwnerName = OwnerName,
             MaxItems = MaxItems,
             FilterKeyword = FilterKeyword

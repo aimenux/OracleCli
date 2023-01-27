@@ -14,7 +14,7 @@ public class FunctionsCommandValidator : AbstractValidator<FunctionsCommand>
             .InclusiveBetween(1, 5000);
 
         RuleFor(x => x.FilterKeyword)
-            .MinimumLength(3)
+            .MinimumLength(2)
             .When(x => x.FilterKeyword is not null);
     }
 }

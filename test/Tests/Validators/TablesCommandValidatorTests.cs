@@ -8,14 +8,14 @@ using NSubstitute;
 
 namespace Tests.Validators;
 
-public class FunctionsCommandValidatorTests
+public class TablesCommandValidatorTests
 {
     [Theory]
     [ClassData(typeof(ValidOracleTestCases))]
-    public void FunctionsCommand_Should_Be_Valid(FunctionsCommand command)
+    public void TablesCommand_Should_Be_Valid(TablesCommand command)
     {
         // arrange
-        var validator = new FunctionsCommandValidator();
+        var validator = new TablesCommandValidator();
 
         // act
         var result = validator.Validate(command);
@@ -26,10 +26,10 @@ public class FunctionsCommandValidatorTests
     
     [Theory]
     [ClassData(typeof(NotValidOracleTestCases))]
-    public void FunctionsCommand_Should_Not_Be_Valid(FunctionsCommand command)
+    public void TablesCommand_Should_Not_Be_Valid(TablesCommand command)
     {
         // arrange
-        var validator = new FunctionsCommandValidator();
+        var validator = new TablesCommandValidator();
 
         // act
         var result = validator.Validate(command);
@@ -38,7 +38,7 @@ public class FunctionsCommandValidatorTests
         result.IsValid.Should().BeFalse();
     }
     
-    private class ValidOracleTestCases : TheoryData<FunctionsCommand>
+    private class ValidOracleTestCases : TheoryData<TablesCommand>
     {
         public ValidOracleTestCases()
         {
@@ -47,46 +47,51 @@ public class FunctionsCommandValidatorTests
             var settings = new SettingsBuilder().Build();
             var options = Options.Create(settings);
             
-            Add(new FunctionsCommand(consoleService, oracleService, options)
+            Add(new TablesCommand(consoleService, oracleService, options)
             {
                 DatabaseName = "oracle-for-tests",
                 OwnerName = null,
+                TableName = null,
                 FilterKeyword = null,
             });
             
-            Add(new FunctionsCommand(consoleService, oracleService, options)
+            Add(new TablesCommand(consoleService, oracleService, options)
             {
                 DatabaseName = "oracle-for-tests",
                 OwnerName = "owner",
+                TableName = "table",
                 FilterKeyword = null,
             });
             
-            Add(new FunctionsCommand(consoleService, oracleService, options)
+            Add(new TablesCommand(consoleService, oracleService, options)
             {
                 DatabaseName = "oracle-for-tests",
                 OwnerName = null,
+                TableName = null,
                 FilterKeyword = null,
                 MaxItems = 1
             });
             
-            Add(new FunctionsCommand(consoleService, oracleService, options)
+            Add(new TablesCommand(consoleService, oracleService, options)
             {
                 DatabaseName = "oracle-for-tests",
                 OwnerName = null,
+                TableName = null,
                 FilterKeyword = "keyword",
             });
 
-            Add(new FunctionsCommand(consoleService, oracleService, options)
+            Add(new TablesCommand(consoleService, oracleService, options)
             {
                 DatabaseName = "oracle-for-tests",
                 OwnerName = "owner",
-                FilterKeyword = "keyword",
+                TableName = "table",
+                FilterKeyword = null,
                 MaxItems = 5000
             });
         }
     }
     
-    private class NotValidOracleTestCases : TheoryData<FunctionsCommand>
+    private class NotValidOracleTestCases : TheoryData<TablesCommand>
     {
         public NotValidOracleTestCases()
         {
@@ -95,40 +100,45 @@ public class FunctionsCommandValidatorTests
             var settings = new SettingsBuilder().Build();
             var options = Options.Create(settings);
             
-            Add(new FunctionsCommand(consoleService, oracleService, options)
+            Add(new TablesCommand(consoleService, oracleService, options)
             {
                 DatabaseName = null,
                 OwnerName = null,
+                TableName = null,
                 FilterKeyword = null,
             });
             
-            Add(new FunctionsCommand(consoleService, oracleService, options)
+            Add(new TablesCommand(consoleService, oracleService, options)
             {
                 DatabaseName = "oracle-for-tests",
                 OwnerName = null,
+                TableName = null,
                 FilterKeyword = null,
                 MaxItems = 0
             });
-
-            Add(new FunctionsCommand(consoleService, oracleService, options)
+            
+            Add(new TablesCommand(consoleService, oracleService, options)
             {
                 DatabaseName = "oracle-for-tests",
                 OwnerName = null,
+                TableName = null,
                 FilterKeyword = null,
                 MaxItems = 5001
             });
-            
-            Add(new FunctionsCommand(consoleService, oracleService, options)
+
+            Add(new TablesCommand(consoleService, oracleService, options)
             {
                 DatabaseName = "oracle-for-tests",
                 OwnerName = null,
+                TableName = null,
                 FilterKeyword = "a"
             });
             
-            Add(new FunctionsCommand(consoleService, oracleService, options)
+            Add(new TablesCommand(consoleService, oracleService, options)
             {
                 DatabaseName = "oracle-for-tests",
                 OwnerName = null,
+                TableName = null,
                 FilterKeyword = "ab",
                 MaxItems = -1
             });

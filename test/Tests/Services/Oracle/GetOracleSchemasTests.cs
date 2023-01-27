@@ -15,8 +15,12 @@ public class GetOracleSchemasTests
         _oracleFixture = oracleFixture;
     }
     
-    [Fact]
-    public async Task Should_Get_Schemas()
+    [Theory]
+    [InlineData(null)]
+    [InlineData("SYS")]
+    [InlineData("OUTLN")]
+    [InlineData("SYSTEM")]
+    public async Task Should_Get_Schemas(string filterKeyword)
     {
         // arrange
         const string databaseName = "oracle-for-tests";
@@ -32,6 +36,7 @@ public class GetOracleSchemasTests
         var parameters = new OracleParameters
         {
             DatabaseName = databaseName,
+            FilterKeyword = filterKeyword,
             MaxItems = 5
         };
 

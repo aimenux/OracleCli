@@ -6,21 +6,52 @@ using Microsoft.Extensions.Options;
 namespace Tests.Services.Oracle;
 
 [Collection(Collections.OracleCollectionName)]
-public class GetOracleObjectsTests
+public class GetOracleTablesTests
 {
     private readonly OracleFixture _oracleFixture;
 
-    public GetOracleObjectsTests(OracleFixture oracleFixture)
+    public GetOracleTablesTests(OracleFixture oracleFixture)
     {
         _oracleFixture = oracleFixture;
     }
     
     [Theory]
+    [InlineData("SYSTEM", "VDK_DATABASE")]
+    [InlineData("SYSTEM", "VDK_DATAFILE")]
+    [InlineData("SYSTEM", "VDK_INSTANCE")]
+    public async Task Should_Get_Table(string ownerName, string tableName)
+    {
+        // arrange
+        const string databaseName = "oracle-for-tests";
+        var connectionString = _oracleFixture.ConnectionString;
+        
+        var settings = new SettingsBuilder()
+            .WithDatabase(databaseName, connectionString)
+            .Build();
+        
+        var options = Options.Create(settings);
+        var logger = NullLogger<OracleService>.Instance;
+
+        var parameters = new OracleParameters
+        {
+            DatabaseName = databaseName,
+            OwnerName = ownerName,
+            TableName = tableName
+        };
+
+        var service = new OracleService(options, logger);
+
+        // act
+        var table = await service.GetOracleTableAsync(parameters, CancellationToken.None);
+
+        // assert
+        table.Should().NotBeNull();
+    }
+    
+    [Theory]
     [InlineData(null)]
     [InlineData("SQL")]
-    [InlineData("USR")]
-    [InlineData("ORA")]
-    public async Task Should_Get_Objects(string filterKeyword)
+    public async Task Should_Get_Tables(string filterKeyword)
     {
         // arrange
         const string databaseName = "oracle-for-tests";
@@ -43,47 +74,9 @@ public class GetOracleObjectsTests
         var service = new OracleService(options, logger);
 
         // act
-        var objects = await service.GetOracleObjectsAsync(parameters, CancellationToken.None);
+        var tables = await service.GetOracleTablesAsync(parameters, CancellationToken.None);
 
         // assert
-        objects.Should().NotBeEmpty();
-    }
-    
-    [Theory]
-    [InlineData("VIEW")]
-    [InlineData("TABLE")]
-    [InlineData("INDEX")]
-    [InlineData("PACKAGE")]
-    [InlineData("CLUSTER")]
-    [InlineData("SEQUENCE")]
-    [InlineData("FUNCTION")]
-    [InlineData("PROCEDURE")]
-    public async Task Should_Get_Objects_Of_Type(string objectType)
-    {
-        // arrange
-        const string databaseName = "oracle-for-tests";
-        var connectionString = _oracleFixture.ConnectionString;
-        
-        var settings = new SettingsBuilder()
-            .WithDatabase(databaseName, connectionString)
-            .Build();
-        
-        var options = Options.Create(settings);
-        var logger = NullLogger<OracleService>.Instance;
-
-        var parameters = new OracleParameters
-        {
-            DatabaseName = databaseName,
-            ObjectTypes = new[] { objectType },
-            MaxItems = 5
-        };
-
-        var service = new OracleService(options, logger);
-
-        // act
-        var objects = await service.GetOracleObjectsAsync(parameters, CancellationToken.None);
-
-        // assert
-        objects.Should().NotBeEmpty();
+        tables.Should().NotBeEmpty();
     }
 }

@@ -94,6 +94,13 @@ public class ConsoleService : IConsoleService
                 return await func.Invoke();
             });
     }
+    
+    public bool GetYesOrNoAnswer(string text, bool defaultAnswer)
+    {
+        if (AnsiConsole.Confirm($"Do you want to [u]{text}[/] ?", defaultAnswer)) return true;
+        AnsiConsole.WriteLine();
+        return false;
+    }
 
     public void RenderValidationErrors(ValidationErrors validationErrors)
     {
@@ -126,6 +133,69 @@ public class ConsoleService : IConsoleService
         {
             await ClipboardService.SetTextAsync(text, cancellationToken);            
         }
+    }
+
+    public void RenderOracleTable(OracleTable oracleTable, OracleParameters parameters)
+    {
+        var ownerName = parameters.OwnerName.ToUpper();
+        var tableName = parameters.TableName.ToUpper();
+        var databaseName = parameters.DatabaseName.ToUpper();
+        var title = $"[yellow][bold]Table {ownerName}.{tableName}[/][/]";
+        var table = new Table()
+            .BorderColor(Color.White)
+            .Border(TableBorder.Square)
+            .Title(title)
+            .AddColumn(new TableColumn("[u]#[/]").Centered())
+            .AddColumn(new TableColumn("[u]ColumnName[/]").Centered())
+            .AddColumn(new TableColumn("[u]ColumnType[/]").Centered())
+            .AddColumn(new TableColumn("[u]IsNullable[/]").Centered())
+            .Caption($"[yellow][bold]{databaseName}[/][/]");
+
+        var index = 1;
+        foreach (var column in oracleTable.TableColumns)
+        {
+            table.AddRow(
+                IndexMarkup(index++),
+                ToMarkup(column.Name),
+                ToMarkup(column.Type),
+                ToMarkup(column.Nullable));
+        }
+
+        AnsiConsole.WriteLine();
+        AnsiConsole.Write(table);
+        AnsiConsole.WriteLine();
+    }
+
+    public void RenderOracleTables(ICollection<OracleTable> oracleTables, OracleParameters parameters)
+    {
+        var databaseName = parameters.DatabaseName.ToUpper();
+        var title = oracleTables.Count > parameters.MaxItems
+            ? $"[yellow][bold]Found more than {parameters.MaxItems} table(s)[/][/]"
+            : $"[yellow][bold]Found {oracleTables.Count} table(s)[/][/]";
+        var table = new Table()
+            .BorderColor(Color.White)
+            .Border(TableBorder.Square)
+            .Title(title)
+            .AddColumn(new TableColumn("[u]#[/]").Centered())
+            .AddColumn(new TableColumn("[u]OwnerName[/]").Centered())
+            .AddColumn(new TableColumn("[u]TableName[/]").Centered())
+            .AddColumn(new TableColumn("[u]RowsCount[/]").Centered())
+            .Caption($"[yellow][bold]{databaseName}[/][/]");
+
+        var index = 1;
+        var count = Math.Min(oracleTables.Count, parameters.MaxItems);
+        foreach (var result in oracleTables.Take(count))
+        {
+            table.AddRow(
+                IndexMarkup(index++),
+                ToMarkup(result.OwnerName),
+                ToMarkup(result.TableName),
+                ToMarkup($"{result.RowsCount}"));
+        }
+
+        AnsiConsole.WriteLine();
+        AnsiConsole.Write(table);
+        AnsiConsole.WriteLine();
     }
 
     public void RenderOracleObjects(ICollection<OracleObject> oracleObjects, OracleParameters parameters)
@@ -238,7 +308,6 @@ public class ConsoleService : IConsoleService
             .AddColumn(new TableColumn("[u]PackageName[/]").Centered())
             .AddColumn(new TableColumn("[u]CreationDate[/]").Centered())
             .AddColumn(new TableColumn("[u]ModificationDate[/]").Centered())
-            .AddColumn(new TableColumn("[u]ProceduresCount[/]").Centered())
             .Caption($"[yellow][bold]{databaseName}[/][/]");
 
         var index = 1;
@@ -250,8 +319,7 @@ public class ConsoleService : IConsoleService
                 ToMarkup(result.OwnerName),
                 ToMarkup(result.PackageName),
                 ToMarkup(result.CreationDate.ToString("g")),
-                ToMarkup(result.ModificationDate.ToString("g")),
-                ToMarkup($"{result.ProceduresCount}"));
+                ToMarkup(result.ModificationDate.ToString("g")));
         }
 
         AnsiConsole.WriteLine();

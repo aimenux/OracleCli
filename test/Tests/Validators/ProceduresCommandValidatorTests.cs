@@ -129,7 +129,8 @@ public class ProceduresCommandValidatorTests
             {
                 DatabaseName = "oracle-for-tests",
                 OwnerName = null,
-                FilterKeyword = "ab"
+                FilterKeyword = "ab",
+                MaxItems = -1
             });
         }
     }

@@ -119,7 +119,8 @@ public class SchemasCommandValidatorTests
             Add(new SchemasCommand(consoleService, oracleService, options)
             {
                 DatabaseName = "oracle-for-tests",
-                FilterKeyword = "ab"
+                FilterKeyword = "ab",
+                MaxItems = -1
             });
         }
     }

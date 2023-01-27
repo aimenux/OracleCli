@@ -28,12 +28,15 @@ public class ObjectsCommand : AbstractCommand
     
     [Option("-o|--owner", "Owner/Schema name", CommandOptionType.SingleValue)]
     public string OwnerName { get; init; }
+
+    [Option("-t|--type", "Object type(s)", CommandOptionType.MultipleValue)]
+    public string[] ObjectTypes { get; init; }
+
+    [Option("-f|--filter", "Filter keyword", CommandOptionType.SingleValue)]
+    public string FilterKeyword { get; init; }
     
     [Option("-m|--max", "Max items", CommandOptionType.SingleValue)]
     public int MaxItems { get; init; } = Settings.DatabaseMaxItems;
-    
-    [Option("-f|--filter", "Filter keyword", CommandOptionType.SingleValue)]
-    public string FilterKeyword { get; init; }
 
     protected override async Task ExecuteAsync(CommandLineApplication app, CancellationToken cancellationToken = default)
     {
@@ -42,6 +45,7 @@ public class ObjectsCommand : AbstractCommand
             DatabaseName = DatabaseName,
             OwnerName = OwnerName,
             MaxItems = MaxItems,
+            ObjectTypes = ObjectTypes,
             FilterKeyword = FilterKeyword
         };
 

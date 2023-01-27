@@ -26,32 +26,30 @@ public class OracleService : IOracleService
         (
             """
                   SELECT
-                    AP.OWNER AS OwnerName, 
-                    AP.OBJECT_NAME AS PackageName, 
+                    AO.OWNER AS OwnerName, 
+                    AO.OBJECT_NAME AS PackageName, 
                     AO.CREATED AS CreationDate, 
-                    AO.LAST_DDL_TIME AS ModificationDate,
-                    SUM(CASE WHEN AP.PROCEDURE_NAME IS NULL THEN 0 ELSE 1 END) AS ProceduresCount
-                  FROM ALL_PROCEDURES AP
-                  INNER JOIN ALL_OBJECTS AO ON AP.OBJECT_ID = AO.OBJECT_ID
+                    AO.LAST_DDL_TIME AS ModificationDate
+                  FROM ALL_OBJECTS AO
                   WHERE 1 = 1
                     AND UPPER(AO.OBJECT_TYPE) = 'PACKAGE'
+                    AND ROWNUM <= :max
             """
         );
 
         if (!string.IsNullOrWhiteSpace(parameters.OwnerName))
         {
-            sqlBuilder.AppendLine(" AND UPPER(AP.OWNER) = :owner");
+            sqlBuilder.AppendLine(" AND UPPER(AO.OWNER) = :owner");
         }
 
         if (!string.IsNullOrWhiteSpace(parameters.FilterKeyword))
         {
-            sqlBuilder.AppendLine($" AND ({HasKeyWord("AP.OWNER")} OR {HasKeyWord("AP.OBJECT_NAME")} OR {HasKeyWord("AP.PROCEDURE_NAME")})");
+            sqlBuilder.AppendLine($" AND ({HasKeyWord("AO.OWNER")} OR {HasKeyWord("AO.OBJECT_NAME")})");
         }
+        
+        sqlBuilder.AppendLine(" ORDER BY AO.OWNER, AO.OBJECT_NAME, AO.CREATED, AO.LAST_DDL_TIME ASC");
 
-        sqlBuilder.AppendLine(" GROUP BY AP.OWNER, AP.OBJECT_NAME, AO.CREATED, AO.LAST_DDL_TIME");
-        sqlBuilder.AppendLine(" ORDER BY AP.OWNER, AP.OBJECT_NAME, AO.CREATED, AO.LAST_DDL_TIME ASC");
-
-        var sql = $"WITH RWS AS ( {sqlBuilder} ) SELECT * FROM RWS WHERE ROWNUM <= :max";
+        var sql = sqlBuilder.ToString();
         var sqlParameters = new
         {
             max = parameters.MaxItems + 1,
@@ -90,6 +88,11 @@ public class OracleService : IOracleService
         {
             sqlBuilder.AppendLine(" AND UPPER(AP.OWNER) = :owner");
         }
+        
+        if (!string.IsNullOrWhiteSpace(parameters.PackageName))
+        {
+            sqlBuilder.AppendLine(" AND UPPER(AP.OBJECT_NAME) = :package");
+        }
 
         if (!string.IsNullOrWhiteSpace(parameters.FilterKeyword))
         {
@@ -103,6 +106,7 @@ public class OracleService : IOracleService
         {
             max = parameters.MaxItems + 1,
             owner = parameters.OwnerName?.ToUpper(),
+            package = parameters.PackageName?.ToUpper(),
             keyword = parameters.FilterKeyword?.ToUpper()
         };
 
@@ -139,6 +143,11 @@ public class OracleService : IOracleService
             sqlBuilder.AppendLine(" AND UPPER(AP.OWNER) = :owner");
         }
 
+        if (!string.IsNullOrWhiteSpace(parameters.PackageName))
+        {
+            sqlBuilder.AppendLine(" AND UPPER(AP.OBJECT_NAME) = :package");
+        }
+
         if (!string.IsNullOrWhiteSpace(parameters.FilterKeyword))
         {
             sqlBuilder.AppendLine($" AND ({HasKeyWord("AP.OWNER")} OR {HasKeyWord("AP.OBJECT_NAME")} OR {HasKeyWord("AP.PROCEDURE_NAME")})");
@@ -151,6 +160,7 @@ public class OracleService : IOracleService
         {
             max = parameters.MaxItems + 1,
             owner = parameters.OwnerName?.ToUpper(),
+            package = parameters.PackageName?.ToUpper(),
             keyword = parameters.FilterKeyword?.ToUpper()
         };
 
@@ -270,9 +280,18 @@ public class OracleService : IOracleService
     public async Task<ICollection<OracleObject>> GetOracleObjectsAsync(OracleParameters parameters, CancellationToken cancellationToken)
     {
         var getFromAllObjectsSourceTask = GetOracleObjectsFromAllObjectsSourceAsync(parameters, cancellationToken);
-        var getPackagesFromAllProceduresSourceTask = GetOraclePackagesAsync(parameters, cancellationToken);
-        var getProceduresFromAllProceduresSourceTask = GetOracleProceduresAsync(parameters, cancellationToken);
-        var getFunctionsFromAllProceduresSourceTask = GetOracleFunctionsAsync(parameters, cancellationToken);
+        
+        var getPackagesFromAllProceduresSourceTask = parameters.ObjectTypes.IgnoreContains("PACKAGE")
+            ? GetOraclePackagesAsync(parameters, cancellationToken)
+            : GetCompletedTask(new List<OraclePackage>());
+        
+        var getProceduresFromAllProceduresSourceTask = parameters.ObjectTypes.IgnoreContains("PROCEDURE") 
+            ? GetOracleProceduresAsync(parameters, cancellationToken)
+            : GetCompletedTask(new List<OracleProcedure>());
+
+        var getFunctionsFromAllProceduresSourceTask = parameters.ObjectTypes.IgnoreContains("FUNCTION")
+            ? GetOracleFunctionsAsync(parameters, cancellationToken)
+            : GetCompletedTask(new List<OracleFunction>());
 
         await Task.WhenAll(
             getFromAllObjectsSourceTask,
@@ -373,7 +392,95 @@ public class OracleService : IOracleService
             return oracleSchemas.ToList();
         });
     }
-    
+
+    public async Task<ICollection<OracleTable>> GetOracleTablesAsync(OracleParameters parameters, CancellationToken cancellationToken)
+    {
+        var sqlBuilder = new StringBuilder
+        (
+            """
+                  SELECT 
+                    AT.OWNER AS OwnerName, 
+                    AT.TABLE_NAME AS TableName,
+                    AT.NUM_ROWS AS RowsCount
+                  FROM ALL_TABLES AT
+                  WHERE 1 = 1 
+                    AND ROWNUM <= :max
+            """
+        );
+
+        if (!string.IsNullOrWhiteSpace(parameters.FilterKeyword))
+        {
+            sqlBuilder.AppendLine($" AND ( {HasKeyWord("AT.OWNER")} OR {HasKeyWord("AT.TABLE_NAME")} )");
+        }
+        
+        if (!string.IsNullOrWhiteSpace(parameters.TableName))
+        {
+            sqlBuilder.AppendLine($" AND UPPER(AT.TABLE_NAME) = :tabname");
+        }
+
+        sqlBuilder.AppendLine(" ORDER BY AT.OWNER, AT.TABLE_NAME ASC");
+
+        var sql = sqlBuilder.ToString();
+        var sqlParameters = new
+        {
+            max = parameters.MaxItems + 1,
+            tabname = parameters.TableName?.ToUpper(),
+            keyword = parameters.FilterKeyword?.ToUpper()
+        };
+        
+        var retryPolicy = GetRetryPolicy<ICollection<OracleTable>>();
+        return await retryPolicy.ExecuteAsync(async () =>
+        {
+            await using var connection = CreateOracleConnection(parameters);
+            var oracleTables = await connection.QueryAsync<OracleTable>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
+            return oracleTables.ToList();
+        });
+    }
+
+    public async Task<OracleTable> GetOracleTableAsync(OracleParameters parameters, CancellationToken cancellationToken)
+    {
+        var sqlBuilder = new StringBuilder
+        (
+            """
+                  SELECT 
+                    AC.COLUMN_NAME AS Name, 
+                    AC.DATA_TYPE AS Type,
+                    AC.COLUMN_ID AS Position,
+                    AC.NULLABLE AS Nullable
+                  FROM ALL_TAB_COLUMNS AC
+                  INNER JOIN ALL_TABLES AT ON AC.TABLE_NAME = AT.TABLE_NAME AND AC.OWNER = AT.OWNER
+                  WHERE 1 = 1 
+                    AND UPPER(AT.TABLE_NAME) = :tabname
+                    AND UPPER(AT.OWNER) = :owner
+                    AND ROWNUM <= :max
+                  ORDER BY AC.COLUMN_ID, AC.COLUMN_NAME ASC
+            """
+        );
+
+        var sql = sqlBuilder.ToString();
+        var sqlParameters = new
+        {
+            max = parameters.MaxItems + 1,
+            owner = parameters.OwnerName.ToUpper(),
+            tabname = parameters.TableName.ToUpper()
+        };
+        
+        var retryPolicy = GetRetryPolicy<ICollection<OracleColumn>>();
+        var tableColumns = await retryPolicy.ExecuteAsync(async () =>
+        {
+            await using var connection = CreateOracleConnection(parameters);
+            var oracleColumns = await connection.QueryAsync<OracleColumn>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
+            return oracleColumns.ToList();
+        });
+
+        return new OracleTable
+        {
+            TableName = parameters.TableName,
+            OwnerName = parameters.OwnerName,
+            TableColumns = tableColumns
+        };
+    }
+
     private async Task<ICollection<OracleSource>> GetUnwrappedOracleSourcesAsync(OracleParameters parameters, CancellationToken cancellationToken)
     {
         var hasOwnerName = !string.IsNullOrWhiteSpace(parameters.OwnerName)
@@ -485,7 +592,6 @@ public class OracleService : IOracleService
                     AO.LAST_DDL_TIME AS ModificationDate
                   FROM ALL_OBJECTS AO
                   WHERE 1 = 1 
-                    AND UPPER(AO.OBJECT_TYPE) IN ('FUNCTION', 'PROCEDURE', 'PACKAGE')
                     AND ROWNUM <= :max
             """
         );
@@ -500,6 +606,11 @@ public class OracleService : IOracleService
             sqlBuilder.AppendLine($" AND ({HasKeyWord("AO.OWNER")} OR {HasKeyWord("AO.OBJECT_NAME")} OR {HasKeyWord("AO.OBJECT_TYPE")})");
         }
 
+        if (parameters.ObjectTypes?.Any() == true)
+        {
+            sqlBuilder.AppendLine(" AND UPPER(AO.OBJECT_TYPE) IN :types");
+        }
+
         sqlBuilder.AppendLine(" ORDER BY AO.OWNER, AO.OBJECT_NAME, AO.OBJECT_TYPE ASC");
 
         var sql = sqlBuilder.ToString();
@@ -507,7 +618,8 @@ public class OracleService : IOracleService
         {
             max = parameters.MaxItems + 1,
             owner = parameters.OwnerName?.ToUpper(),
-            keyword = parameters.FilterKeyword?.ToUpper()
+            keyword = parameters.FilterKeyword?.ToUpper(),
+            types = parameters.ObjectTypes?.Select(x => x.ToUpper())
         };
 
         var retryPolicy = GetRetryPolicy<ICollection<OracleObject>>();
@@ -564,6 +676,13 @@ public class OracleService : IOracleService
                 maxRetry,
                 reason);
         }
+    }
+    
+    private static Task<ICollection<T>> GetCompletedTask<T>(ICollection<T> result)
+    {
+        var taskSource = new TaskCompletionSource<ICollection<T>>();
+        taskSource.SetResult(result);
+        return taskSource.Task;
     }
 
     private static string HasKeyWord(string fieldName) => $"UPPER({fieldName}) LIKE '%' || :keyword || '%'";

@@ -58,7 +58,11 @@ public class SourcesCommand : AbstractCommand
         var oracleProcedures = await ConsoleService.RenderStatusAsync(() => FindOracleProceduresAsync(parameters, cancellationToken));
         if (oracleProcedures.Count is 0 or > 1)
         {
-            ConsoleService.RenderFoundOracleProcedures(oracleProcedures, parameters);
+            ConsoleService.RenderProblem($"Found {oracleProcedures.Count} procedure(s) matching name '{parameters.ProcedureName}'");
+            if (oracleProcedures.Count > 1 && ConsoleService.GetYesOrNoAnswer("display found procedures on console screen", true))
+            {
+                ConsoleService.RenderOracleProcedures(oracleProcedures, parameters);
+            }
         }
         else
         {

@@ -158,6 +158,24 @@ public class ToolCommandValidatorTests
     }
     
     [Fact]
+    public void Should_Get_ValidationErrors_For_TablesCommand()
+    {
+        // arrange
+        var consoleService = Substitute.For<IConsoleService>();
+        var oracleService = Substitute.For<IOracleService>();
+        var settings = new SettingsBuilder().Build();
+        var options = Options.Create(settings);
+
+        var command = new TablesCommand(consoleService, oracleService, options);
+
+        // act
+        var validationErrors = ToolCommandValidator.Validate(command);
+
+        // assert
+        validationErrors.Should().NotBeNull();
+    }
+    
+    [Fact]
     public void Should_Throw_Exception_For_Unexpected_Commands()
     {
         // arrange

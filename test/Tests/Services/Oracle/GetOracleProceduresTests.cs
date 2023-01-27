@@ -15,8 +15,12 @@ public class GetOracleProceduresTests
         _oracleFixture = oracleFixture;
     }
     
-    [Fact]
-    public async Task Should_Get_Procedures()
+    [Theory]
+    [InlineData(null)]
+    [InlineData("DROP_EXP")]
+    [InlineData("GRANT_EXP")]
+    [InlineData("CREATE_EXP")]
+    public async Task Should_Get_Procedures(string filterKeyword)
     {
         // arrange
         const string databaseName = "oracle-for-tests";
@@ -32,6 +36,7 @@ public class GetOracleProceduresTests
         var parameters = new OracleParameters
         {
             DatabaseName = databaseName,
+            FilterKeyword = filterKeyword,
             MaxItems = 5
         };
 

@@ -3,9 +3,9 @@ using FluentValidation;
 
 namespace App.Validators;
 
-public class ObjectsCommandValidator : AbstractValidator<ObjectsCommand>
+public class TablesCommandValidator : AbstractValidator<TablesCommand>
 {
-    public ObjectsCommandValidator()
+    public TablesCommandValidator()
     {
         RuleFor(x => x.DatabaseName)
             .NotEmpty();

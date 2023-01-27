@@ -15,8 +15,12 @@ public class GetOracleFunctionsTests
         _oracleFixture = oracleFixture;
     }
     
-    [Fact]
-    public async Task Should_Get_Functions()
+    [Theory]
+    [InlineData(null)]
+    [InlineData("LOGIN_USER")]
+    [InlineData("SERVER_ERROR")]
+    [InlineData("DATABASE_NAME")]
+    public async Task Should_Get_Functions(string filterKeyword)
     {
         // arrange
         const string databaseName = "oracle-for-tests";
@@ -32,6 +36,7 @@ public class GetOracleFunctionsTests
         var parameters = new OracleParameters
         {
             DatabaseName = databaseName,
+            FilterKeyword = filterKeyword,
             MaxItems = 5
         };
 

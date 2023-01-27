@@ -3,30 +3,25 @@ using FluentAssertions;
 
 namespace Tests.Services.Oracle;
 
-public class OracleObjectsTests
+public class OracleTableTests
 {
     [Theory]
-    [InlineData("USR", "PROCEDURE", "GET_INFOS" )]
-    [InlineData("SYS", "PROCEDURE", "GET_SYS_DATE")]
-    public void Should_Oracle_Objects_Be_Equals(string ownerName, string objectType, string objectName)
+    [InlineData("Owner1", "Table1", 10)]
+    [InlineData("Owner2", "Table2", 20)]
+    public void Should_Oracle_Tables_Be_Equals(string ownerName, string tableName, int rowsCount)
     {
         // arrange
-        var date = DateTime.Now.Date;
-        var obj1 = new OracleObject
+        var obj1 = new OracleTable
         {
-            ObjectName = objectName,
-            ObjectType = objectType,
             OwnerName = ownerName,
-            CreationDate = date,
-            ModificationDate = date
+            TableName = tableName,
+            RowsCount = rowsCount
         };
-        var obj2 = new OracleObject
+        var obj2 = new OracleTable
         {
-            ObjectName = objectName,
-            ObjectType = objectType,
             OwnerName = ownerName,
-            CreationDate = date,
-            ModificationDate = date
+            TableName = tableName,
+            RowsCount = rowsCount
         };
 
         // act
@@ -39,29 +34,29 @@ public class OracleObjectsTests
     }
     
     [Fact]
-    public void Should_Get_Distinct_Oracle_Objects()
+    public void Should_Get_Distinct_Oracle_Tables()
     {
         // arrange
-        var list = new List<OracleObject>
+        var list = new List<OracleTable>
         {
             new()
             {
-                ObjectName = "name",
-                ObjectType = "type",
                 OwnerName = "owner",
+                TableName = "table",
+                RowsCount = 5
             },
             new()
             {
-                ObjectName = "name",
-                ObjectType = "type",
                 OwnerName = "owner",
+                TableName = "table",
+                RowsCount = 5
             },
             new(),
             new(),
             null
         };
 
-        var hashset = new HashSet<OracleObject>(list);
+        var hashset = new HashSet<OracleTable>(list);
 
         // act
         var hashsetCount = hashset.Count;

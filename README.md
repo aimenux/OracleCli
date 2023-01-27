@@ -4,12 +4,13 @@
 
 # OracleCli
 ```
-A net global tool helping to retrieve some infos (packages, functions, procedures, etc.) from oracle
+A net global tool helping to retrieve some infos (packages, functions, procedures, tables, etc.) from oracle
 ```
 
 > In this repo, i m building a global tool that allows to retrieve schema(s), package(s), function(s), procedure(s) and argument(s) infos from oracle.
 >
 > The tool is based on multiple sub commmands :
+> - Use sub command `Table` or `Tables` to list tables from oracle
 > - Use sub command `Schema` or `Schemas` to list schemas from oracle
 > - Use sub command `Object` or `Objects` to list objects from oracle
 > - Use sub command `Package` or `Packages` to list packages from oracle
@@ -22,6 +23,7 @@ A net global tool helping to retrieve some infos (packages, functions, procedure
 > To run the tool, type commands :
 > - `OracleCli -h` to show help
 > - `OracleCli -s` to show settings
+> - `OracleCli Tables -d [db-name]` to list tables from oracle
 > - `OracleCli Schemas -d [db-name]` to list schemas from oracle
 > - `OracleCli Objects -d [db-name]` to list objects from oracle
 > - `OracleCli Packages -d [db-name]` to list packages from oracle

@@ -6,7 +6,7 @@ using Spectre.Console;
 
 namespace Tests;
 
-public class FakeConsoleService : IConsoleService
+internal class FakeConsoleService : IConsoleService
 {
     public void RenderTitle(string text)
     {
@@ -42,6 +42,11 @@ public class FakeConsoleService : IConsoleService
     {
         return await func.Invoke();
     }
+    
+    public bool GetYesOrNoAnswer(string text, bool defaultAnswer)
+    {
+        return defaultAnswer;
+    }
 
     public void RenderValidationErrors(ValidationErrors validationErrors)
     {
@@ -50,6 +55,14 @@ public class FakeConsoleService : IConsoleService
     public Task CopyTextToClipboardAsync(string text, CancellationToken cancellationToken)
     {
         return Task.CompletedTask;
+    }
+
+    public void RenderOracleTable(OracleTable oracleTable, OracleParameters parameters)
+    {
+    }
+
+    public void RenderOracleTables(ICollection<OracleTable> oracleTables, OracleParameters parameters)
+    {
     }
 
     public void RenderOracleObjects(ICollection<OracleObject> oracleObjects, OracleParameters parameters)
