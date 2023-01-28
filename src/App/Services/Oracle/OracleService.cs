@@ -407,6 +407,11 @@ public class OracleService : IOracleService
                     AND ROWNUM <= :max
             """
         );
+        
+        if (!string.IsNullOrWhiteSpace(parameters.OwnerName))
+        {
+            sqlBuilder.AppendLine(" AND UPPER(AT.OWNER) = :owner");
+        }
 
         if (!string.IsNullOrWhiteSpace(parameters.FilterKeyword))
         {
@@ -415,7 +420,7 @@ public class OracleService : IOracleService
         
         if (!string.IsNullOrWhiteSpace(parameters.TableName))
         {
-            sqlBuilder.AppendLine($" AND UPPER(AT.TABLE_NAME) = :tabname");
+            sqlBuilder.AppendLine(" AND UPPER(AT.TABLE_NAME) = :tabname");
         }
 
         sqlBuilder.AppendLine(" ORDER BY AT.OWNER, AT.TABLE_NAME ASC");
@@ -424,6 +429,7 @@ public class OracleService : IOracleService
         var sqlParameters = new
         {
             max = parameters.MaxItems + 1,
+            owner = parameters.OwnerName?.ToUpper(),
             tabname = parameters.TableName?.ToUpper(),
             keyword = parameters.FilterKeyword?.ToUpper()
         };
@@ -546,7 +552,7 @@ public class OracleService : IOracleService
         });
     }
     
-    private async Task<ICollection<OracleSource>> GetWrappedOracleSourcesAsync(OracleParameters parameters, CancellationToken cancellationToken = default)
+    private async Task<ICollection<OracleSource>> GetWrappedOracleSourcesAsync(OracleParameters parameters, CancellationToken cancellationToken)
     {
         var hasOwnerName = !string.IsNullOrWhiteSpace(parameters.OwnerName)
             ? "UPPER(OWNER) = :owner"

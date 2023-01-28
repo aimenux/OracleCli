@@ -30,6 +30,35 @@ public class OracleSourcesTests
         sourcesEquals.Should().BeTrue();
         objectsEquals.Should().BeTrue();
     }
+
+    [Fact]
+    public void Should_Oracle_Sources_Not_Be_Equals()
+    {
+        // arrange
+        var obj1 = new OracleSource
+        {
+            Line = 1,
+            Text = "text",
+        };
+        
+        var obj2 = new OracleSource
+        {
+            Line = 2,
+            Text = "text",
+        };
+        
+        // act
+        var equals1 = obj1.Equals(obj2);
+        var equals2 = obj1.Equals((object)obj2);
+        var equals3 = obj1.Equals(null);
+        var equals4 = obj1.Equals((object)null);
+
+        // assert
+        equals1.Should().BeFalse();
+        equals2.Should().BeFalse();
+        equals3.Should().BeFalse();
+        equals4.Should().BeFalse();
+    }    
     
     [Fact]
     public void Should_Get_Distinct_Oracle_Sources()

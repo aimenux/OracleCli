@@ -11,7 +11,10 @@ public sealed class OracleColumn : IEquatable<OracleColumn>
     {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;
-        return Name == other.Name && Type == other.Type && Position == other.Position && Nullable == other.Nullable;
+        return Name == other.Name 
+               && Type == other.Type 
+               && Position == other.Position 
+               && Nullable == other.Nullable;
     }
 
     public override bool Equals(object obj)
