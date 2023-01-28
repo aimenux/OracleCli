@@ -25,12 +25,14 @@ public class OracleTableTests
         };
 
         // act
-        var equals = obj1.Equals(obj2);
-        var objectsEquals = obj1.Equals((object)obj2);
+        var equals1 = obj1.Equals(obj1);
+        var equals2 = obj1.Equals(obj2);
+        var equals3 = obj1.Equals((object)obj2);
 
         // assert
-        equals.Should().BeTrue();
-        objectsEquals.Should().BeTrue();
+        equals1.Should().BeTrue();
+        equals2.Should().BeTrue();
+        equals3.Should().BeTrue();
     }
     
     [Fact]

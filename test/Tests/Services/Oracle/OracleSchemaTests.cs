@@ -12,24 +12,26 @@ public class OracleSchemaTests
     {
         // arrange
         var schemaDate = DateTime.Parse(creationDate);
-        var schema1 = new OracleSchema
+        var obj1 = new OracleSchema
         {
             SchemaName = schemaName,
             CreationDate = schemaDate
         };
-        var schema2 = new OracleSchema
+        var obj2 = new OracleSchema
         {
             SchemaName = schemaName,
             CreationDate = schemaDate
         };
 
         // act
-        var schemasEquals = schema1.Equals(schema2);
-        var objectsEquals = schema1.Equals((object)schema2);
+        var equals1 = obj1.Equals(obj1);
+        var equals2 = obj1.Equals(obj2);
+        var equals3 = obj1.Equals((object)obj2);
 
         // assert
-        schemasEquals.Should().BeTrue();
-        objectsEquals.Should().BeTrue();
+        equals1.Should().BeTrue();
+        equals2.Should().BeTrue();
+        equals3.Should().BeTrue();
     }
     
     [Fact]

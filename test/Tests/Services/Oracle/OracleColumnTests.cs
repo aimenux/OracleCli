@@ -27,13 +27,48 @@ public class OracleColumnTests
         };
 
         // act
-        var equals = obj1.Equals(obj2);
-        var objectsEquals = obj1.Equals((object)obj2);
+        var equals1 = obj1.Equals(obj1);
+        var equals2 = obj1.Equals(obj2);
+        var equals3 = obj1.Equals((object)obj2);
 
         // assert
-        equals.Should().BeTrue();
-        objectsEquals.Should().BeTrue();
+        equals1.Should().BeTrue();
+        equals2.Should().BeTrue();
+        equals3.Should().BeTrue();
     }
+    
+    [Fact]
+    public void Should_Oracle_Columns_Not_Be_Equals()
+    {
+        // arrange
+        var obj1 = new OracleColumn
+        {
+            Name = "name",
+            Type = "type",
+            Position = 1,
+            Nullable = "Y"
+        };
+        
+        var obj2 = new OracleColumn
+        {
+            Name = "name",
+            Type = "type",
+            Position = 2,
+            Nullable = "Y"
+        };
+        
+        // act
+        var equals1 = obj1.Equals(obj2);
+        var equals2 = obj1.Equals((object)obj2);
+        var equals3 = obj1.Equals(null);
+        var equals4 = obj1.Equals((object)null);
+
+        // assert
+        equals1.Should().BeFalse();
+        equals2.Should().BeFalse();
+        equals3.Should().BeFalse();
+        equals4.Should().BeFalse();
+    }    
     
     [Fact]
     public void Should_Get_Distinct_Oracle_Columns()

@@ -11,24 +11,26 @@ public class OracleSourcesTests
     public void Should_Oracle_Sources_Be_Equals(int sourceLine, string sourceText)
     {
         // arrange
-        var source1 = new OracleSource
+        var obj1 = new OracleSource
         {
             Line = sourceLine,
             Text = sourceText
         };
-        var source2 = new OracleSource
+        var obj2 = new OracleSource
         {
             Line = sourceLine,
             Text = sourceText
         };
 
         // act
-        var sourcesEquals = source1.Equals(source2);
-        var objectsEquals = source1.Equals((object)source2);
+        var equals1 = obj1.Equals(obj1);
+        var equals2 = obj1.Equals(obj2);
+        var equals3 = obj1.Equals((object)obj2);
 
         // assert
-        sourcesEquals.Should().BeTrue();
-        objectsEquals.Should().BeTrue();
+        equals1.Should().BeTrue();
+        equals2.Should().BeTrue();
+        equals3.Should().BeTrue();
     }
 
     [Fact]
