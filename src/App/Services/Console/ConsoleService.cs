@@ -366,6 +366,7 @@ public class ConsoleService : IConsoleService
             .Title(title)
             .AddColumn(new TableColumn("[u]#[/]").Centered())
             .AddColumn(new TableColumn("[u]OwnerName[/]").Centered())
+            .AddColumn(new TableColumn("[u]PackageName[/]").Centered())
             .AddColumn(new TableColumn("[u]FunctionName[/]").Centered())
             .AddColumn(new TableColumn("[u]CreationDate[/]").Centered())
             .AddColumn(new TableColumn("[u]ModificationDate[/]").Centered())
@@ -378,6 +379,7 @@ public class ConsoleService : IConsoleService
             table.AddRow(
                 IndexMarkup(index++),
                 ToMarkup(result.OwnerName),
+                ToMarkup(result.PackageName),
                 ToMarkup(result.FunctionName),
                 ToMarkup(result.CreationDate.ToString("g")),
                 ToMarkup(result.ModificationDate.ToString("g")));

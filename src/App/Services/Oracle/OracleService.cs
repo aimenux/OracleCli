@@ -62,7 +62,11 @@ public class OracleService : IOracleService
         {
             await using var connection = CreateOracleConnection(parameters);
             var oraclePackages = await connection.QueryAsync<OraclePackage>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
-            return oraclePackages.ToList();
+            return oraclePackages
+                .Distinct()
+                .OrderBy(x => x.OwnerName)
+                .ThenBy(x => x.PackageName)
+                .ToList();
         });
     }
 
@@ -73,6 +77,7 @@ public class OracleService : IOracleService
             """
                   SELECT
                     AP.OWNER AS OwnerName, 
+                    NULL AS PackageName,
                     AP.OBJECT_NAME AS FunctionName, 
                     AO.CREATED AS CreationDate,
                     AO.LAST_DDL_TIME AS ModificationDate
@@ -115,7 +120,11 @@ public class OracleService : IOracleService
         {
             await using var connection = CreateOracleConnection(parameters);
             var oracleFunctions = await connection.QueryAsync<OracleFunction>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
-            return oracleFunctions.ToList();
+            return oracleFunctions
+                .Distinct()
+                .OrderBy(x => x.OwnerName)
+                .ThenBy(x => x.FunctionName)
+                .ToList();
         });
     }
 
@@ -175,7 +184,11 @@ public class OracleService : IOracleService
         {
             await using var connection = CreateOracleConnection(parameters);
             var oracleProcedures = await connection.QueryAsync<OracleProcedure>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
-            return oracleProcedures.ToList();
+            return oracleProcedures
+                .Distinct()
+                .OrderBy(x => x.OwnerName)
+                .ThenBy(x => x.ProcedureName)
+                .ToList();
         });
     }
 
@@ -220,7 +233,10 @@ public class OracleService : IOracleService
         {
             await using var connection = CreateOracleConnection(parameters);
             var oracleArguments = await connection.QueryAsync<OracleArgument>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
-            return oracleArguments.ToList();
+            return oracleArguments
+                .Distinct()
+                .OrderBy(x => x.Position)
+                .ToList();
         });
     }
 
@@ -309,8 +325,7 @@ public class OracleService : IOracleService
             .Distinct()
             .OrderBy(x => x.OwnerName)
             .ThenBy(x => x.ObjectName)
-            .ThenBy(x => x.ObjectType)
-            .Take(parameters.MaxItems)
+            .Take(parameters.MaxItems + 1)
             .ToList();
 
         return objects;
@@ -348,7 +363,10 @@ public class OracleService : IOracleService
         {
             await using var connection = CreateOracleConnection(parameters);
             var oracleSchemas = await connection.QueryAsync<OracleSchema>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
-            return oracleSchemas.ToList();
+            return oracleSchemas
+                .Distinct()
+                .OrderBy(x => x.SchemaName)
+                .ToList();
         });
     }
 
@@ -398,7 +416,11 @@ public class OracleService : IOracleService
         {
             await using var connection = CreateOracleConnection(parameters);
             var oracleTables = await connection.QueryAsync<OracleTable>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
-            return oracleTables.ToList();
+            return oracleTables
+                .Distinct()
+                .OrderBy(x => x.OwnerName)
+                .ThenBy(x => x.TableName)
+                .ToList();
         });
     }
 
@@ -435,7 +457,10 @@ public class OracleService : IOracleService
         {
             await using var connection = CreateOracleConnection(parameters);
             var oracleColumns = await connection.QueryAsync<OracleColumn>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
-            return oracleColumns.ToList();
+            return oracleColumns
+                .Distinct()
+                .OrderBy(x => x.Position)
+                .ToList();
         });
 
         return new OracleTable
@@ -507,7 +532,10 @@ public class OracleService : IOracleService
         {
             await using var connection = CreateOracleConnection(parameters);
             var oracleSources = await connection.QueryAsync<OracleSource>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
-            return oracleSources.ToList();
+            return oracleSources
+                .Distinct()
+                .OrderBy(x => x.Line)
+                .ToList();
         });
     }
     
@@ -540,7 +568,10 @@ public class OracleService : IOracleService
         {
             await using var connection = CreateOracleConnection(parameters);
             var oracleSources = await connection.QueryAsync<OracleSource>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
-            return oracleSources.ToList();
+            return oracleSources
+                .Distinct()
+                .OrderBy(x => x.Line)
+                .ToList();
         });
     }
 
@@ -592,7 +623,11 @@ public class OracleService : IOracleService
         {
             await using var connection = CreateOracleConnection(parameters);
             var oracleObjects = await connection.QueryAsync<OracleObject>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
-            return oracleObjects.ToList();
+            return oracleObjects
+                .Distinct()
+                .OrderBy(x => x.OwnerName)
+                .ThenBy(x => x.ObjectName)
+                .ToList();
         });
     }
 
