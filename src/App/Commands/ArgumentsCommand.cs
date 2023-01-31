@@ -4,7 +4,6 @@ using App.Services.Exporters;
 using App.Services.Oracle;
 using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Options;
-using Spectre.Console;
 
 namespace App.Commands;
 
@@ -50,7 +49,12 @@ public class ArgumentsCommand : AbstractCommand
             ProcedureName = ProcedureName
         };
 
-        var oracleProcedures = await ConsoleService.RenderStatusAsync(() => FindOracleProceduresAsync(parameters, cancellationToken));
+        var oracleProcedures = await ConsoleService.RenderStatusAsync(async () =>
+        {
+            var oracleProcedures = await _oracleService.GetOracleProceduresAsync(parameters, cancellationToken);
+            return oracleProcedures;
+        });
+        
         if (oracleProcedures.Count is 0 or > 1)
         {
             ConsoleService.RenderFoundOracleProcedures(oracleProcedures, parameters);
@@ -66,11 +70,5 @@ public class ArgumentsCommand : AbstractCommand
                 ConsoleService.RenderOracleArguments(oracleArguments, parameters);
             });
         }
-    }
-
-    private async Task<ICollection<OracleProcedure>> FindOracleProceduresAsync(OracleParameters parameters, CancellationToken cancellationToken)
-    {
-        var oracleProcedures = await _oracleService.FindOracleProceduresAsync(parameters, cancellationToken);
-        return oracleProcedures.ToList();
     }
 }

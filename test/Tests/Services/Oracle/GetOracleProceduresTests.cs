@@ -16,11 +16,16 @@ public class GetOracleProceduresTests
     }
     
     [Theory]
-    [InlineData(null)]
-    [InlineData("DROP_EXP")]
-    [InlineData("GRANT_EXP")]
-    [InlineData("CREATE_EXP")]
-    public async Task Should_Get_Procedures(string filterKeyword)
+    [InlineData(null, null, null, null)]
+    [InlineData(null, null, null, "DROP_EXP")]
+    [InlineData(null, null, null, "GRANT_EXP")]
+    [InlineData(null, null, null, "CREATE_EXP")]
+    [InlineData(null, null, "SET_USER_ID", null)]
+    [InlineData(null, "OWA", "SET_USER_ID", null)]
+    [InlineData("SYS", "DBMS_FILE_GROUP_EXP", "DROP_EXP", null)]
+    [InlineData("SYS", "DBMS_FILE_GROUP_EXP", "GRANT_EXP", null)]
+    [InlineData("SYS", "DBMS_FILE_GROUP_EXP", "CREATE_EXP", null)]
+    public async Task Should_Get_Procedures(string ownerName, string packageName, string procedureName, string filterKeyword)
     {
         // arrange
         const string databaseName = "oracle-for-tests";
@@ -36,6 +41,9 @@ public class GetOracleProceduresTests
         var parameters = new OracleParameters
         {
             DatabaseName = databaseName,
+            OwnerName = ownerName,
+            PackageName = packageName,
+            ProcedureName = procedureName,
             FilterKeyword = filterKeyword,
             MaxItems = 5
         };

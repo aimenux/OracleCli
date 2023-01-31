@@ -147,6 +147,11 @@ public class OracleService : IOracleService
         {
             sqlBuilder.AppendLine(" AND UPPER(AP.OBJECT_NAME) = :package");
         }
+        
+        if (!string.IsNullOrWhiteSpace(parameters.ProcedureName))
+        {
+            sqlBuilder.AppendLine(" AND (UPPER(AP.OBJECT_NAME) = :procedure OR UPPER(AP.PROCEDURE_NAME) = :procedure)");
+        }
 
         if (!string.IsNullOrWhiteSpace(parameters.FilterKeyword))
         {
@@ -161,54 +166,8 @@ public class OracleService : IOracleService
             max = parameters.MaxItems + 1,
             owner = parameters.OwnerName?.ToUpper(),
             package = parameters.PackageName?.ToUpper(),
+            procedure = parameters.ProcedureName?.ToUpper(),
             keyword = parameters.FilterKeyword?.ToUpper()
-        };
-
-        var retryPolicy = GetRetryPolicy<ICollection<OracleProcedure>>();
-        return await retryPolicy.ExecuteAsync(async () =>
-        {
-            await using var connection = CreateOracleConnection(parameters);
-            var oracleProcedures = await connection.QueryAsync<OracleProcedure>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
-            return oracleProcedures.ToList();
-        });
-    }
-
-    public async Task<ICollection<OracleProcedure>> FindOracleProceduresAsync(OracleParameters parameters, CancellationToken cancellationToken)
-    {
-        var sqlBuilder = new StringBuilder
-        (
-            """
-                  SELECT    
-                    AP.OWNER AS OwnerName, 
-                    (CASE WHEN AP.PROCEDURE_NAME IS NULL THEN '' ELSE AP.OBJECT_NAME END) AS PackageName, 
-                    (CASE WHEN AP.PROCEDURE_NAME IS NULL THEN AP.OBJECT_NAME ELSE AP.PROCEDURE_NAME END) AS ProcedureName, 
-                    AO.CREATED AS CreationDate,
-                    AO.LAST_DDL_TIME AS ModificationDate
-                  FROM ALL_PROCEDURES AP
-                  INNER JOIN ALL_OBJECTS AO ON AP.OBJECT_ID = AO.OBJECT_ID
-                  WHERE 1 = 1 
-                    AND ((UPPER(AO.OBJECT_TYPE) = 'PROCEDURE' AND UPPER(AP.OBJECT_NAME) = :spcName) OR (UPPER(AO.OBJECT_TYPE) = 'PACKAGE' AND UPPER(AP.PROCEDURE_NAME) = :spcName))
-                    AND ROWNUM <= :max
-            """
-        );
-
-        if (!string.IsNullOrWhiteSpace(parameters.OwnerName))
-        {
-            sqlBuilder.AppendLine(" AND UPPER(AP.OWNER) = :owner");
-        }
-
-        if (!string.IsNullOrWhiteSpace(parameters.PackageName))
-        {
-            sqlBuilder.AppendLine(" AND UPPER(AP.OBJECT_NAME) = :pkgName");
-        }
-
-        var sql = sqlBuilder.ToString();
-        var sqlParameters = new
-        {
-            max = parameters.MaxItems + 1,
-            owner = parameters.OwnerName?.ToUpper(),
-            spcName = parameters.ProcedureName?.ToUpper(),
-            pkgName = parameters.PackageName?.ToUpper()
         };
 
         var retryPolicy = GetRetryPolicy<ICollection<OracleProcedure>>();
