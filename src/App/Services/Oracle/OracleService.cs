@@ -72,60 +72,18 @@ public class OracleService : IOracleService
 
     public async Task<ICollection<OracleFunction>> GetOracleFunctionsAsync(OracleParameters parameters, CancellationToken cancellationToken)
     {
-        var sqlBuilder = new StringBuilder
-        (
-            """
-                  SELECT
-                    AP.OWNER AS OwnerName, 
-                    NULL AS PackageName,
-                    AP.OBJECT_NAME AS FunctionName, 
-                    AO.CREATED AS CreationDate,
-                    AO.LAST_DDL_TIME AS ModificationDate
-                  FROM ALL_PROCEDURES AP
-                  INNER JOIN ALL_OBJECTS AO ON AP.OBJECT_ID = AO.OBJECT_ID
-                  WHERE 1 = 1 
-                    AND UPPER(AO.OBJECT_TYPE) = 'FUNCTION' 
-                    AND ROWNUM <= :max
-            """
-        );
-
-        if (!string.IsNullOrWhiteSpace(parameters.OwnerName))
-        {
-            sqlBuilder.AppendLine(" AND UPPER(AP.OWNER) = :owner");
-        }
-        
-        if (!string.IsNullOrWhiteSpace(parameters.PackageName))
-        {
-            sqlBuilder.AppendLine(" AND UPPER(AP.OBJECT_NAME) = :package");
-        }
-
-        if (!string.IsNullOrWhiteSpace(parameters.FilterKeyword))
-        {
-            sqlBuilder.AppendLine($" AND ({HasKeyWord("AP.OWNER")} OR {HasKeyWord("AP.OBJECT_NAME")})");
-        }
-
-        sqlBuilder.AppendLine(" ORDER BY AP.OWNER, AP.OBJECT_NAME ASC");
-
-        var sql = sqlBuilder.ToString();
-        var sqlParameters = new
-        {
-            max = parameters.MaxItems + 1,
-            owner = parameters.OwnerName?.ToUpper(),
-            package = parameters.PackageName?.ToUpper(),
-            keyword = parameters.FilterKeyword?.ToUpper()
-        };
-
-        var retryPolicy = GetRetryPolicy<ICollection<OracleFunction>>();
-        return await retryPolicy.ExecuteAsync(async () =>
-        {
-            await using var connection = CreateOracleConnection(parameters);
-            var oracleFunctions = await connection.QueryAsync<OracleFunction>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
-            return oracleFunctions
-                .Distinct()
-                .OrderBy(x => x.OwnerName)
-                .ThenBy(x => x.FunctionName)
-                .ToList();
-        });
+        var getFromAllProceduresTask = GetOracleFunctionsFromAllProceduresAsync(parameters, cancellationToken);
+        var getFromAllArgumentsTask = GetOracleFunctionsFromAllArgumentsAsync(parameters, cancellationToken);
+        await Task.WhenAll(getFromAllProceduresTask, getFromAllArgumentsTask);
+        var functionsFromAllProcedures = await getFromAllProceduresTask;
+        var functionsFromAllSources = await getFromAllArgumentsTask;
+        return functionsFromAllProcedures
+            .Union(functionsFromAllSources)
+            .Distinct()
+            .OrderBy(x => x.OwnerName)
+            .ThenBy(x => x.FunctionName)
+            .Take(parameters.MaxItems + 1)
+            .ToList();
     }
 
     public async Task<ICollection<OracleProcedure>> GetOracleProceduresAsync(OracleParameters parameters, CancellationToken cancellationToken)
@@ -571,6 +529,122 @@ public class OracleService : IOracleService
             return oracleSources
                 .Distinct()
                 .OrderBy(x => x.Line)
+                .ToList();
+        });
+    }
+    
+    private async Task<ICollection<OracleFunction>> GetOracleFunctionsFromAllProceduresAsync(OracleParameters parameters, CancellationToken cancellationToken)
+    {
+        var sqlBuilder = new StringBuilder
+        (
+            """
+                  SELECT
+                    AP.OWNER AS OwnerName, 
+                    NULL AS PackageName,
+                    AP.OBJECT_NAME AS FunctionName, 
+                    AO.CREATED AS CreationDate,
+                    AO.LAST_DDL_TIME AS ModificationDate
+                  FROM ALL_PROCEDURES AP
+                  INNER JOIN ALL_OBJECTS AO ON AP.OBJECT_ID = AO.OBJECT_ID
+                  WHERE 1 = 1 
+                    AND UPPER(AO.OBJECT_TYPE) = 'FUNCTION' 
+                    AND ROWNUM <= :max
+            """
+        );
+
+        if (!string.IsNullOrWhiteSpace(parameters.OwnerName))
+        {
+            sqlBuilder.AppendLine(" AND UPPER(AP.OWNER) = :owner");
+        }
+        
+        if (!string.IsNullOrWhiteSpace(parameters.PackageName))
+        {
+            sqlBuilder.AppendLine(" AND UPPER(AP.OBJECT_NAME) = :package");
+        }
+
+        if (!string.IsNullOrWhiteSpace(parameters.FilterKeyword))
+        {
+            sqlBuilder.AppendLine($" AND ({HasKeyWord("AP.OWNER")} OR {HasKeyWord("AP.OBJECT_NAME")})");
+        }
+
+        sqlBuilder.AppendLine(" ORDER BY AP.OWNER, AP.OBJECT_NAME ASC");
+
+        var sql = sqlBuilder.ToString();
+        var sqlParameters = new
+        {
+            max = parameters.MaxItems + 1,
+            owner = parameters.OwnerName?.ToUpper(),
+            package = parameters.PackageName?.ToUpper(),
+            keyword = parameters.FilterKeyword?.ToUpper()
+        };
+
+        var retryPolicy = GetRetryPolicy<ICollection<OracleFunction>>();
+        return await retryPolicy.ExecuteAsync(async () =>
+        {
+            await using var connection = CreateOracleConnection(parameters);
+            var oracleFunctions = await connection.QueryAsync<OracleFunction>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
+            return oracleFunctions
+                .Distinct()
+                .OrderBy(x => x.OwnerName)
+                .ThenBy(x => x.FunctionName)
+                .ToList();
+        });
+    }
+    
+    private async Task<ICollection<OracleFunction>> GetOracleFunctionsFromAllArgumentsAsync(OracleParameters parameters, CancellationToken cancellationToken)
+    {
+        var sqlBuilder = new StringBuilder
+        (
+            """
+                  SELECT DISTINCT 
+                    AG.OWNER AS OwnerName, 
+                    AG.PACKAGE_NAME AS PackageName, 
+                    AG.OBJECT_NAME AS FunctionName, 
+                    AO.CREATED AS CreationDate,
+                    AO.LAST_DDL_TIME AS ModificationDate
+                  FROM ALL_ARGUMENTS AG
+                  INNER JOIN ALL_OBJECTS AO ON AG.OBJECT_ID = AO.OBJECT_ID
+                  WHERE 1 = 1
+                    AND AG.POSITION = 0
+                    AND ROWNUM <= :max
+            """
+        );
+
+        if (!string.IsNullOrWhiteSpace(parameters.OwnerName))
+        {
+            sqlBuilder.AppendLine(" AND UPPER(AG.OWNER) = :owner");
+        }
+        
+        if (!string.IsNullOrWhiteSpace(parameters.PackageName))
+        {
+            sqlBuilder.AppendLine(" AND UPPER(AG.PACKAGE_NAME) = :package");
+        }
+
+        if (!string.IsNullOrWhiteSpace(parameters.FilterKeyword))
+        {
+            sqlBuilder.AppendLine($" AND ({HasKeyWord("AG.OWNER")} OR {HasKeyWord("AG.PACKAGE_NAME")} OR {HasKeyWord("AG.OBJECT_NAME")})");
+        }
+
+        sqlBuilder.AppendLine(" ORDER BY AG.OWNER, AG.PACKAGE_NAME, AG.OBJECT_NAME ASC");
+
+        var sql = sqlBuilder.ToString();
+        var sqlParameters = new
+        {
+            max = parameters.MaxItems + 1,
+            owner = parameters.OwnerName?.ToUpper(),
+            package = parameters.PackageName?.ToUpper(),
+            keyword = parameters.FilterKeyword?.ToUpper()
+        };
+
+        var retryPolicy = GetRetryPolicy<ICollection<OracleFunction>>();
+        return await retryPolicy.ExecuteAsync(async () =>
+        {
+            await using var connection = CreateOracleConnection(parameters);
+            var oracleFunctions = await connection.QueryAsync<OracleFunction>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
+            return oracleFunctions
+                .Distinct()
+                .OrderBy(x => x.OwnerName)
+                .ThenBy(x => x.FunctionName)
                 .ToList();
         });
     }
