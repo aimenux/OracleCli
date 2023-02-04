@@ -266,9 +266,16 @@ public class ConsoleService : IConsoleService
 
     public void RenderOracleSources(ICollection<OracleSource> oracleSources, OracleParameters parameters)
     {
+        var isProcedure = !string.IsNullOrWhiteSpace(parameters.ProcedureName);
+        var column = isProcedure ? "ProcedureName" : "FunctionName";
+        var @object = isProcedure ? "procedure" : "function"; 
+        var name = isProcedure
+            ? parameters.ProcedureName
+            : parameters.FunctionName;
+        
         if (oracleSources.Count == 0)
         {
-            RenderProblem($"Code source is not found for procedure '{parameters.ProcedureName}'");
+            RenderProblem($"Code source is not found for {@object} '{name}'");
             return;
         }
 
@@ -279,13 +286,13 @@ public class ConsoleService : IConsoleService
             .Border(TableBorder.Square)
             .Title($"[yellow][bold]Found {lines} line(s)[/][/]")
             .AddColumn(new TableColumn("[u]PackageName[/]").Centered())
-            .AddColumn(new TableColumn("[u]ProcedureName[/]").Centered())
+            .AddColumn(new TableColumn($"[u]{column}[/]").Centered())
             .AddColumn(new TableColumn("[u]OutputFile[/]").Centered())
             .Caption($"[yellow][bold]{databaseName}[/][/]");
         
         table.AddRow(
             ToMarkup(parameters.PackageName),
-            ToMarkup(parameters.ProcedureName),
+            ToMarkup(name),
             ToMarkupLink(parameters.OutputFile));
         
         AnsiConsole.WriteLine();
@@ -426,20 +433,6 @@ public class ConsoleService : IConsoleService
         AnsiConsole.WriteLine();
     }
 
-    public void RenderFoundOracleProcedures(ICollection<OracleProcedure> oracleProcedures, OracleParameters parameters)
-    {
-        RenderProblem($"Found {oracleProcedures.Count} procedure(s) matching name '{parameters.ProcedureName}'");
-        if (oracleProcedures.Count == 0) return;
-        if (!AnsiConsole.Confirm("Do you want to [u]display found procedure(s) on console screen[/] ?"))
-        {
-            AnsiConsole.WriteLine();
-        }
-        else
-        {
-            RenderOracleProcedures(oracleProcedures, parameters);            
-        }
-    }
-    
     private static string GetFormattedJson(string json)
     {
         var options = new JsonSerializerOptions { WriteIndented = true };

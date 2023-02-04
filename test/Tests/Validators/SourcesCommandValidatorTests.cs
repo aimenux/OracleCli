@@ -67,7 +67,20 @@ public class SourcesCommandValidatorTests
             Add(new SourcesCommand(consoleService, oracleService, exportService, options)
             {
                 DatabaseName = "oracle-for-tests",
+                FunctionName = "oracle-fun",
+                PackageName = "oracle-pkg"
+            });
+            
+            Add(new SourcesCommand(consoleService, oracleService, exportService, options)
+            {
+                DatabaseName = "oracle-for-tests",
                 ProcedureName = "oracle-spc"
+            });
+            
+            Add(new SourcesCommand(consoleService, oracleService, exportService, options)
+            {
+                DatabaseName = "oracle-for-tests",
+                FunctionName = "oracle-fun"
             });
         }
     }
@@ -85,7 +98,15 @@ public class SourcesCommandValidatorTests
             Add(new SourcesCommand(consoleService, oracleService, exportService, options)
             {
                 DatabaseName = "oracle-for-tests",
+                ProcedureName = "oracle-spc",
+                FunctionName = "oracle-fun"
+            });
+            
+            Add(new SourcesCommand(consoleService, oracleService, exportService, options)
+            {
+                DatabaseName = "oracle-for-tests",
                 ProcedureName = null,
+                FunctionName = null
             });
             
             Add(new SourcesCommand(consoleService, oracleService, exportService, options)
@@ -98,12 +119,20 @@ public class SourcesCommandValidatorTests
             {
                 DatabaseName = null,
                 ProcedureName = null,
+                FunctionName = null
             });
             
             Add(new SourcesCommand(consoleService, oracleService, exportService, options)
             {
                 DatabaseName = "oracle-for-tests",
                 ProcedureName = "oracle-spc",
+                OutputDirectory = null
+            });
+            
+            Add(new SourcesCommand(consoleService, oracleService, exportService, options)
+            {
+                DatabaseName = "oracle-for-tests",
+                FunctionName = "oracle-fun",
                 OutputDirectory = null
             });
         }

@@ -59,7 +59,7 @@ public class TablesCommand : AbstractCommand
         if (oracleTables.Count == 1 && ConsoleService.GetYesOrNoAnswer("display table columns on console screen", true))
         {
             var oracleTable = oracleTables.Single();
-            parameters = parameters.With(oracleTable.OwnerName, oracleTable.TableName);
+            parameters = parameters.WithTable(oracleTable.OwnerName, oracleTable.TableName);
             oracleTable = await _oracleService.GetOracleTableAsync(parameters, cancellationToken);
             ConsoleService.RenderOracleTable(oracleTable, parameters);
         }

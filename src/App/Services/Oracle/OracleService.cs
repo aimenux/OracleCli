@@ -166,15 +166,20 @@ public class OracleService : IOracleService
         {
             sqlBuilder.AppendLine(" AND UPPER(AA.OWNER) = :owner");
         }
+        
+        sqlBuilder.AppendLine(!string.IsNullOrWhiteSpace(parameters.PackageName)
+            ? " AND UPPER(AA.PACKAGE_NAME) = :package"
+            : " AND AA.PACKAGE_NAME IS NULL");
 
         if (!string.IsNullOrWhiteSpace(parameters.ProcedureName))
         {
             sqlBuilder.AppendLine(" AND UPPER(AA.OBJECT_NAME) = :procedure");
         }
-
-        sqlBuilder.AppendLine(string.IsNullOrWhiteSpace(parameters.PackageName)
-            ? " AND AA.PACKAGE_NAME IS NULL"
-            : " AND UPPER(AA.PACKAGE_NAME) = :package");
+        
+        if (!string.IsNullOrWhiteSpace(parameters.FunctionName))
+        {
+            sqlBuilder.AppendLine(" AND UPPER(AA.OBJECT_NAME) = :function");
+        }
 
         sqlBuilder.AppendLine(" ORDER BY AA.POSITION ASC");
 
@@ -183,7 +188,8 @@ public class OracleService : IOracleService
         {
             owner = parameters.OwnerName?.ToUpper(),
             package = parameters.PackageName?.ToUpper(),
-            procedure = parameters.ProcedureName?.ToUpper()
+            procedure = parameters.ProcedureName?.ToUpper(),
+            function = parameters.FunctionName?.ToUpper()
         };
 
         var retryPolicy = GetRetryPolicy<ICollection<OracleArgument>>();
@@ -431,6 +437,14 @@ public class OracleService : IOracleService
 
     private async Task<ICollection<OracleSource>> GetUnwrappedOracleSourcesAsync(OracleParameters parameters, CancellationToken cancellationToken)
     {
+        var name = !string.IsNullOrWhiteSpace(parameters.ProcedureName)
+            ? parameters.ProcedureName
+            : parameters.FunctionName;
+        
+        var type = !string.IsNullOrWhiteSpace(parameters.ProcedureName)
+            ? "PROCEDURE"
+            : "FUNCTION";
+        
         var hasOwnerName = !string.IsNullOrWhiteSpace(parameters.OwnerName)
             ? "UPPER(OWNER) = :owner"
             : "1 = 1";
@@ -447,8 +461,8 @@ public class OracleService : IOracleService
                       WHERE {hasOwnerName}
                         AND UPPER(NAME) = :package
                         AND UPPER(TYPE) = 'PACKAGE BODY'
-                        AND INSTR(UPPER(TEXT), :procedure) > 0
-                        AND INSTR(UPPER(TEXT), 'PROCEDURE') > 0
+                        AND INSTR(UPPER(TEXT), :name) > 0
+                        AND INSTR(UPPER(TEXT), '{type}') > 0
                         AND REGEXP_LIKE (UPPER(TEXT), :regex)
                       ORDER BY LINE ASC
                   ),
@@ -461,7 +475,7 @@ public class OracleService : IOracleService
                       WHERE {hasOwnerName}
                         AND UPPER(NAME) = :package
                         AND UPPER(TYPE) = 'PACKAGE BODY'
-                        AND INSTR(UPPER(TEXT), :procedure) > 0
+                        AND INSTR(UPPER(TEXT), :name) > 0
                         AND INSTR(UPPER(TEXT), 'END') > 0
                         AND REGEXP_LIKE (UPPER(TEXT), :regex)
                       ORDER BY LINE ASC
@@ -479,10 +493,10 @@ public class OracleService : IOracleService
         var sql = sqlBuilder.ToString();
         var sqlParameters = new
         {
+            name = name?.ToUpper(),
             owner = parameters.OwnerName?.ToUpper(),
             package = parameters.PackageName?.ToUpper(),
-            procedure = parameters.ProcedureName?.ToUpper(),
-            regex = $@"{parameters.ProcedureName?.ToUpper()}(;|\(|\s)+"
+            regex = $@"{name?.ToUpper()}(;|\(|\s)+"
         };
 
         var retryPolicy = GetRetryPolicy<ICollection<OracleSource>>();
@@ -559,7 +573,12 @@ public class OracleService : IOracleService
         
         if (!string.IsNullOrWhiteSpace(parameters.PackageName))
         {
-            sqlBuilder.AppendLine(" AND UPPER(AP.OBJECT_NAME) = :package");
+            sqlBuilder.AppendLine(" AND 1 = 2");
+        }
+        
+        if (!string.IsNullOrWhiteSpace(parameters.FunctionName))
+        {
+            sqlBuilder.AppendLine(" AND UPPER(AP.OBJECT_NAME) = :function");
         }
 
         if (!string.IsNullOrWhiteSpace(parameters.FilterKeyword))
@@ -574,7 +593,7 @@ public class OracleService : IOracleService
         {
             max = parameters.MaxItems + 1,
             owner = parameters.OwnerName?.ToUpper(),
-            package = parameters.PackageName?.ToUpper(),
+            function = parameters.FunctionName?.ToUpper(),
             keyword = parameters.FilterKeyword?.ToUpper()
         };
 
@@ -619,6 +638,11 @@ public class OracleService : IOracleService
         {
             sqlBuilder.AppendLine(" AND UPPER(AG.PACKAGE_NAME) = :package");
         }
+        
+        if (!string.IsNullOrWhiteSpace(parameters.FunctionName))
+        {
+            sqlBuilder.AppendLine(" AND UPPER(AG.OBJECT_NAME) = :function");
+        }
 
         if (!string.IsNullOrWhiteSpace(parameters.FilterKeyword))
         {
@@ -633,6 +657,7 @@ public class OracleService : IOracleService
             max = parameters.MaxItems + 1,
             owner = parameters.OwnerName?.ToUpper(),
             package = parameters.PackageName?.ToUpper(),
+            function = parameters.FunctionName?.ToUpper(),
             keyword = parameters.FilterKeyword?.ToUpper()
         };
 

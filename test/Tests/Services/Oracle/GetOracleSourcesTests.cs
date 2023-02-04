@@ -15,8 +15,14 @@ public class GetOracleSourcesTests
         _oracleFixture = oracleFixture;
     }
     
-    [Fact]
-    public async Task Should_Get_Sources()
+    [Theory]
+    [InlineData("SYS", "OWA", "GET_LINE", null)]
+    [InlineData("SYS", "OWA", "SET_USER_ID", null)]
+    [InlineData("SYS", "OWA", "SET_PASSWORD", null)]
+    [InlineData("SYS", "STANDARD", null, "GREATEST")]
+    [InlineData("SYS", "STANDARD", null, "TO_MULTI_BYTE")]
+    [InlineData("SYS", "STANDARD", null, "TO_SINGLE_BYTE")]
+    public async Task Should_Get_Sources(string ownerName, string packageName, string procedureName, string functionName)
     {
         // arrange
         const string databaseName = "oracle-for-tests";
@@ -31,9 +37,11 @@ public class GetOracleSourcesTests
 
         var parameters = new OracleParameters
         {
+            OwnerName = ownerName,
             DatabaseName = databaseName,
-            ProcedureName = "SET_USER_ID",
-            PackageName = "OWA"
+            ProcedureName = procedureName,
+            FunctionName = functionName,
+            PackageName = packageName
         };
 
         var service = new OracleService(options, logger);

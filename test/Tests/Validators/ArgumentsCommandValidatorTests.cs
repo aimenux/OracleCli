@@ -67,7 +67,20 @@ public class ArgumentsCommandValidatorTests
             Add(new ArgumentsCommand(consoleService, oracleService, exportService, options)
             {
                 DatabaseName = "oracle-for-tests",
+                FunctionName = "oracle-fun",
+                PackageName = "oracle-pkg"
+            });
+            
+            Add(new ArgumentsCommand(consoleService, oracleService, exportService, options)
+            {
+                DatabaseName = "oracle-for-tests",
                 ProcedureName = "oracle-spc"
+            });
+            
+            Add(new ArgumentsCommand(consoleService, oracleService, exportService, options)
+            {
+                DatabaseName = "oracle-for-tests",
+                FunctionName = "oracle-fun"
             });
         }
     }
@@ -85,19 +98,29 @@ public class ArgumentsCommandValidatorTests
             Add(new ArgumentsCommand(consoleService, oracleService, exportService, options)
             {
                 DatabaseName = "oracle-for-tests",
+                ProcedureName = "oracle-spc",
+                FunctionName = "oracle-fun"
+            });
+            
+            Add(new ArgumentsCommand(consoleService, oracleService, exportService, options)
+            {
+                DatabaseName = "oracle-for-tests",
                 ProcedureName = null,
+                FunctionName = null
             });
             
             Add(new ArgumentsCommand(consoleService, oracleService, exportService, options)
             {
                 DatabaseName = null,
                 ProcedureName = "oracle-spc",
+                FunctionName = null
             });
             
             Add(new ArgumentsCommand(consoleService, oracleService, exportService, options)
             {
                 DatabaseName = null,
                 ProcedureName = null,
+                FunctionName = null
             });
         }
     }

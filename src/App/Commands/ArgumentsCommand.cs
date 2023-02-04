@@ -38,6 +38,9 @@ public class ArgumentsCommand : AbstractCommand
 
     [Option("-s|--spc", "Procedure name", CommandOptionType.SingleValue)]
     public string ProcedureName { get; init; }
+    
+    [Option("-f|--fun", "Function name", CommandOptionType.SingleValue)]
+    public string FunctionName { get; init; }
 
     protected override async Task ExecuteAsync(CommandLineApplication app, CancellationToken cancellationToken = default)
     {
@@ -46,9 +49,23 @@ public class ArgumentsCommand : AbstractCommand
             DatabaseName = DatabaseName,
             OwnerName = OwnerName,
             PackageName = PackageName,
-            ProcedureName = ProcedureName
+            ProcedureName = ProcedureName,
+            FunctionName = FunctionName
         };
 
+        var tasks = new List<Task>
+        {
+            ExecuteProcedureArgumentsAsync(parameters, cancellationToken),
+            ExecuteFunctionArgumentsAsync(parameters, cancellationToken)
+        };
+
+        await Task.WhenAll(tasks);
+    }
+    
+    private async Task ExecuteProcedureArgumentsAsync(OracleParameters parameters, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(parameters.ProcedureName)) return;
+        
         var oracleProcedures = await ConsoleService.RenderStatusAsync(async () =>
         {
             var oracleProcedures = await _oracleService.GetOracleProceduresAsync(parameters, cancellationToken);
@@ -57,14 +74,49 @@ public class ArgumentsCommand : AbstractCommand
         
         if (oracleProcedures.Count is 0 or > 1)
         {
-            ConsoleService.RenderFoundOracleProcedures(oracleProcedures, parameters);
+            ConsoleService.RenderProblem($"Found {oracleProcedures.Count} procedure(s) matching name '{parameters.ProcedureName}'");
+            if (oracleProcedures.Count > 1 && ConsoleService.GetYesOrNoAnswer("display found procedures on console screen", true))
+            {
+                ConsoleService.RenderOracleProcedures(oracleProcedures, parameters);
+            }
         }
         else
         {
             await ConsoleService.RenderStatusAsync(async () =>
             {
                 var oracleProcedure = oracleProcedures.Single();
-                parameters = parameters.With(oracleProcedure.OwnerName, oracleProcedure.PackageName, oracleProcedure.ProcedureName);
+                parameters = parameters.WithProcedure(oracleProcedure.OwnerName, oracleProcedure.PackageName, oracleProcedure.ProcedureName);
+                var oracleArguments = await _oracleService.GetOracleArgumentsAsync(parameters, cancellationToken);
+                await _exportService.ExportOracleArgumentsAsync(oracleArguments, parameters, cancellationToken);
+                ConsoleService.RenderOracleArguments(oracleArguments, parameters);
+            });
+        }
+    }
+    
+    private async Task ExecuteFunctionArgumentsAsync(OracleParameters parameters, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(parameters.FunctionName)) return;
+        
+        var oracleFunctions = await ConsoleService.RenderStatusAsync(async () =>
+        {
+            var oracleFunctions = await _oracleService.GetOracleFunctionsAsync(parameters, cancellationToken);
+            return oracleFunctions;
+        });
+        
+        if (oracleFunctions.Count is 0 or > 1)
+        {
+            ConsoleService.RenderProblem($"Found {oracleFunctions.Count} function(s) matching name '{parameters.FunctionName}'");
+            if (oracleFunctions.Count > 1 && ConsoleService.GetYesOrNoAnswer("display found functions on console screen", true))
+            {
+                ConsoleService.RenderOracleFunctions(oracleFunctions, parameters);
+            }
+        }
+        else
+        {
+            await ConsoleService.RenderStatusAsync(async () =>
+            {
+                var oracleFunction = oracleFunctions.Single();
+                parameters = parameters.WithFunction(oracleFunction.OwnerName, oracleFunction.PackageName, oracleFunction.FunctionName);
                 var oracleArguments = await _oracleService.GetOracleArgumentsAsync(parameters, cancellationToken);
                 await _exportService.ExportOracleArgumentsAsync(oracleArguments, parameters, cancellationToken);
                 ConsoleService.RenderOracleArguments(oracleArguments, parameters);

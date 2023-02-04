@@ -11,7 +11,20 @@ public class SourcesCommandValidator : AbstractValidator<SourcesCommand>
             .NotEmpty();
 
         RuleFor(x => x.ProcedureName)
-            .NotEmpty();
+            .NotEmpty()
+            .When(x => string.IsNullOrEmpty(x.FunctionName));
+
+        RuleFor(x => x.ProcedureName)
+            .Empty()
+            .When(x => !string.IsNullOrEmpty(x.FunctionName));
+        
+        RuleFor(x => x.FunctionName)
+            .NotEmpty()
+            .When(x => string.IsNullOrEmpty(x.ProcedureName));
+        
+        RuleFor(x => x.FunctionName)
+            .Empty()
+            .When(x => !string.IsNullOrEmpty(x.ProcedureName));
 
         RuleFor(x => x.OutputDirectory)
             .NotEmpty()
