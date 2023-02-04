@@ -45,7 +45,7 @@ internal class FakeConsoleService : IConsoleService
     
     public bool GetYesOrNoAnswer(string text, bool defaultAnswer)
     {
-        return defaultAnswer;
+        return true;
     }
 
     public void RenderValidationErrors(ValidationErrors validationErrors)
