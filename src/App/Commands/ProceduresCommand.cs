@@ -32,7 +32,10 @@ public class ProceduresCommand : AbstractCommand
     [Option("-p|--pkg", "Package name", CommandOptionType.SingleValue)]
     public string PackageName { get; init; }
 
-    [Option("-f|--filter", "Filter keyword", CommandOptionType.SingleValue)]
+    [Option("-n|--name", "Procedure name", CommandOptionType.SingleValue)]
+    public string ProcedureName { get; init; }
+    
+    [Option("--filter", "Filter keyword", CommandOptionType.SingleValue)]
     public string FilterKeyword { get; init; }
     
     [Option("-m|--max", "Max items", CommandOptionType.SingleValue)]
@@ -44,6 +47,7 @@ public class ProceduresCommand : AbstractCommand
         {
             DatabaseName = DatabaseName,
             PackageName = PackageName,
+            ProcedureName = ProcedureName,
             OwnerName = OwnerName,
             MaxItems = MaxItems,
             FilterKeyword = FilterKeyword

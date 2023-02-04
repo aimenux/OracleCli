@@ -24,8 +24,11 @@ public class SchemasCommand : AbstractCommand
     
     [Option("-d|--db", "Database name", CommandOptionType.SingleValue)]
     public string DatabaseName { get; init; }
+        
+    [Option("-n|--name", "Schema name", CommandOptionType.SingleValue)]
+    public string SchemaName { get; init; }
     
-    [Option("-f|--filter", "Filter keyword", CommandOptionType.SingleValue)]
+    [Option("--filter", "Filter keyword", CommandOptionType.SingleValue)]
     public string FilterKeyword { get; init; }
     
     [Option("-m|--max", "Max items", CommandOptionType.SingleValue)]
@@ -36,6 +39,7 @@ public class SchemasCommand : AbstractCommand
         var parameters = new OracleParameters
         {
             DatabaseName = DatabaseName,
+            OwnerName = SchemaName,
             MaxItems = MaxItems,
             FilterKeyword = FilterKeyword
         };

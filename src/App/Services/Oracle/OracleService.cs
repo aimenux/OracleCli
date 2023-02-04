@@ -41,6 +41,11 @@ public class OracleService : IOracleService
         {
             sqlBuilder.AppendLine(" AND UPPER(AO.OWNER) = :owner");
         }
+        
+        if (!string.IsNullOrWhiteSpace(parameters.PackageName))
+        {
+            sqlBuilder.AppendLine(" AND UPPER(AO.OBJECT_NAME) = :package");
+        }
 
         if (!string.IsNullOrWhiteSpace(parameters.FilterKeyword))
         {
@@ -54,6 +59,7 @@ public class OracleService : IOracleService
         {
             max = parameters.MaxItems + 1,
             owner = parameters.OwnerName?.ToUpper(),
+            package = parameters.PackageName?.ToUpper(),
             keyword = parameters.FilterKeyword?.ToUpper()
         };
 
@@ -117,7 +123,7 @@ public class OracleService : IOracleService
         
         if (!string.IsNullOrWhiteSpace(parameters.ProcedureName))
         {
-            sqlBuilder.AppendLine(" AND (UPPER(AP.OBJECT_NAME) = :procedure OR UPPER(AP.PROCEDURE_NAME) = :procedure)");
+            sqlBuilder.AppendLine(" AND ((UPPER(AO.OBJECT_TYPE) = 'PROCEDURE' AND UPPER(AP.OBJECT_NAME) = :procedure) OR (UPPER(AO.OBJECT_TYPE) = 'PACKAGE' AND UPPER(AP.PROCEDURE_NAME) = :procedure))");
         }
 
         if (!string.IsNullOrWhiteSpace(parameters.FilterKeyword))
@@ -301,12 +307,18 @@ public class OracleService : IOracleService
         (
             """
                   SELECT 
-                    AU.USERNAME AS SchemaName, AU.CREATED AS CreationDate 
+                    AU.USERNAME AS SchemaName, 
+                    AU.CREATED AS CreationDate 
                   FROM ALL_USERS AU
                   WHERE 1 = 1 
                     AND ROWNUM <= :max
             """
         );
+        
+        if (!string.IsNullOrWhiteSpace(parameters.OwnerName))
+        {
+            sqlBuilder.AppendLine($" AND UPPER(AU.USERNAME) = :owner");
+        }
 
         if (!string.IsNullOrWhiteSpace(parameters.FilterKeyword))
         {
@@ -319,6 +331,7 @@ public class OracleService : IOracleService
         var sqlParameters = new
         {
             max = parameters.MaxItems + 1,
+            owner = parameters.OwnerName?.ToUpper(),
             keyword = parameters.FilterKeyword?.ToUpper()
         };
         

@@ -32,7 +32,7 @@ public class ObjectsCommand : AbstractCommand
     [Option("-t|--type", "Object type(s)", CommandOptionType.MultipleValue)]
     public string[] ObjectTypes { get; init; }
 
-    [Option("-f|--filter", "Filter keyword", CommandOptionType.SingleValue)]
+    [Option("--filter", "Filter keyword", CommandOptionType.SingleValue)]
     public string FilterKeyword { get; init; }
     
     [Option("-m|--max", "Max items", CommandOptionType.SingleValue)]

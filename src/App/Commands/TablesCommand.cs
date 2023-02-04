@@ -32,7 +32,7 @@ public class TablesCommand : AbstractCommand
     [Option("-n|--name", "Table name", CommandOptionType.SingleValue)]
     public string TableName { get; init; }
 
-    [Option("-f|--filter", "Filter keyword", CommandOptionType.SingleValue)]
+    [Option("--filter", "Filter keyword", CommandOptionType.SingleValue)]
     public string FilterKeyword { get; init; }
     
     [Option("-m|--max", "Max items", CommandOptionType.SingleValue)]

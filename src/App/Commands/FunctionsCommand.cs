@@ -31,8 +31,11 @@ public class FunctionsCommand : AbstractCommand
     
     [Option("-p|--pkg", "Package name", CommandOptionType.SingleValue)]
     public string PackageName { get; init; }
+    
+    [Option("-n|--name", "Function name", CommandOptionType.SingleValue)]
+    public string FunctionName { get; init; }
 
-    [Option("-f|--filter", "Filter keyword", CommandOptionType.SingleValue)]
+    [Option("--filter", "Filter keyword", CommandOptionType.SingleValue)]
     public string FilterKeyword { get; init; }
     
     [Option("-m|--max", "Max items", CommandOptionType.SingleValue)]
@@ -44,6 +47,7 @@ public class FunctionsCommand : AbstractCommand
         {
             DatabaseName = DatabaseName,
             PackageName = PackageName,
+            FunctionName = FunctionName,
             OwnerName = OwnerName,
             MaxItems = MaxItems,
             FilterKeyword = FilterKeyword

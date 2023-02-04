@@ -28,8 +28,11 @@ public class PackagesCommand : AbstractCommand
     
     [Option("-o|--owner", "Owner/Schema name", CommandOptionType.SingleValue)]
     public string OwnerName { get; init; }
+    
+    [Option("-n|--name", "Package name", CommandOptionType.SingleValue)]
+    public string PackageName { get; init; }
 
-    [Option("-f|--filter", "Filter keyword", CommandOptionType.SingleValue)]
+    [Option("--filter", "Filter keyword", CommandOptionType.SingleValue)]
     public string FilterKeyword { get; init; }
     
     [Option("-m|--max", "Max items", CommandOptionType.SingleValue)]
@@ -40,6 +43,7 @@ public class PackagesCommand : AbstractCommand
         var parameters = new OracleParameters
         {
             DatabaseName = DatabaseName,
+            PackageName = PackageName,
             OwnerName = OwnerName,
             MaxItems = MaxItems,
             FilterKeyword = FilterKeyword
