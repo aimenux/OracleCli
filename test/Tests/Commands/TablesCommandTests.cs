@@ -25,6 +25,7 @@ public class TablesCommandTests
     [InlineData(null, null, "VDK", 5)]
     [InlineData(null, "VDK_DATABASE", null, 5)]
     [InlineData("SYSTEM", "VDK_DATABASE", null, 5)]
+    [InlineData("SYSTEM", "VDK_USER_RULE", null, 1)]
     public async Task Should_TablesCommand_Return_Ok(string ownerName, string tableName, string filterKeyword, int maxItems)
     {
         // arrange

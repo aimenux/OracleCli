@@ -59,7 +59,7 @@ public class CSharpExportService : ICSharpExportService
         
         foreach (var oracleArgument in oracleArguments.Where(x => x.IsCursorType))
         {
-            var cursorClassType = GetCSharpCursorType(oracleArgument);
+            var cursorClassType = GetCSharpArgumentCursorType(oracleArgument);
             csharpBuilder.AppendLine();
             csharpBuilder.AppendLine
             (
@@ -81,8 +81,8 @@ public class CSharpExportService : ICSharpExportService
         
         foreach (var oracleArgument in oracleArguments)
         {
-            var name = GetCSharpName(oracleArgument);
-            var type = GetCSharpType(oracleArgument);
+            var name = GetCSharpArgumentName(oracleArgument);
+            var type = GetCSharpArgumentType(oracleArgument);
             csharpBuilder.AppendLine();
             csharpBuilder.AppendLine
             (
@@ -96,7 +96,7 @@ public class CSharpExportService : ICSharpExportService
         return csharpBuilder.ToString();
     }
 
-    private static string GetCSharpName(OracleArgument oracleArgument)
+    private static string GetCSharpArgumentName(OracleArgument oracleArgument)
     {
         var name = string.IsNullOrWhiteSpace(oracleArgument.Name)
             ? $"{oracleArgument.Direction}{oracleArgument.Position}"
@@ -105,7 +105,7 @@ public class CSharpExportService : ICSharpExportService
         return name.Transform(To.LowerCase).Pascalize();
     }
 
-    private static string GetCSharpType(OracleArgument oracleArgument)
+    private static string GetCSharpArgumentType(OracleArgument oracleArgument)
     {
         return oracleArgument.DataType.ToUpper() switch
         {
@@ -113,12 +113,12 @@ public class CSharpExportService : ICSharpExportService
             "VARCHAR" => "string",
             "VARCHAR2" => "string",
             "DATE" => "DateTime",
-            "REF CURSOR" => GetCSharpCursorType(oracleArgument),
+            "REF CURSOR" => GetCSharpArgumentCursorType(oracleArgument),
             _ => "NotSupportedType"
         };
     }
 
-    private static string GetCSharpCursorType(OracleArgument oracleArgument)
+    private static string GetCSharpArgumentCursorType(OracleArgument oracleArgument)
     {
         return $"IEnumerable<OracleCursor{oracleArgument.Position}>";
     }

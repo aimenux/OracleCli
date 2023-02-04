@@ -23,17 +23,26 @@ public class SourcesCommandTests
     }
 
     [Theory]
-    [InlineData(null, null, "RUN")]
-    [InlineData(null, null, "UPPER")]
-    [InlineData(null, null, "LOWER")]
-    [InlineData(null, null, "LENGTH")]
-    [InlineData(null, "RMJVM", "RUN")]
-    [InlineData("SYS", "DBMS_AW", "RUN")]
-    [InlineData("SYS", null, "GET_TEXT")]
-    [InlineData("SYS", null, "GET_LINE")]
-    [InlineData("SYS", "UTL_TCP", "GET_TEXT")]
-    [InlineData("SYS", "DBMS_OUTPUT", "GET_LINE")]
-    public async Task Should_SourcesCommand_Return_Ok(string ownerName, string packageName, string procedureName)
+    [InlineData(null, null, "RUN", null)]
+    [InlineData(null, null, "UPPER", null)]
+    [InlineData(null, null, "LOWER", null)]
+    [InlineData(null, null, "LENGTH", null)]
+    [InlineData(null, "RMJVM", "RUN", null)]
+    [InlineData("SYS", "DBMS_AW", "RUN", null)]
+    [InlineData("SYS", null, "GET_TEXT", null)]
+    [InlineData("SYS", null, "GET_LINE", null)]
+    [InlineData("SYS", "UTL_TCP", "GET_TEXT", null)]
+    [InlineData("SYS", "DBMS_OUTPUT", "GET_LINE", null)]
+    [InlineData(null, null, null, "GREATEST")]
+    [InlineData(null, null, null, "TO_MULTI_BYTE")]
+    [InlineData(null, null, null, "TO_SINGLE_BYTE")]
+    [InlineData("SYS", null, null, "GREATEST")]
+    [InlineData("SYS", null, null, "TO_MULTI_BYTE")]
+    [InlineData("SYS", null, null, "TO_SINGLE_BYTE")]
+    [InlineData("SYS", "STANDARD", null, "GREATEST")]
+    [InlineData("SYS", "STANDARD", null, "TO_MULTI_BYTE")]
+    [InlineData("SYS", "STANDARD", null, "TO_SINGLE_BYTE")]
+    public async Task Should_SourcesCommand_Return_Ok(string ownerName, string packageName, string procedureName, string functionName)
     {
         // arrange
         var connectionString = _oracleFixture.ConnectionString;
@@ -54,7 +63,8 @@ public class SourcesCommandTests
             DatabaseName = DatabaseName,
             OwnerName = ownerName,
             PackageName = packageName,
-            ProcedureName = procedureName
+            ProcedureName = procedureName,
+            FunctionName = functionName
         };
 
         // act
@@ -65,9 +75,13 @@ public class SourcesCommandTests
     }
     
     [Theory]
-    [InlineData("SYS", "RMJVM", null)]
-    [InlineData("SYS", "RMJVM", "")]
-    public async Task Should_SourcesCommand_Return_Ko(string ownerName, string packageName, string procedureName)
+    [InlineData(null, null, null, null)]
+    [InlineData("SYS", null, null, null)]
+    [InlineData("SYS", "STANDARD", null, null)]
+    [InlineData("SYS", "STANDARD", "", null)]
+    [InlineData("SYS", "STANDARD", null, "")]
+    [InlineData("SYS", "STANDARD", "", "")]
+    public async Task Should_SourcesCommand_Return_Ko(string ownerName, string packageName, string procedureName, string functionName)
     {
         // arrange
         var connectionString = _oracleFixture.ConnectionString;
@@ -88,7 +102,8 @@ public class SourcesCommandTests
             DatabaseName = DatabaseName,
             OwnerName = ownerName,
             PackageName = packageName,
-            ProcedureName = procedureName
+            ProcedureName = procedureName,
+            FunctionName = functionName
         };
 
         // act
