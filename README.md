@@ -18,6 +18,7 @@ A net global tool helping to retrieve some infos (packages, functions, procedure
 > - Use sub command `Procedure` or `Procedures` to list procedures from oracle
 > - Use sub command `Argument` or `Arguments` to list procedure/function arguments from oracle
 > - Use sub command `Source` or `Sources` to get procedure/function source code from oracle
+> - Use sub command `Lock` or `Locks` to get locked sessions from oracle
 
 >
 > To run the tool, type commands :
@@ -33,6 +34,7 @@ A net global tool helping to retrieve some infos (packages, functions, procedure
 > - `OracleCli Arguments -d [db-name] -p [pkg-name] -f [fun-name]` to list function arguments from oracle
 > - `OracleCli Sources -d [db-name] -p [pkg-name] -s [spc-name]` to get procedure source code from oracle
 > - `OracleCli Sources -d [db-name] -p [pkg-name] -f [fun-name]` to get function source code from oracle
+> - `OracleCli Locks -d [db-name] -t [min-time]` to get locked sessions from oracle
 >
 >
 > To install global tool from a local source path, type commands :

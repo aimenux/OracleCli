@@ -5,6 +5,7 @@ using System.Text.Json;
 using App.Configuration;
 using App.Services.Oracle;
 using App.Validators;
+using Humanizer;
 using Spectre.Console;
 using TextCopy;
 
@@ -426,6 +427,57 @@ public class ConsoleService : IConsoleService
                 ToMarkup(result.ProcedureName),
                 ToMarkup(result.CreationDate.ToString("g")),
                 ToMarkup(result.ModificationDate.ToString("g")));
+        }
+
+        AnsiConsole.WriteLine();
+        AnsiConsole.Write(table);
+        AnsiConsole.WriteLine();
+    }
+
+    public void RenderOracleLocks(ICollection<OracleLock> oracleLocks, OracleParameters parameters)
+    {
+        var databaseName = parameters.DatabaseName.ToUpper();
+        var title = oracleLocks.Count > parameters.MaxItems
+            ? $"[yellow][bold]Found more than {parameters.MaxItems} lock(s)[/][/]"
+            : $"[yellow][bold]Found {oracleLocks.Count} lock(s)[/][/]";
+        var table = new Table()
+            .BorderColor(Color.White)
+            .Border(TableBorder.Square)
+            .Title(title)
+            .AddColumn(new TableColumn("[u]#[/]").Centered())
+            .AddColumn(new TableColumn("[u]SchemaName[/]").Centered())
+            .AddColumn(new TableColumn("[u]UserName[/]").Centered())
+            .AddColumn(new TableColumn("[u]MachineName[/]").Centered())
+            .AddColumn(new TableColumn("[u]ProgramName[/]").Centered())
+            .AddColumn(new TableColumn("[u]BlockingSession[/]").Centered())
+            .AddColumn(new TableColumn("[u]BlockedSession[/]").Centered())
+            .AddColumn(new TableColumn("[u]BlockingStartDate[/]").Centered())
+            .AddColumn(new TableColumn("[u]BlockingTime[/]").Centered())
+            .AddColumn(new TableColumn("[u]BlockedSqlText[/]").Centered())
+            .Caption($"[yellow][bold]{databaseName}[/][/]");
+
+        var index = 1;
+        var count = Math.Min(oracleLocks.Count, parameters.MaxItems);
+        foreach (var result in oracleLocks.Take(count))
+        {
+            var program = result.ProgramName.Truncate(50);
+            var date = result.BlockingStartDate.ToString("g");
+            var time = TimeSpan.FromSeconds(result.BlockingTime).Humanize();
+            var text = result.BlockedSqlText
+                .Truncate(100)
+                .ToUpper();
+
+            table.AddRow(
+                IndexMarkup(index++),
+                ToMarkup(result.SchemaName),
+                ToMarkup(result.UserName),
+                ToMarkup(result.MachineName),
+                ToMarkup(program),
+                ToMarkup(result.BlockingSession),
+                ToMarkup(result.BlockedSession),
+                ToMarkup(date),
+                ToMarkup(time),
+                ToMarkup($"[green][bold]{text}[/][/]"));
         }
 
         AnsiConsole.WriteLine();

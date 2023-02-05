@@ -448,6 +448,55 @@ public class OracleService : IOracleService
         };
     }
 
+    public async Task<ICollection<OracleLock>> GetOracleLocksAsync(OracleParameters parameters, CancellationToken cancellationToken)
+    {
+        var sqlBuilder = new StringBuilder
+        (
+            """
+                  SELECT 
+                    VS.SCHEMANAME AS SchemaName,
+                    VS.OSUSER AS UserName,
+                    VS.MACHINE AS MachineName,
+                    VS.PROGRAM AS ProgramName,
+                    VS.BLOCKING_SESSION AS BlockingSession,
+                    VS.SID AS BlockedSession,
+                    VSQ.SQL_TEXT AS BlockedSqlText,
+                    VS.SQL_EXEC_START AS BlockingStartDate,
+                    VS.SECONDS_IN_WAIT AS BlockingTime
+                  FROM V$SESSION VS
+                  INNER JOIN V$SQLAREA VSQ ON VS.SQL_ADDRESS = VSQ.ADDRESS
+                  WHERE 1 = 1 
+                    AND VS.BLOCKING_SESSION IS NOT NULL 
+                    AND VS.SECONDS_IN_WAIT >= :time
+                    AND ROWNUM <= :max
+            """
+        );
+        
+        if (!string.IsNullOrWhiteSpace(parameters.OwnerName))
+        {
+            sqlBuilder.AppendLine(" AND UPPER(VS.SCHEMANAME) = :owner");
+        }
+
+        var sql = sqlBuilder.ToString();
+        var sqlParameters = new
+        {
+            max = parameters.MaxItems + 1,
+            owner = parameters.OwnerName?.ToUpper(),
+            time = parameters.MinBlockingTimeInMinutes * 60
+        };
+        
+        var retryPolicy = GetRetryPolicy<ICollection<OracleLock>>();
+        return await retryPolicy.ExecuteAsync(async () =>
+        {
+            await using var connection = CreateOracleConnection(parameters);
+            var oracleLocks = await connection.QueryAsync<OracleLock>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
+            return oracleLocks
+                .Distinct()
+                .OrderByDescending(x => x.BlockingTime)
+                .ToList();
+        });
+    }
+
     private async Task<ICollection<OracleSource>> GetUnwrappedOracleSourcesAsync(OracleParameters parameters, CancellationToken cancellationToken)
     {
         var name = !string.IsNullOrWhiteSpace(parameters.ProcedureName)

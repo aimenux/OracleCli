@@ -14,6 +14,7 @@ public sealed class OracleParameters
     public string[] ObjectTypes { get; init; }
     public string OutputDirectory { get; init; }
     public string OutputFile { get; init; }
+    public int MinBlockingTimeInMinutes { get; init; }
     public int MaxItems { get; init; } = Settings.DatabaseMaxItems;
 }
 
@@ -33,7 +34,8 @@ public static class OracleParametersExtensions
             FilterKeyword = parameters.FilterKeyword,
             ObjectTypes = parameters.ObjectTypes,
             OutputDirectory = parameters.OutputDirectory,
-            OutputFile = parameters.OutputFile
+            OutputFile = parameters.OutputFile,
+            MinBlockingTimeInMinutes = parameters.MinBlockingTimeInMinutes
         };
     }
     
@@ -51,7 +53,8 @@ public static class OracleParametersExtensions
             FilterKeyword = parameters.FilterKeyword,
             ObjectTypes = parameters.ObjectTypes,
             OutputDirectory = parameters.OutputDirectory,
-            OutputFile = parameters.OutputFile
+            OutputFile = parameters.OutputFile,
+            MinBlockingTimeInMinutes = parameters.MinBlockingTimeInMinutes
         };
     }
     
@@ -69,7 +72,8 @@ public static class OracleParametersExtensions
             FilterKeyword = parameters.FilterKeyword,
             ObjectTypes = parameters.ObjectTypes,
             OutputDirectory = parameters.OutputDirectory,
-            OutputFile = parameters.OutputFile
+            OutputFile = parameters.OutputFile,
+            MinBlockingTimeInMinutes = parameters.MinBlockingTimeInMinutes
         };
     }
 }

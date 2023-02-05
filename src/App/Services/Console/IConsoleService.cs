@@ -26,4 +26,5 @@ public interface IConsoleService
     void RenderOracleArguments(ICollection<OracleArgument> oracleArguments, OracleParameters parameters);
     void RenderOracleFunctions(ICollection<OracleFunction> oracleFunctions, OracleParameters parameters);
     void RenderOracleProcedures(ICollection<OracleProcedure> oracleProcedures, OracleParameters parameters);
+    void RenderOracleLocks(ICollection<OracleLock> oracleLocks, OracleParameters parameters);
 }
