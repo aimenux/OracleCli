@@ -15,7 +15,8 @@ namespace App.Commands;
     typeof(TablesCommand),
     typeof(ArgumentsCommand),
     typeof(SourcesCommand),
-    typeof(LocksCommand))
+    typeof(LocksCommand),
+    typeof(SessionsCommand))
 ]
 public class ToolCommand : AbstractCommand
 {

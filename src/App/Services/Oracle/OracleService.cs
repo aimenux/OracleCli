@@ -460,9 +460,9 @@ public class OracleService : IOracleService
                     VS.PROGRAM AS ProgramName,
                     VS.BLOCKING_SESSION AS BlockingSession,
                     VS.SID AS BlockedSession,
-                    VSQ.SQL_TEXT AS BlockedSqlText,
                     VS.SQL_EXEC_START AS BlockingStartDate,
-                    VS.SECONDS_IN_WAIT AS BlockingTime
+                    VS.SECONDS_IN_WAIT AS BlockingTime,
+                    VSQ.SQL_TEXT AS BlockedSqlText
                   FROM V$SESSION VS
                   INNER JOIN V$SQLAREA VSQ ON VS.SQL_ADDRESS = VSQ.ADDRESS
                   WHERE 1 = 1 
@@ -476,6 +476,8 @@ public class OracleService : IOracleService
         {
             sqlBuilder.AppendLine(" AND UPPER(VS.SCHEMANAME) = :owner");
         }
+        
+        sqlBuilder.AppendLine(" ORDER BY VS.SECONDS_IN_WAIT DESC");
 
         var sql = sqlBuilder.ToString();
         var sqlParameters = new
@@ -493,6 +495,55 @@ public class OracleService : IOracleService
             return oracleLocks
                 .Distinct()
                 .OrderByDescending(x => x.BlockingTime)
+                .ToList();
+        });
+    }
+
+    public async Task<ICollection<OracleSession>> GetOracleSessionsAsync(OracleParameters parameters, CancellationToken cancellationToken)
+    {
+        var sqlBuilder = new StringBuilder
+        (
+            """
+                  SELECT 
+                    VS.SCHEMANAME AS SchemaName,
+                    VS.OSUSER AS UserName,
+                    VS.MACHINE AS MachineName,
+                    VS.PROGRAM AS ProgramName,
+                    VS.State AS State,
+                    VS.LOGON_TIME AS LogonDate,
+                    VS.SQL_EXEC_START AS StartDate,
+                    VSQ.SQL_TEXT AS SqlText
+                  FROM V$SESSION VS
+                  INNER JOIN V$SQLAREA VSQ ON VS.SQL_ADDRESS = VSQ.ADDRESS
+                  WHERE 1 = 1
+                    AND VS.STATUS = 'ACTIVE'
+                    AND VS.USERNAME NOT LIKE 'SYS%'
+                    AND ROWNUM <= :max
+            """
+        );
+        
+        if (!string.IsNullOrWhiteSpace(parameters.OwnerName))
+        {
+            sqlBuilder.AppendLine(" AND UPPER(VS.SCHEMANAME) = :owner");
+        }
+        
+        sqlBuilder.AppendLine(" ORDER BY VS.LOGON_TIME DESC");
+
+        var sql = sqlBuilder.ToString();
+        var sqlParameters = new
+        {
+            max = parameters.MaxItems + 1,
+            owner = parameters.OwnerName?.ToUpper()
+        };
+        
+        var retryPolicy = GetRetryPolicy<ICollection<OracleSession>>();
+        return await retryPolicy.ExecuteAsync(async () =>
+        {
+            await using var connection = CreateOracleConnection(parameters);
+            var oracleSessions = await connection.QueryAsync<OracleSession>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
+            return oracleSessions
+                .Distinct()
+                .OrderByDescending(x => x.LogonDate)
                 .ToList();
         });
     }

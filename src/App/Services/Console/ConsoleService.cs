@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using App.Configuration;
+using App.Extensions;
 using App.Services.Oracle;
 using App.Validators;
 using Humanizer;
@@ -472,6 +473,8 @@ public class ConsoleService : IConsoleService
             var date = result.BlockingStartDate.ToString("g");
             var time = TimeSpan.FromSeconds(result.BlockingTime).Humanize();
             var text = result.BlockedSqlText
+                .RemoveLineBreaks()
+                .RemoveExtraSpace()
                 .Truncate(100)
                 .ToUpper();
 
@@ -485,7 +488,58 @@ public class ConsoleService : IConsoleService
                 ToMarkup(result.BlockedSession),
                 ToMarkup(date),
                 ToMarkup(time),
-                ToMarkup($"[green][bold]{text}[/][/]"));
+                ToMarkup($"[grey][bold]{text}[/][/]"));
+        }
+
+        AnsiConsole.WriteLine();
+        AnsiConsole.Write(table);
+        AnsiConsole.WriteLine();
+    }
+
+    public void RenderOracleSessions(ICollection<OracleSession> oracleSessions, OracleParameters parameters)
+    {
+        var databaseName = parameters.DatabaseName.ToUpper();
+        var title = oracleSessions.Count > parameters.MaxItems
+            ? $"[yellow][bold]Found more than {parameters.MaxItems} active session(s)[/][/]"
+            : $"[yellow][bold]Found {oracleSessions.Count} active session(s)[/][/]";
+        var table = new Table()
+            .BorderColor(Color.White)
+            .Border(TableBorder.Square)
+            .Title(title)
+            .AddColumn(new TableColumn("[u]#[/]").Centered())
+            .AddColumn(new TableColumn("[u]SchemaName[/]").Centered())
+            .AddColumn(new TableColumn("[u]UserName[/]").Centered())
+            .AddColumn(new TableColumn("[u]MachineName[/]").Centered())
+            .AddColumn(new TableColumn("[u]ProgramName[/]").Centered())
+            .AddColumn(new TableColumn("[u]State[/]").Centered())
+            .AddColumn(new TableColumn("[u]LogonDate[/]").Centered())
+            .AddColumn(new TableColumn("[u]StartDate[/]").Centered())
+            .AddColumn(new TableColumn("[u]SqlText[/]").Centered())
+            .Caption($"[yellow][bold]{databaseName}[/][/]");
+
+        var index = 1;
+        var count = Math.Min(oracleSessions.Count, parameters.MaxItems);
+        foreach (var result in oracleSessions.Take(count))
+        {
+            var program = result.ProgramName.Truncate(50);
+            var logonDate = result.LogonDate.ToString("g");
+            var startDate = result.StartDate.ToString("g");
+            var text = result.SqlText
+                .RemoveLineBreaks()
+                .RemoveExtraSpace()
+                .Truncate(100)
+                .ToUpper();
+
+            table.AddRow(
+                IndexMarkup(index++),
+                ToMarkup(result.SchemaName),
+                ToMarkup(result.UserName),
+                ToMarkup(result.MachineName),
+                ToMarkup(program),
+                ToMarkup(result.State),
+                ToMarkup(logonDate),
+                ToMarkup(startDate),
+                ToMarkup($"[grey][bold]{text}[/][/]"));
         }
 
         AnsiConsole.WriteLine();

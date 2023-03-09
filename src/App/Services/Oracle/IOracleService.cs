@@ -12,4 +12,5 @@ public interface IOracleService
     Task<ICollection<OracleTable>> GetOracleTablesAsync(OracleParameters parameters, CancellationToken cancellationToken);
     Task<OracleTable> GetOracleTableAsync(OracleParameters parameters, CancellationToken cancellationToken);
     Task<ICollection<OracleLock>> GetOracleLocksAsync(OracleParameters parameters, CancellationToken cancellationToken);
+    Task<ICollection<OracleSession>> GetOracleSessionsAsync(OracleParameters parameters, CancellationToken cancellationToken);
 }

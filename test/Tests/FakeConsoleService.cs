@@ -100,4 +100,8 @@ internal class FakeConsoleService : IConsoleService
     public void RenderOracleLocks(ICollection<OracleLock> oracleLocks, OracleParameters parameters)
     {
     }
+
+    public void RenderOracleSessions(ICollection<OracleSession> oracleSessions, OracleParameters parameters)
+    {
+    }
 }
