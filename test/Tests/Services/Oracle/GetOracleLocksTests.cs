@@ -19,7 +19,7 @@ public class GetOracleLocksTests
     [InlineData(null, 10)]
     [InlineData("SYS", 20)]
     [InlineData("SYSTEM", 30)]
-    public async Task Should_Get_Functions(string ownerName, int minTime)
+    public async Task Should_Get_Locks(string ownerName, int minTime)
     {
         // arrange
         const string databaseName = "oracle-for-tests";
