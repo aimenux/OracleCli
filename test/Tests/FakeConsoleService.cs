@@ -27,6 +27,10 @@ internal class FakeConsoleService : IConsoleService
     public void RenderSettingsFile(string filepath)
     {
     }
+    
+    public void RenderUserSecretsFile(string filepath)
+    {
+    }
 
     public void RenderException(Exception exception)
     {

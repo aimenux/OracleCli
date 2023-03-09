@@ -58,6 +58,14 @@ public class ConsoleService : IConsoleService
         AnsiConsole.Write(footer);
         AnsiConsole.WriteLine();
     }
+    
+    public void RenderUserSecretsFile(string filepath)
+    {
+        if (!OperatingSystem.IsWindows()) return;
+        if (!File.Exists(filepath)) return;
+        if (!GetYesOrNoAnswer("display user secrets", false)) return;
+        RenderSettingsFile(filepath);
+    }
 
     public void RenderException(Exception exception) => RenderAnyException(exception);
 

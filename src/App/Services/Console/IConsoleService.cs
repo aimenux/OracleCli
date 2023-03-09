@@ -11,6 +11,7 @@ public interface IConsoleService
     void RenderProblem(string text);
     void RenderText(string text, Color color);
     void RenderSettingsFile(string filepath);
+    void RenderUserSecretsFile(string filepath);
     void RenderException(Exception exception);
     Task RenderStatusAsync(Func<Task> action);
     Task<T> RenderStatusAsync<T>(Func<Task<T>> func);
