@@ -2,22 +2,26 @@ using System.Diagnostics;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Configurations;
 using DotNet.Testcontainers.Containers;
-using Testcontainers.Oracle;
+using Microsoft.Extensions.Logging;
 
 namespace Tests;
 
 public sealed class OracleFixture : IAsyncLifetime
 {
-    private readonly OracleContainer _container;
+    private readonly OracleTestcontainer _container;
 
-    public string ConnectionString => _container.GetConnectionString();
+    public string ConnectionString => _container.ConnectionString;
 
     public OracleFixture()
     {
-        _container = new OracleBuilder()
-            .WithPassword("p@ssWord")
-            .WithWaitStrategy(Wait.ForUnixContainer().AddCustomWaitStrategy(new OracleWaitStrategy()))
-            .Build();
+        var builder = new TestcontainersBuilder<OracleTestcontainer>()
+            .WithDatabase(new OracleTestcontainerConfiguration
+            {
+                Password = "p@ssWord"
+            })
+            .WithWaitStrategy(Wait.ForUnixContainer().AddCustomWaitStrategy(new OracleWaitStrategy()));
+
+        _container = builder.Build();
     }
 
     public async Task InitializeAsync()
@@ -46,7 +50,7 @@ public sealed class OracleFixture : IAsyncLifetime
 
     private class OracleWaitStrategy : IWaitUntil
     {
-        public async Task<bool> UntilAsync(IContainer container)
+        public async Task<bool> Until(ITestcontainersContainer testcontainers, ILogger logger)
         {
             await Task.Delay(TimeSpan.FromSeconds(60));
             return true;
