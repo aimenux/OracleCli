@@ -474,7 +474,7 @@ public class ConsoleService : IConsoleService
             var time = TimeSpan.FromSeconds(result.BlockingTime).Humanize();
             var text = result.BlockedSqlText
                 .RemoveLineBreaks()
-                .RemoveExtraSpace()
+                .RemoveExtraSpaces()
                 .Truncate(100)
                 .ToUpper();
 
@@ -526,7 +526,7 @@ public class ConsoleService : IConsoleService
             var startDate = result.StartDate.ToString("g");
             var text = result.SqlText
                 .RemoveLineBreaks()
-                .RemoveExtraSpace()
+                .RemoveExtraSpaces()
                 .Truncate(100)
                 .ToUpper();
 

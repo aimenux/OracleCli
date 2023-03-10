@@ -23,17 +23,17 @@ public static class StringExtensions
         return left is not null && left.Any(x => x.IgnoreContains(right));
     }
     
-    public static string RemoveExtraSpace(this string input)
+    public static string RemoveExtraSpaces(this string input)
     {
         return string.IsNullOrWhiteSpace(input) 
             ? string.Empty 
-            : ExtraSpaceRegex.Replace(input.Trim(), " ");
+            : ExtraSpaceRegex.Replace(input, " ").Trim();
     }
 
     public static string RemoveLineBreaks(this string input)
     {
         return string.IsNullOrWhiteSpace(input) 
             ? string.Empty 
-            : LineBreaksRegex.Replace(input.Trim(), " ");
+            : LineBreaksRegex.Replace(input, " ").Trim();
     }
 }

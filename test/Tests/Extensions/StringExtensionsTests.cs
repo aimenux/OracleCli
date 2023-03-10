@@ -104,4 +104,34 @@ public class StringExtensionsTests
         // assert
         contains.Should().BeFalse();
     }
+    
+    [Theory]
+    [InlineData("abc  efg", "abc efg")]
+    [InlineData(" abc  efg ", "abc efg")]
+    public void Should_Remove_ExtraSpaces(string input, string expected)
+    {
+        // arrange
+        // act
+        var result = input.RemoveExtraSpaces();
+
+        // assert
+        result.Should().Be(expected);
+    }
+    
+    [Theory]
+    [InlineData("abc\n", "abc")]
+    [InlineData("\nabc", "abc")]
+    [InlineData("abc\r", "abc")]
+    [InlineData("\rabc", "abc")]
+    [InlineData("abc\t", "abc")]
+    [InlineData("\tabc", "abc")]
+    public void Should_Remove_LineBreaks(string input, string expected)
+    {
+        // arrange
+        // act
+        var result = input.RemoveLineBreaks();
+
+        // assert
+        result.Should().Be(expected);
+    }
 }
