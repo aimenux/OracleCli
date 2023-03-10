@@ -6,7 +6,7 @@
         <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <UserSecretsId>OracleCli-UserSecrets</UserSecretsId>
-	    <Version>0.8.0</Version>
+	    <Version>0.9.0</Version>
 	    <Authors>Aymen TROUDI</Authors>
 	    <PackAsTool>true</PackAsTool>
 	    <PackageId>OracleCli</PackageId>
@@ -24,6 +24,7 @@
         <Deterministic>true</Deterministic>
 	    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
 	    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <EnablePackageValidation>true</EnablePackageValidation>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
     </PropertyGroup>
 
