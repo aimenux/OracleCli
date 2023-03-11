@@ -4,9 +4,9 @@ namespace App.Extensions;
 
 public static class StringExtensions
 {
-    private static readonly Regex ExtraSpaceRegex = new Regex(@"\s\s+", RegexOptions.Compiled);
+    private static readonly Regex ExtraSpaceRegex = new Regex(@"\s\s+", RegexOptions.Compiled, TimeSpan.FromSeconds(1));
     
-    private static readonly Regex LineBreaksRegex = new Regex(@"\r\n?|\n", RegexOptions.Compiled);
+    private static readonly Regex LineBreaksRegex = new Regex(@"\r\n?|\n", RegexOptions.Compiled, TimeSpan.FromSeconds(1));
     
     public static bool IgnoreEquals(this string left, string right)
     {
