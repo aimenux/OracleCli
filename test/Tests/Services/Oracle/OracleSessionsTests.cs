@@ -6,9 +6,9 @@ namespace Tests.Services.Oracle;
 public class OracleSessionsTests
 {
     [Theory]
-    [InlineData("schema1", "user1", "machine1", "program1", "state1", "text1")]
-    [InlineData("schema2", "user2", "machine2", "program2", "state2", "text2")]
-    public void Should_Oracle_Sessions_Be_Equals(string schema, string user, string machine, string program, string state, string text)
+    [InlineData("schema1", "user1", "machine1", "program1", "module1", "state1", "text1")]
+    [InlineData("schema2", "user2", "machine2", "program2", "module2", "state2", "text2")]
+    public void Should_Oracle_Sessions_Be_Equals(string schema, string user, string machine, string program, string module, string state, string text)
     {
         // arrange
         var date = DateTime.Now.Date;
@@ -18,6 +18,7 @@ public class OracleSessionsTests
             UserName = user,
             MachineName = machine,
             ProgramName = program,
+            ModuleName = module,
             State = state,
             SqlText = text,
             LogonDate = date,
@@ -29,6 +30,7 @@ public class OracleSessionsTests
             UserName = user,
             MachineName = machine,
             ProgramName = program,
+            ModuleName = module,
             State = state,
             SqlText = text,
             LogonDate = date,
@@ -57,6 +59,7 @@ public class OracleSessionsTests
             UserName = "user",
             MachineName = "machine",
             ProgramName = "program",
+            ModuleName = "module",
             State = "state",
             SqlText = "text",
             LogonDate = date1,
@@ -70,6 +73,7 @@ public class OracleSessionsTests
             UserName = "user",
             MachineName = "machine",
             ProgramName = "program",
+            ModuleName = "module",
             State = "state",
             SqlText = "text",
             LogonDate = date2,
@@ -102,6 +106,7 @@ public class OracleSessionsTests
                 UserName = "user",
                 MachineName = "machine",
                 ProgramName = "program",
+                ModuleName = "module",
                 State = "state",
                 SqlText = "text",
                 LogonDate = date,
@@ -113,6 +118,7 @@ public class OracleSessionsTests
                 UserName = "user",
                 MachineName = "machine",
                 ProgramName = "program",
+                ModuleName = "module",
                 State = "state",
                 SqlText = "text",
                 LogonDate = date,

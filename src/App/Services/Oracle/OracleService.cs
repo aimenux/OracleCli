@@ -509,6 +509,7 @@ public class OracleService : IOracleService
                     VS.OSUSER AS UserName,
                     VS.MACHINE AS MachineName,
                     VS.PROGRAM AS ProgramName,
+                    VS.MODULE AS ModuleName,
                     VS.State AS State,
                     VS.LOGON_TIME AS LogonDate,
                     VS.SQL_EXEC_START AS StartDate,

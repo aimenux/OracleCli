@@ -6,6 +6,7 @@ public sealed class OracleSession : IEquatable<OracleSession>
     public string UserName { get; init; }
     public string MachineName { get; init; }
     public string ProgramName { get; init; }
+    public string ModuleName { get; init; }
     public string State { get; init; }
     public DateTime LogonDate { get; init; }
     public DateTime StartDate { get; init; }
@@ -19,6 +20,7 @@ public sealed class OracleSession : IEquatable<OracleSession>
                UserName == other.UserName &&
                MachineName == other.MachineName &&
                ProgramName == other.ProgramName &&
+               ModuleName == other.ModuleName &&
                State == other.State &&
                LogonDate == other.LogonDate &&
                StartDate == other.StartDate &&
@@ -37,6 +39,7 @@ public sealed class OracleSession : IEquatable<OracleSession>
         hashCode.Add(UserName);
         hashCode.Add(MachineName);
         hashCode.Add(ProgramName);
+        hashCode.Add(ModuleName);
         hashCode.Add(State);
         hashCode.Add(LogonDate);
         hashCode.Add(StartDate);

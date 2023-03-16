@@ -521,7 +521,13 @@ public class ConsoleService : IConsoleService
         var count = Math.Min(oracleSessions.Count, parameters.MaxItems);
         foreach (var result in oracleSessions.Take(count))
         {
+            var module = result.ModuleName.Truncate(50);
             var program = result.ProgramName.Truncate(50);
+            if (!string.IsNullOrWhiteSpace(module) && !module.IgnoreEquals(program))
+            {
+                program = $"{program} ({module})";
+            }
+            
             var logonDate = result.LogonDate.ToString("g");
             var startDate = result.StartDate.ToString("g");
             var text = result.SqlText
