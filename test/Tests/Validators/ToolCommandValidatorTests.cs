@@ -1,5 +1,6 @@
 using App.Commands;
 using App.Configuration;
+using App.Exceptions;
 using App.Services.Console;
 using App.Services.Exporters;
 using App.Services.Oracle;
@@ -225,7 +226,7 @@ public class ToolCommandValidatorTests
         var validationErrorsFunc = () => ToolCommandValidator.Validate(command);
 
         // assert
-        validationErrorsFunc.Should().Throw<ArgumentOutOfRangeException>();
+        validationErrorsFunc.Should().Throw<OracleCliException>();
     }
 
     private class UnexpectedCommand : AbstractCommand

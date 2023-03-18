@@ -167,18 +167,18 @@ public class ConsoleService : IConsoleService
             .AddColumn(new TableColumn("[u]CreationDate[/]").Centered())
             .AddColumn(new TableColumn("[u]StartupDate[/]").Centered())
             .Caption($"[yellow][bold]{databaseName}[/][/]");
-
+        
         table.AddRow(
-            ToMarkup(oracleInfo.InstanceName),
-            ToMarkup(oracleInfo.HostName),
-            ToMarkup(oracleInfo.Version),
-            ToMarkup(oracleInfo.LogMode),
-            ToMarkup(oracleInfo.OpenMode),
-            ToMarkup(oracleInfo.ProtectionMode),
-            ToMarkup(oracleInfo.InstanceStatus),
-            ToMarkup(oracleInfo.DatabaseStatus),
-            ToMarkup(oracleInfo.CreationDate.ToString("g")),
-            ToMarkup(oracleInfo.StartupDate.ToString("g")));
+            ToErrorMarkupWhenDefaultValue(oracleInfo.InstanceName),
+            ToErrorMarkupWhenDefaultValue(oracleInfo.HostName),
+            ToErrorMarkupWhenDefaultValue(oracleInfo.Version),
+            ToErrorMarkupWhenDefaultValue(oracleInfo.LogMode),
+            ToErrorMarkupWhenDefaultValue(oracleInfo.OpenMode),
+            ToErrorMarkupWhenDefaultValue(oracleInfo.ProtectionMode),
+            ToErrorMarkupWhenDefaultValue(oracleInfo.InstanceStatus),
+            ToErrorMarkupWhenDefaultValue(oracleInfo.DatabaseStatus),
+            ToErrorMarkupWhenDefaultValue(oracleInfo.CreationDate),
+            ToErrorMarkupWhenDefaultValue(oracleInfo.StartupDate));
 
         AnsiConsole.WriteLine();
         AnsiConsole.Write(table);
@@ -627,6 +627,16 @@ public class ConsoleService : IConsoleService
         }
     }
 
+    private static Markup ToErrorMarkupWhenDefaultValue(string text)
+    {
+        return text == default ? ErrorMarkup : ToMarkup(text);
+    }
+    
+    private static Markup ToErrorMarkupWhenDefaultValue(DateTime date)
+    {
+        return date == default ? ErrorMarkup : ToMarkup(date.ToString("g"));
+    }
+    
     private static readonly Markup ErrorMarkup = new(Emoji.Known.CrossMark);
 
     private static Markup IndexMarkup(int index) => ToMarkup($"[dim]{index:D4}[/]");

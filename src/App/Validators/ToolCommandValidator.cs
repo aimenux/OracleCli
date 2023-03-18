@@ -1,4 +1,5 @@
 ﻿using App.Commands;
+using App.Exceptions;
 using FluentValidation;
 
 namespace App.Validators;
@@ -21,7 +22,7 @@ public static class ToolCommandValidator
             FunctionsCommand functionsCommand => Validate(new FunctionsCommandValidator(), functionsCommand),
             ProceduresCommand proceduresCommand => Validate(new ProceduresCommandValidator(), proceduresCommand),
             PackagesCommand packagesCommand => Validate(new PackagesCommandValidator(), packagesCommand),
-            _ => throw new ArgumentOutOfRangeException(nameof(command), typeof(TCommand), "Unexpected command type")
+            _ => throw new OracleCliException($"Unexpected command type {typeof(TCommand)}")
         };
     }
 

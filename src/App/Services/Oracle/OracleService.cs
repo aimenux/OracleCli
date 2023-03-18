@@ -1,5 +1,6 @@
 using System.Text;
 using App.Configuration;
+using App.Exceptions;
 using App.Extensions;
 using Dapper;
 using Microsoft.Extensions.Logging;
@@ -22,6 +23,12 @@ public class OracleService : IOracleService
 
     public async Task<OracleInfo> GetOracleInfoAsync(OracleArgs oracleArgs, CancellationToken cancellationToken)
     {
+        var (isConnectionValid, oracleInfo) = await IsDatabaseConnectionValidAsync(oracleArgs, cancellationToken);
+        if (!isConnectionValid)
+        {
+            throw new OracleCliException($"Failed to connect to database '{oracleArgs.DatabaseName}'");
+        }
+        
         var infoVersionTask = GetOracleInfoFromVersionAsync(oracleArgs, cancellationToken);
         var infoInstanceTask = GetOracleInfoFromInstanceAsync(oracleArgs, cancellationToken);
         var infoDatabaseTask = GetOracleInfoFromDatabaseAsync(oracleArgs, cancellationToken);
@@ -29,9 +36,9 @@ public class OracleService : IOracleService
         return new OracleInfo
         {
             Description = infoVersionTask.Result.Description,
-            Version = infoInstanceTask.Result.Version,
-            HostName = infoInstanceTask.Result.HostName,
-            InstanceName = infoInstanceTask.Result.InstanceName,
+            Version = infoInstanceTask.Result.Version ?? oracleInfo.Version,
+            HostName = infoInstanceTask.Result.HostName ?? oracleInfo.HostName,
+            InstanceName = infoInstanceTask.Result.InstanceName ?? oracleInfo.InstanceName,
             LogMode = infoDatabaseTask.Result.LogMode,
             OpenMode = infoDatabaseTask.Result.OpenMode,
             ProtectionMode = infoDatabaseTask.Result.ProtectionMode,
@@ -588,7 +595,8 @@ public class OracleService : IOracleService
 
         var sql = sqlBuilder.ToString();
         var retryPolicy = GetRetryPolicy<OracleInfo>();
-        return await retryPolicy.ExecuteAsync(async () =>
+        var fallbackPolicy = GetFallbackPolicy(new OracleInfo());
+        return await fallbackPolicy.WrapAsync(retryPolicy).ExecuteAsync(async () =>
         {
             await using var connection = CreateOracleConnection(oracleArgs);
             var infos = await connection.QueryAsync<OracleInfo>(sql, commandTimeout: Settings.DatabaseTimeoutInSeconds);
@@ -604,7 +612,7 @@ public class OracleService : IOracleService
                   SELECT 
                       HOST_NAME AS HostName,
                       INSTANCE_NAME AS InstanceName,
-                      VERSION AS Version,
+                      VERSION_FULL AS Version,
                       STATUS AS InstanceStatus,
                       DATABASE_STATUS AS DatabaseStatus,
                       STARTUP_TIME AS StartupDate
@@ -616,7 +624,8 @@ public class OracleService : IOracleService
 
         var sql = sqlBuilder.ToString();
         var retryPolicy = GetRetryPolicy<OracleInfo>();
-        return await retryPolicy.ExecuteAsync(async () =>
+        var fallbackPolicy = GetFallbackPolicy(new OracleInfo());
+        return await fallbackPolicy.WrapAsync(retryPolicy).ExecuteAsync(async () =>
         {
             await using var connection = CreateOracleConnection(oracleArgs);
             var infos = await connection.QueryAsync<OracleInfo>(sql, commandTimeout: Settings.DatabaseTimeoutInSeconds);
@@ -642,7 +651,8 @@ public class OracleService : IOracleService
 
         var sql = sqlBuilder.ToString();
         var retryPolicy = GetRetryPolicy<OracleInfo>();
-        return await retryPolicy.ExecuteAsync(async () =>
+        var fallbackPolicy = GetFallbackPolicy(new OracleInfo());
+        return await fallbackPolicy.WrapAsync(retryPolicy).ExecuteAsync(async () =>
         {
             await using var connection = CreateOracleConnection(oracleArgs);
             var infos = await connection.QueryAsync<OracleInfo>(sql, commandTimeout: Settings.DatabaseTimeoutInSeconds);
@@ -958,10 +968,43 @@ public class OracleService : IOracleService
 
         if (string.IsNullOrWhiteSpace(connectionString))
         {
-            throw new ArgumentException($"ConnectionString not found for database name '{oracleArgs.DatabaseName}'");
+            throw new OracleCliException($"ConnectionString not found for database name '{oracleArgs.DatabaseName}'");
         }
 
         return new OracleConnection(connectionString);
+    }
+    
+    private async Task<(bool, OracleInfo)> IsDatabaseConnectionValidAsync(OracleArgs oracleArgs, CancellationToken cancellationToken)
+    {
+        await using var oracleConnection = CreateOracleConnection(oracleArgs);
+
+        try
+        {
+            await oracleConnection.OpenAsync(cancellationToken);
+            var oracleInfo = new OracleInfo
+            {
+                InstanceName = oracleConnection.InstanceName,
+                HostName = oracleConnection.HostName,
+                Version = oracleConnection.ServerVersion
+            };
+            return (true, oracleInfo);
+        }
+        catch
+        {
+            return (false, null);
+        }
+        finally
+        {
+            await oracleConnection.CloseAsync();
+        }
+    }
+    
+    private IAsyncPolicy<T> GetFallbackPolicy<T>(T fallbackValue)
+    {
+        var fallbackPolicy = Policy<T>
+            .Handle<OracleException>()
+            .FallbackAsync(fallbackValue);
+        return fallbackPolicy;
     }
     
     private IAsyncPolicy<T> GetRetryPolicy<T>()
@@ -976,6 +1019,16 @@ public class OracleService : IOracleService
                 {
                     OnRetry(response, retryCount, maxRetry);
                 });
+        return retryPolicy;
+    }
+    
+    private IAsyncPolicy GetRetryPolicy()
+    {
+        var maxRetry = _settings.MaxRetry;
+        var sleepDuration = TimeSpan.FromSeconds(1);
+        var retryPolicy = Policy
+            .Handle<OracleException>()
+            .WaitAndRetryAsync(maxRetry, _ => sleepDuration);
         return retryPolicy;
     }
     
