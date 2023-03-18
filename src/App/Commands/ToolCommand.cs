@@ -7,7 +7,8 @@ using static App.Extensions.PathExtensions;
 namespace App.Commands;
 
 [Command(Name = Settings.Cli.UsageName, Description = $"\n{Settings.Cli.Description}")]
-[Subcommand(typeof(ObjectsCommand),
+[Subcommand(typeof(InfosCommand),
+    typeof(ObjectsCommand),
     typeof(SchemasCommand),
     typeof(PackagesCommand),
     typeof(ProceduresCommand),

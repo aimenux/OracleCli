@@ -134,4 +134,20 @@ public class StringExtensionsTests
         // assert
         result.Should().Be(expected);
     }
+
+    [Theory]
+    [InlineData("USER", false)]
+    [InlineData("Data", false)]
+    [InlineData("Source", false)]
+    [InlineData("Data Source=HOSTNAME:PORT/SERVICENAME;User Id=USER;Password=PASS;", true)]
+    [InlineData("User Id=USER;Password=PASS;Data Source=HOSTNAME:PORT/SERVICENAME;", true)]
+    public void Should_Validate_ConnectionString(string input, bool expected)
+    {
+        // arrange
+        // act
+        var result = input.IsConnectionString();
+
+        // assert
+        result.Should().Be(expected);
+    }
 }

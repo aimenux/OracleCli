@@ -10,6 +10,7 @@ public static class ToolCommandValidator
         return command switch
         {
             ToolCommand _ => ValidationErrors.New<ToolCommand>(),
+            InfosCommand infosCommand => Validate(new InfosCommandValidator(), infosCommand),
             LocksCommand locksCommand => Validate(new LocksCommandValidator(), locksCommand),
             TablesCommand tablesCommand => Validate(new TablesCommandValidator(), tablesCommand),
             ObjectsCommand objectsCommand => Validate(new ObjectsCommandValidator(), objectsCommand),

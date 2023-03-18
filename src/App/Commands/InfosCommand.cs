@@ -6,12 +6,12 @@ using Microsoft.Extensions.Options;
 
 namespace App.Commands;
 
-[Command("Lock", "Locks", FullName = "List oracle locks", Description = "List oracle locks.")]
-public class LocksCommand : AbstractCommand
+[Command("Info", "Infos", FullName = "Get oracle infos", Description = "Get oracle infos.")]
+public class InfosCommand : AbstractCommand
 {
     private readonly IOracleService _oracleService;
     
-    public LocksCommand(
+    public InfosCommand(
         IConsoleService consoleService,
         IOracleService oracleService,
         IOptions<Settings> options) : base(
@@ -24,30 +24,18 @@ public class LocksCommand : AbstractCommand
     
     [Option("-d|--db", "Database name", CommandOptionType.SingleValue)]
     public string DatabaseName { get; init; }
-    
-    [Option("-o|--owner", "Owner/Schema name", CommandOptionType.SingleValue)]
-    public string OwnerName { get; init; }
-
-    [Option("-t|--time", "Minimum blocking time in minutes", CommandOptionType.SingleValue)]
-    public int MinBlockingTimeInMinutes { get; init; } = 5;
-
-    [Option("-m|--max", "Max items", CommandOptionType.SingleValue)]
-    public int MaxItems { get; init; } = Settings.DatabaseMaxItems;
 
     protected override async Task ExecuteAsync(CommandLineApplication app, CancellationToken cancellationToken = default)
     {
         var parameters = new OracleParameters
         {
-            DatabaseName = DatabaseName,
-            OwnerName = OwnerName,
-            MinBlockingTimeInMinutes = MinBlockingTimeInMinutes,
-            MaxItems = MaxItems
+            DatabaseName = DatabaseName
         };
 
         await ConsoleService.RenderStatusAsync(async () =>
         {
-            var oracleLocks = await _oracleService.GetOracleLocksAsync(parameters, cancellationToken);
-            ConsoleService.RenderOracleLocks(oracleLocks, parameters);
+            var oracleInfo = await _oracleService.GetOracleInfoAsync(parameters, cancellationToken);
+            ConsoleService.RenderOracleInfo(oracleInfo, parameters);
         });
     }
 }

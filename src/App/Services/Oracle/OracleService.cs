@@ -20,6 +20,28 @@ public class OracleService : IOracleService
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
+    public async Task<OracleInfo> GetOracleInfoAsync(OracleParameters parameters, CancellationToken cancellationToken)
+    {
+        var infoVersionTask = GetOracleInfoFromVersionAsync(parameters, cancellationToken);
+        var infoInstanceTask = GetOracleInfoFromInstanceAsync(parameters, cancellationToken);
+        var infoDatabaseTask = GetOracleInfoFromDatabaseAsync(parameters, cancellationToken);
+        await Task.WhenAll(infoVersionTask, infoInstanceTask, infoDatabaseTask);
+        return new OracleInfo
+        {
+            Description = infoVersionTask.Result.Description,
+            Version = infoInstanceTask.Result.Version,
+            HostName = infoInstanceTask.Result.HostName,
+            InstanceName = infoInstanceTask.Result.InstanceName,
+            LogMode = infoDatabaseTask.Result.LogMode,
+            OpenMode = infoDatabaseTask.Result.OpenMode,
+            ProtectionMode = infoDatabaseTask.Result.ProtectionMode,
+            InstanceStatus = infoInstanceTask.Result.InstanceStatus,
+            DatabaseStatus = infoInstanceTask.Result.DatabaseStatus,
+            CreationDate = infoDatabaseTask.Result.CreationDate,
+            StartupDate = infoInstanceTask.Result.StartupDate
+        };
+    }
+
     public async Task<ICollection<OraclePackage>> GetOraclePackagesAsync(OracleParameters parameters, CancellationToken cancellationToken)
     {
         var sqlBuilder = new StringBuilder
@@ -548,6 +570,84 @@ public class OracleService : IOracleService
                 .ToList();
         });
     }
+    
+    private async Task<OracleInfo> GetOracleInfoFromVersionAsync(OracleParameters parameters, CancellationToken cancellationToken)
+    {
+        var sqlBuilder = new StringBuilder
+        (
+            """
+                  SELECT 
+                      BANNER AS Description
+                  FROM V$VERSION
+                  WHERE 1 = 1
+                    AND UPPER(BANNER) LIKE '%ORACLE%'  
+                    AND ROWNUM <= 1
+            """
+        );
+
+        var sql = sqlBuilder.ToString();
+        var retryPolicy = GetRetryPolicy<OracleInfo>();
+        return await retryPolicy.ExecuteAsync(async () =>
+        {
+            await using var connection = CreateOracleConnection(parameters);
+            var infos = await connection.QueryAsync<OracleInfo>(sql, commandTimeout: Settings.DatabaseTimeoutInSeconds);
+            return infos.SingleOrDefault();
+        });
+    }
+    
+    private async Task<OracleInfo> GetOracleInfoFromInstanceAsync(OracleParameters parameters, CancellationToken cancellationToken)
+    {
+        var sqlBuilder = new StringBuilder
+        (
+            """
+                  SELECT 
+                      HOST_NAME AS HostName,
+                      INSTANCE_NAME AS InstanceName,
+                      VERSION AS Version,
+                      STATUS AS InstanceStatus,
+                      DATABASE_STATUS AS DatabaseStatus,
+                      STARTUP_TIME AS StartupDate
+                  FROM V$INSTANCE
+                  WHERE 1 = 1
+                    AND ROWNUM <= 1
+            """
+        );
+
+        var sql = sqlBuilder.ToString();
+        var retryPolicy = GetRetryPolicy<OracleInfo>();
+        return await retryPolicy.ExecuteAsync(async () =>
+        {
+            await using var connection = CreateOracleConnection(parameters);
+            var infos = await connection.QueryAsync<OracleInfo>(sql, commandTimeout: Settings.DatabaseTimeoutInSeconds);
+            return infos.SingleOrDefault();
+        });
+    }
+    
+    private async Task<OracleInfo> GetOracleInfoFromDatabaseAsync(OracleParameters parameters, CancellationToken cancellationToken)
+    {
+        var sqlBuilder = new StringBuilder
+        (
+            """
+                  SELECT 
+                      LOG_MODE AS LogMode,
+                      OPEN_MODE AS OpenMode,
+                      PROTECTION_MODE AS ProtectionMode,
+                      CREATED AS CreationDate
+                  FROM V$DATABASE
+                  WHERE 1 = 1
+                    AND ROWNUM <= 1
+            """
+        );
+
+        var sql = sqlBuilder.ToString();
+        var retryPolicy = GetRetryPolicy<OracleInfo>();
+        return await retryPolicy.ExecuteAsync(async () =>
+        {
+            await using var connection = CreateOracleConnection(parameters);
+            var infos = await connection.QueryAsync<OracleInfo>(sql, commandTimeout: Settings.DatabaseTimeoutInSeconds);
+            return infos.SingleOrDefault();
+        });
+    }
 
     private async Task<ICollection<OracleSource>> GetUnwrappedOracleSourcesAsync(OracleParameters parameters, CancellationToken cancellationToken)
     {
@@ -846,6 +946,11 @@ public class OracleService : IOracleService
 
     private OracleConnection CreateOracleConnection(OracleParameters parameters)
     {
+        if (parameters.DatabaseName.IsConnectionString())
+        {
+            return new OracleConnection(parameters.DatabaseName);
+        }
+        
         var connectionString = _settings.Databases
             .SingleOrDefault(x => x.DatabaseName.IgnoreEquals(parameters.DatabaseName))
             ?.ConnectionString;
@@ -861,7 +966,7 @@ public class OracleService : IOracleService
     private IAsyncPolicy<T> GetRetryPolicy<T>()
     {
         var maxRetry = _settings.MaxRetry;
-        var sleepDuration = TimeSpan.FromSeconds(5);
+        var sleepDuration = TimeSpan.FromSeconds(1);
         var retryPolicy = Policy<T>
             .Handle<OracleException>()
             .WaitAndRetryAsync(maxRetry,

@@ -2,6 +2,7 @@ namespace App.Services.Oracle;
 
 public interface IOracleService
 {
+    Task<OracleInfo> GetOracleInfoAsync(OracleParameters parameters, CancellationToken cancellationToken);
     Task<ICollection<OraclePackage>> GetOraclePackagesAsync(OracleParameters parameters, CancellationToken cancellationToken);
     Task<ICollection<OracleFunction>> GetOracleFunctionsAsync(OracleParameters parameters, CancellationToken cancellationToken);
     Task<ICollection<OracleProcedure>> GetOracleProceduresAsync(OracleParameters parameters, CancellationToken cancellationToken);

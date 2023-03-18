@@ -145,6 +145,46 @@ public class ConsoleService : IConsoleService
         }
     }
 
+    public void RenderOracleInfo(OracleInfo oracleInfo, OracleParameters parameters)
+    {
+        var description = oracleInfo.Description
+            .Replace("Production", "")
+            .Trim(' ', '-');
+        var databaseName = parameters.DatabaseName.ToUpper();
+        var title = $"[yellow][bold]{description}[/][/]";
+        var table = new Table()
+            .BorderColor(Color.White)
+            .Border(TableBorder.Square)
+            .Title(title)
+            .AddColumn(new TableColumn("[u]InstanceName[/]").Centered())
+            .AddColumn(new TableColumn("[u]HostName[/]").Centered())
+            .AddColumn(new TableColumn("[u]Version[/]").Centered())
+            .AddColumn(new TableColumn("[u]LogMode[/]").Centered())
+            .AddColumn(new TableColumn("[u]OpenMode[/]").Centered())
+            .AddColumn(new TableColumn("[u]ProtectionMode[/]").Centered())
+            .AddColumn(new TableColumn("[u]InstanceStatus[/]").Centered())
+            .AddColumn(new TableColumn("[u]DatabaseStatus[/]").Centered())
+            .AddColumn(new TableColumn("[u]CreationDate[/]").Centered())
+            .AddColumn(new TableColumn("[u]StartupDate[/]").Centered())
+            .Caption($"[yellow][bold]{databaseName}[/][/]");
+
+        table.AddRow(
+            ToMarkup(oracleInfo.InstanceName),
+            ToMarkup(oracleInfo.HostName),
+            ToMarkup(oracleInfo.Version),
+            ToMarkup(oracleInfo.LogMode),
+            ToMarkup(oracleInfo.OpenMode),
+            ToMarkup(oracleInfo.ProtectionMode),
+            ToMarkup(oracleInfo.InstanceStatus),
+            ToMarkup(oracleInfo.DatabaseStatus),
+            ToMarkup(oracleInfo.CreationDate.ToString("g")),
+            ToMarkup(oracleInfo.StartupDate.ToString("g")));
+
+        AnsiConsole.WriteLine();
+        AnsiConsole.Write(table);
+        AnsiConsole.WriteLine();
+    }
+
     public void RenderOracleTable(OracleTable oracleTable, OracleParameters parameters)
     {
         var ownerName = parameters.OwnerName.ToUpper();

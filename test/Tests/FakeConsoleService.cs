@@ -61,6 +61,10 @@ internal class FakeConsoleService : IConsoleService
         return Task.CompletedTask;
     }
 
+    public void RenderOracleInfo(OracleInfo oracleInfo, OracleParameters parameters)
+    {
+    }
+
     public void RenderOracleTable(OracleTable oracleTable, OracleParameters parameters)
     {
     }

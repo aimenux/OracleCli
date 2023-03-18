@@ -36,4 +36,15 @@ public static class StringExtensions
             ? string.Empty 
             : LineBreaksRegex.Replace(input, " ").Trim();
     }
+
+    public static bool IsConnectionString(this string input)
+    {
+        return !string.IsNullOrWhiteSpace(input)
+               && input.IgnoreContains("User")
+               && input.IgnoreContains("Password")
+               && input.IgnoreContains("Data")
+               && input.IgnoreContains("Source")
+               && input.IgnoreContains("=")
+               && input.IgnoreContains(";");
+    }
 }

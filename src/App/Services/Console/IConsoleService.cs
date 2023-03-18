@@ -18,6 +18,7 @@ public interface IConsoleService
     bool GetYesOrNoAnswer(string text, bool defaultAnswer);
     void RenderValidationErrors(ValidationErrors validationErrors);
     Task CopyTextToClipboardAsync(string text, CancellationToken cancellationToken);
+    void RenderOracleInfo(OracleInfo oracleInfo, OracleParameters parameters);
     void RenderOracleTable(OracleTable oracleTable, OracleParameters parameters);
     void RenderOracleTables(ICollection<OracleTable> oracleTables, OracleParameters parameters);
     void RenderOracleObjects(ICollection<OracleObject> oracleObjects, OracleParameters parameters);

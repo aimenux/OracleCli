@@ -10,6 +10,7 @@ A net global tool helping to retrieve some infos (packages, functions, procedure
 > In this repo, i m building a global tool that allows to retrieve schema(s), package(s), function(s), procedure(s) and argument(s) infos from oracle.
 >
 > The tool is based on multiple sub commmands :
+> - Use sub command `Info` or `Infos` to get oracle database infos
 > - Use sub command `Table` or `Tables` to list tables from oracle
 > - Use sub command `Schema` or `Schemas` to list schemas from oracle
 > - Use sub command `Object` or `Objects` to list objects from oracle
@@ -25,6 +26,7 @@ A net global tool helping to retrieve some infos (packages, functions, procedure
 > To run the tool, type commands :
 > - `OracleCli -h` to show help
 > - `OracleCli -s` to show settings
+> - `OracleCli Infos -d [db-name]` to get oracle database infos
 > - `OracleCli Tables -d [db-name]` to list tables from oracle
 > - `OracleCli Schemas -d [db-name]` to list schemas from oracle
 > - `OracleCli Objects -d [db-name]` to list objects from oracle
