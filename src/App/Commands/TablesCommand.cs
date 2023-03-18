@@ -20,14 +20,14 @@ public class TablesCommand : AbstractCommand
     {
         _oracleService = oracleService ?? throw new ArgumentNullException(nameof(oracleService));
         DatabaseName = Settings.DefaultDatabaseToUse;
-        OwnerName = Settings.DefaultSchemaToUse;
+        SchemaName = Settings.DefaultSchemaToUse;
     }
     
     [Option("-d|--db", "Database name", CommandOptionType.SingleValue)]
     public string DatabaseName { get; init; }
     
-    [Option("-o|--owner", "Owner/Schema name", CommandOptionType.SingleValue)]
-    public string OwnerName { get; init; }
+    [Option("-u|--schema", "Schema/User name", CommandOptionType.SingleValue)]
+    public string SchemaName { get; init; }
     
     [Option("-n|--name", "Table name", CommandOptionType.SingleValue)]
     public string TableName { get; init; }
@@ -44,7 +44,7 @@ public class TablesCommand : AbstractCommand
         {
             DatabaseName = DatabaseName,
             TableName = TableName,
-            OwnerName = OwnerName,
+            SchemaName = SchemaName,
             MaxItems = MaxItems,
             FilterKeyword = FilterKeyword
         };
@@ -59,7 +59,7 @@ public class TablesCommand : AbstractCommand
         if (oracleTables.Count == 1 && ConsoleService.GetYesOrNoAnswer("display table columns on console screen", true))
         {
             var oracleTable = oracleTables.Single();
-            oracleArgs = oracleArgs.WithTable(oracleTable.OwnerName, oracleTable.TableName);
+            oracleArgs = oracleArgs.WithTable(oracleTable.SchemaName, oracleTable.TableName);
             oracleTable = await _oracleService.GetOracleTableAsync(oracleArgs, cancellationToken);
             ConsoleService.RenderOracleTable(oracleTable, oracleArgs);
         }

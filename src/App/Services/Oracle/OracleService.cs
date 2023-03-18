@@ -48,7 +48,7 @@ public class OracleService : IOracleService
         (
             """
                   SELECT
-                    AO.OWNER AS OwnerName, 
+                    AO.OWNER AS SchemaName, 
                     AO.OBJECT_NAME AS PackageName, 
                     AO.CREATED AS CreationDate, 
                     AO.LAST_DDL_TIME AS ModificationDate
@@ -59,7 +59,7 @@ public class OracleService : IOracleService
             """
         );
 
-        if (!string.IsNullOrWhiteSpace(oracleArgs.OwnerName))
+        if (!string.IsNullOrWhiteSpace(oracleArgs.SchemaName))
         {
             sqlBuilder.AppendLine(" AND UPPER(AO.OWNER) = :owner");
         }
@@ -80,7 +80,7 @@ public class OracleService : IOracleService
         var sqlParameters = new
         {
             max = oracleArgs.MaxItems + 1,
-            owner = oracleArgs.OwnerName?.ToUpper(),
+            owner = oracleArgs.SchemaName?.ToUpper(),
             package = oracleArgs.PackageName?.ToUpper(),
             keyword = oracleArgs.FilterKeyword?.ToUpper()
         };
@@ -92,7 +92,7 @@ public class OracleService : IOracleService
             var oraclePackages = await connection.QueryAsync<OraclePackage>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
             return oraclePackages
                 .Distinct()
-                .OrderBy(x => x.OwnerName)
+                .OrderBy(x => x.SchemaName)
                 .ThenBy(x => x.PackageName)
                 .ToList();
         });
@@ -108,7 +108,7 @@ public class OracleService : IOracleService
         return functionsFromAllProcedures
             .Union(functionsFromAllSources)
             .Distinct()
-            .OrderBy(x => x.OwnerName)
+            .OrderBy(x => x.SchemaName)
             .ThenBy(x => x.FunctionName)
             .Take(oracleArgs.MaxItems + 1)
             .ToList();
@@ -120,7 +120,7 @@ public class OracleService : IOracleService
         (
             """
                   SELECT    
-                    AP.OWNER AS OwnerName, 
+                    AP.OWNER AS SchemaName, 
                     (CASE WHEN AP.PROCEDURE_NAME IS NULL THEN '' ELSE AP.OBJECT_NAME END) AS PackageName, 
                     (CASE WHEN AP.PROCEDURE_NAME IS NULL THEN AP.OBJECT_NAME ELSE AP.PROCEDURE_NAME END) AS ProcedureName, 
                     AO.CREATED AS CreationDate,
@@ -133,7 +133,7 @@ public class OracleService : IOracleService
             """
         );
 
-        if (!string.IsNullOrWhiteSpace(oracleArgs.OwnerName))
+        if (!string.IsNullOrWhiteSpace(oracleArgs.SchemaName))
         {
             sqlBuilder.AppendLine(" AND UPPER(AP.OWNER) = :owner");
         }
@@ -159,7 +159,7 @@ public class OracleService : IOracleService
         var sqlParameters = new
         {
             max = oracleArgs.MaxItems + 1,
-            owner = oracleArgs.OwnerName?.ToUpper(),
+            owner = oracleArgs.SchemaName?.ToUpper(),
             package = oracleArgs.PackageName?.ToUpper(),
             procedure = oracleArgs.ProcedureName?.ToUpper(),
             keyword = oracleArgs.FilterKeyword?.ToUpper()
@@ -172,7 +172,7 @@ public class OracleService : IOracleService
             var oracleProcedures = await connection.QueryAsync<OracleProcedure>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
             return oracleProcedures
                 .Distinct()
-                .OrderBy(x => x.OwnerName)
+                .OrderBy(x => x.SchemaName)
                 .ThenBy(x => x.ProcedureName)
                 .ToList();
         });
@@ -190,7 +190,7 @@ public class OracleService : IOracleService
             """
         );
 
-        if (!string.IsNullOrWhiteSpace(oracleArgs.OwnerName))
+        if (!string.IsNullOrWhiteSpace(oracleArgs.SchemaName))
         {
             sqlBuilder.AppendLine(" AND UPPER(AA.OWNER) = :owner");
         }
@@ -214,7 +214,7 @@ public class OracleService : IOracleService
         var sql = sqlBuilder.ToString();
         var sqlParameters = new
         {
-            owner = oracleArgs.OwnerName?.ToUpper(),
+            owner = oracleArgs.SchemaName?.ToUpper(),
             package = oracleArgs.PackageName?.ToUpper(),
             procedure = oracleArgs.ProcedureName?.ToUpper(),
             function = oracleArgs.FunctionName?.ToUpper()
@@ -269,7 +269,7 @@ public class OracleService : IOracleService
         var objectsFromAllObjectsSource = (await getFromAllObjectsSourceTask)
             .Select(x => new OracleObject
             {
-                OwnerName = x.OwnerName,
+                SchemaName = x.SchemaName,
                 ObjectName = x.ObjectName,
                 ObjectType = x.ObjectType,
                 CreationDate = x.CreationDate,
@@ -280,7 +280,7 @@ public class OracleService : IOracleService
         var packagesFromAllProceduresSource = (await getPackagesFromAllProceduresSourceTask)
             .Select(x => new OracleObject
             {
-                OwnerName = x.OwnerName,
+                SchemaName = x.SchemaName,
                 ObjectName = x.PackageName,
                 ObjectType = "PACKAGE",
                 CreationDate = x.CreationDate,
@@ -291,7 +291,7 @@ public class OracleService : IOracleService
         var proceduresFromAllProceduresSource = (await getProceduresFromAllProceduresSourceTask)
             .Select(x => new OracleObject
             {
-                OwnerName = x.OwnerName,
+                SchemaName = x.SchemaName,
                 ObjectName = string.IsNullOrWhiteSpace(x.ProcedureName) ? x.PackageName : x.ProcedureName,
                 ObjectType = string.IsNullOrWhiteSpace(x.ProcedureName) ? "PACKAGE" : "PROCEDURE",
                 CreationDate = x.CreationDate,
@@ -302,7 +302,7 @@ public class OracleService : IOracleService
         var functionsFromAllProceduresSource = (await getFunctionsFromAllProceduresSourceTask)
             .Select(x => new OracleObject
             {
-                OwnerName = x.OwnerName,
+                SchemaName = x.SchemaName,
                 ObjectName = x.FunctionName,
                 ObjectType = "FUNCTION",
                 CreationDate = x.CreationDate,
@@ -315,7 +315,7 @@ public class OracleService : IOracleService
             .Union(proceduresFromAllProceduresSource)
             .Union(functionsFromAllProceduresSource)
             .Distinct()
-            .OrderBy(x => x.OwnerName)
+            .OrderBy(x => x.SchemaName)
             .ThenBy(x => x.ObjectName)
             .Take(oracleArgs.MaxItems + 1)
             .ToList();
@@ -337,7 +337,7 @@ public class OracleService : IOracleService
             """
         );
         
-        if (!string.IsNullOrWhiteSpace(oracleArgs.OwnerName))
+        if (!string.IsNullOrWhiteSpace(oracleArgs.SchemaName))
         {
             sqlBuilder.AppendLine($" AND UPPER(AU.USERNAME) = :owner");
         }
@@ -353,7 +353,7 @@ public class OracleService : IOracleService
         var sqlParameters = new
         {
             max = oracleArgs.MaxItems + 1,
-            owner = oracleArgs.OwnerName?.ToUpper(),
+            owner = oracleArgs.SchemaName?.ToUpper(),
             keyword = oracleArgs.FilterKeyword?.ToUpper()
         };
         
@@ -375,7 +375,7 @@ public class OracleService : IOracleService
         (
             """
                   SELECT 
-                    AT.OWNER AS OwnerName, 
+                    AT.OWNER AS SchemaName, 
                     AT.TABLE_NAME AS TableName,
                     AT.NUM_ROWS AS RowsCount
                   FROM ALL_TABLES AT
@@ -384,7 +384,7 @@ public class OracleService : IOracleService
             """
         );
         
-        if (!string.IsNullOrWhiteSpace(oracleArgs.OwnerName))
+        if (!string.IsNullOrWhiteSpace(oracleArgs.SchemaName))
         {
             sqlBuilder.AppendLine(" AND UPPER(AT.OWNER) = :owner");
         }
@@ -405,7 +405,7 @@ public class OracleService : IOracleService
         var sqlParameters = new
         {
             max = oracleArgs.MaxItems + 1,
-            owner = oracleArgs.OwnerName?.ToUpper(),
+            owner = oracleArgs.SchemaName?.ToUpper(),
             tabname = oracleArgs.TableName?.ToUpper(),
             keyword = oracleArgs.FilterKeyword?.ToUpper()
         };
@@ -417,7 +417,7 @@ public class OracleService : IOracleService
             var oracleTables = await connection.QueryAsync<OracleTable>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
             return oracleTables
                 .Distinct()
-                .OrderBy(x => x.OwnerName)
+                .OrderBy(x => x.SchemaName)
                 .ThenBy(x => x.TableName)
                 .ToList();
         });
@@ -447,7 +447,7 @@ public class OracleService : IOracleService
         var sqlParameters = new
         {
             max = oracleArgs.MaxItems + 1,
-            owner = oracleArgs.OwnerName.ToUpper(),
+            owner = oracleArgs.SchemaName.ToUpper(),
             tabname = oracleArgs.TableName.ToUpper()
         };
         
@@ -465,7 +465,7 @@ public class OracleService : IOracleService
         return new OracleTable
         {
             TableName = oracleArgs.TableName,
-            OwnerName = oracleArgs.OwnerName,
+            SchemaName = oracleArgs.SchemaName,
             TableColumns = tableColumns
         };
     }
@@ -494,7 +494,7 @@ public class OracleService : IOracleService
             """
         );
         
-        if (!string.IsNullOrWhiteSpace(oracleArgs.OwnerName))
+        if (!string.IsNullOrWhiteSpace(oracleArgs.SchemaName))
         {
             sqlBuilder.AppendLine(" AND UPPER(VS.SCHEMANAME) = :owner");
         }
@@ -505,7 +505,7 @@ public class OracleService : IOracleService
         var sqlParameters = new
         {
             max = oracleArgs.MaxItems + 1,
-            owner = oracleArgs.OwnerName?.ToUpper(),
+            owner = oracleArgs.SchemaName?.ToUpper(),
             time = oracleArgs.MinBlockingTimeInMinutes * 60
         };
         
@@ -545,7 +545,7 @@ public class OracleService : IOracleService
             """
         );
         
-        if (!string.IsNullOrWhiteSpace(oracleArgs.OwnerName))
+        if (!string.IsNullOrWhiteSpace(oracleArgs.SchemaName))
         {
             sqlBuilder.AppendLine(" AND UPPER(VS.SCHEMANAME) = :owner");
         }
@@ -556,7 +556,7 @@ public class OracleService : IOracleService
         var sqlParameters = new
         {
             max = oracleArgs.MaxItems + 1,
-            owner = oracleArgs.OwnerName?.ToUpper()
+            owner = oracleArgs.SchemaName?.ToUpper()
         };
         
         var retryPolicy = GetRetryPolicy<ICollection<OracleSession>>();
@@ -659,7 +659,7 @@ public class OracleService : IOracleService
             ? "PROCEDURE"
             : "FUNCTION";
         
-        var hasOwnerName = !string.IsNullOrWhiteSpace(oracleArgs.OwnerName)
+        var hasSchemaName = !string.IsNullOrWhiteSpace(oracleArgs.SchemaName)
             ? "UPPER(OWNER) = :owner"
             : "1 = 1";
         
@@ -672,7 +672,7 @@ public class OracleService : IOracleService
                         LINE,
                         TEXT
                       FROM ALL_SOURCE
-                      WHERE {hasOwnerName}
+                      WHERE {hasSchemaName}
                         AND UPPER(NAME) = :package
                         AND UPPER(TYPE) = 'PACKAGE BODY'
                         AND INSTR(UPPER(TEXT), :name) > 0
@@ -686,7 +686,7 @@ public class OracleService : IOracleService
                         LINE,
                         TEXT
                       FROM ALL_SOURCE
-                      WHERE {hasOwnerName}
+                      WHERE {hasSchemaName}
                         AND UPPER(NAME) = :package
                         AND UPPER(TYPE) = 'PACKAGE BODY'
                         AND INSTR(UPPER(TEXT), :name) > 0
@@ -696,7 +696,7 @@ public class OracleService : IOracleService
                   )
                   SELECT AC.LINE AS Line, AC.TEXT AS Text
                     FROM ALL_SOURCE AC
-                  WHERE {hasOwnerName}
+                  WHERE {hasSchemaName}
                     AND UPPER(AC.NAME) = :package
                     AND UPPER(AC.TYPE) = 'PACKAGE BODY'
                     AND AC.LINE BETWEEN (SELECT LINE from FIRST_LINE) AND (SELECT LINE from LAST_LINE)
@@ -708,7 +708,7 @@ public class OracleService : IOracleService
         var sqlParameters = new
         {
             name = name?.ToUpper(),
-            owner = oracleArgs.OwnerName?.ToUpper(),
+            owner = oracleArgs.SchemaName?.ToUpper(),
             package = oracleArgs.PackageName?.ToUpper(),
             regex = $@"{name?.ToUpper()}(;|\(|\s)+"
         };
@@ -727,7 +727,7 @@ public class OracleService : IOracleService
     
     private async Task<ICollection<OracleSource>> GetWrappedOracleSourcesAsync(OracleArgs oracleArgs, CancellationToken cancellationToken)
     {
-        var hasOwnerName = !string.IsNullOrWhiteSpace(oracleArgs.OwnerName)
+        var hasSchemaName = !string.IsNullOrWhiteSpace(oracleArgs.SchemaName)
             ? "UPPER(OWNER) = :owner"
             : "1 = 1";
         
@@ -736,7 +736,7 @@ public class OracleService : IOracleService
             $"""
                 SELECT AC.LINE AS Line, AC.TEXT AS Text
                   FROM ALL_SOURCE AC
-                WHERE {hasOwnerName}
+                WHERE {hasSchemaName}
                   AND UPPER(AC.NAME) = :package
                   AND UPPER(AC.TYPE) = 'PACKAGE BODY'
             """
@@ -745,7 +745,7 @@ public class OracleService : IOracleService
         var sql = sqlBuilder.ToString();
         var sqlParameters = new
         {
-            owner = oracleArgs.OwnerName?.ToUpper(),
+            owner = oracleArgs.SchemaName?.ToUpper(),
             package = oracleArgs.PackageName?.ToUpper()
         };
 
@@ -767,7 +767,7 @@ public class OracleService : IOracleService
         (
             """
                   SELECT
-                    AP.OWNER AS OwnerName, 
+                    AP.OWNER AS SchemaName, 
                     NULL AS PackageName,
                     AP.OBJECT_NAME AS FunctionName, 
                     AO.CREATED AS CreationDate,
@@ -780,7 +780,7 @@ public class OracleService : IOracleService
             """
         );
 
-        if (!string.IsNullOrWhiteSpace(oracleArgs.OwnerName))
+        if (!string.IsNullOrWhiteSpace(oracleArgs.SchemaName))
         {
             sqlBuilder.AppendLine(" AND UPPER(AP.OWNER) = :owner");
         }
@@ -806,7 +806,7 @@ public class OracleService : IOracleService
         var sqlParameters = new
         {
             max = oracleArgs.MaxItems + 1,
-            owner = oracleArgs.OwnerName?.ToUpper(),
+            owner = oracleArgs.SchemaName?.ToUpper(),
             function = oracleArgs.FunctionName?.ToUpper(),
             keyword = oracleArgs.FilterKeyword?.ToUpper()
         };
@@ -818,7 +818,7 @@ public class OracleService : IOracleService
             var oracleFunctions = await connection.QueryAsync<OracleFunction>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
             return oracleFunctions
                 .Distinct()
-                .OrderBy(x => x.OwnerName)
+                .OrderBy(x => x.SchemaName)
                 .ThenBy(x => x.FunctionName)
                 .ToList();
         });
@@ -830,7 +830,7 @@ public class OracleService : IOracleService
         (
             """
                   SELECT DISTINCT 
-                    AG.OWNER AS OwnerName, 
+                    AG.OWNER AS SchemaName, 
                     AG.PACKAGE_NAME AS PackageName, 
                     AG.OBJECT_NAME AS FunctionName, 
                     AO.CREATED AS CreationDate,
@@ -843,7 +843,7 @@ public class OracleService : IOracleService
             """
         );
 
-        if (!string.IsNullOrWhiteSpace(oracleArgs.OwnerName))
+        if (!string.IsNullOrWhiteSpace(oracleArgs.SchemaName))
         {
             sqlBuilder.AppendLine(" AND UPPER(AG.OWNER) = :owner");
         }
@@ -869,7 +869,7 @@ public class OracleService : IOracleService
         var sqlParameters = new
         {
             max = oracleArgs.MaxItems + 1,
-            owner = oracleArgs.OwnerName?.ToUpper(),
+            owner = oracleArgs.SchemaName?.ToUpper(),
             package = oracleArgs.PackageName?.ToUpper(),
             function = oracleArgs.FunctionName?.ToUpper(),
             keyword = oracleArgs.FilterKeyword?.ToUpper()
@@ -882,7 +882,7 @@ public class OracleService : IOracleService
             var oracleFunctions = await connection.QueryAsync<OracleFunction>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
             return oracleFunctions
                 .Distinct()
-                .OrderBy(x => x.OwnerName)
+                .OrderBy(x => x.SchemaName)
                 .ThenBy(x => x.FunctionName)
                 .ToList();
         });
@@ -894,7 +894,7 @@ public class OracleService : IOracleService
         (
             """
                   SELECT 
-                    AO.OWNER AS OwnerName, 
+                    AO.OWNER AS SchemaName, 
                     AO.OBJECT_NAME AS ObjectName, 
                     AO.OBJECT_TYPE AS ObjectType, 
                     AO.CREATED AS CreationDate,
@@ -905,7 +905,7 @@ public class OracleService : IOracleService
             """
         );
 
-        if (!string.IsNullOrWhiteSpace(oracleArgs.OwnerName))
+        if (!string.IsNullOrWhiteSpace(oracleArgs.SchemaName))
         {
             sqlBuilder.AppendLine(" AND UPPER(AO.OWNER) = :owner");
         }
@@ -926,7 +926,7 @@ public class OracleService : IOracleService
         var sqlParameters = new
         {
             max = oracleArgs.MaxItems + 1,
-            owner = oracleArgs.OwnerName?.ToUpper(),
+            owner = oracleArgs.SchemaName?.ToUpper(),
             keyword = oracleArgs.FilterKeyword?.ToUpper(),
             types = oracleArgs.ObjectTypes?.Select(x => x.ToUpper())
         };
@@ -938,7 +938,7 @@ public class OracleService : IOracleService
             var oracleObjects = await connection.QueryAsync<OracleObject>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
             return oracleObjects
                 .Distinct()
-                .OrderBy(x => x.OwnerName)
+                .OrderBy(x => x.SchemaName)
                 .ThenBy(x => x.ObjectName)
                 .ToList();
         });

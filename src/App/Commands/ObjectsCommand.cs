@@ -20,14 +20,14 @@ public class ObjectsCommand : AbstractCommand
     {
         _oracleService = oracleService ?? throw new ArgumentNullException(nameof(oracleService));
         DatabaseName = Settings.DefaultDatabaseToUse;
-        OwnerName = Settings.DefaultSchemaToUse;
+        SchemaName = Settings.DefaultSchemaToUse;
     }
     
     [Option("-d|--db", "Database name", CommandOptionType.SingleValue)]
     public string DatabaseName { get; init; }
     
-    [Option("-o|--owner", "Owner/Schema name", CommandOptionType.SingleValue)]
-    public string OwnerName { get; init; }
+    [Option("-u|--schema", "Schema/User name", CommandOptionType.SingleValue)]
+    public string SchemaName { get; init; }
 
     [Option("-t|--type", "Object type(s)", CommandOptionType.MultipleValue)]
     public string[] ObjectTypes { get; init; }
@@ -43,7 +43,7 @@ public class ObjectsCommand : AbstractCommand
         var oracleArgs = new OracleArgs
         {
             DatabaseName = DatabaseName,
-            OwnerName = OwnerName,
+            SchemaName = SchemaName,
             MaxItems = MaxItems,
             ObjectTypes = ObjectTypes,
             FilterKeyword = FilterKeyword

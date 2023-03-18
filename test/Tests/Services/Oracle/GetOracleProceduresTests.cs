@@ -25,7 +25,7 @@ public class GetOracleProceduresTests
     [InlineData("SYS", "DBMS_FILE_GROUP_EXP", "DROP_EXP", null)]
     [InlineData("SYS", "DBMS_FILE_GROUP_EXP", "GRANT_EXP", null)]
     [InlineData("SYS", "DBMS_FILE_GROUP_EXP", "CREATE_EXP", null)]
-    public async Task Should_Get_Procedures(string ownerName, string packageName, string procedureName, string filterKeyword)
+    public async Task Should_Get_Procedures(string schemaName, string packageName, string procedureName, string filterKeyword)
     {
         // arrange
         const string databaseName = "oracle-for-tests";
@@ -41,7 +41,7 @@ public class GetOracleProceduresTests
         var oracleArgs = new OracleArgs
         {
             DatabaseName = databaseName,
-            OwnerName = ownerName,
+            SchemaName = schemaName,
             PackageName = packageName,
             ProcedureName = procedureName,
             FilterKeyword = filterKeyword,

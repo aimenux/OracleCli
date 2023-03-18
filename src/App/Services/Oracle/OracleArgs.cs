@@ -4,7 +4,7 @@ namespace App.Services.Oracle;
 
 public sealed class OracleArgs
 {
-    public string OwnerName { get; init; }
+    public string SchemaName { get; init; }
     public string TableName { get; init; }
     public string PackageName { get; init; }
     public string ProcedureName { get; init; }
@@ -20,13 +20,13 @@ public sealed class OracleArgs
 
 public static class OracleArgsExtensions
 {
-    public static OracleArgs WithTable(this OracleArgs args, string ownerName, string tableName)
+    public static OracleArgs WithTable(this OracleArgs args, string schemaName, string tableName)
     {
         return new OracleArgs
         {
             DatabaseName = args.DatabaseName,
             TableName = tableName,
-            OwnerName = ownerName,
+            SchemaName = schemaName,
             PackageName = args.PackageName,
             ProcedureName = args.ProcedureName,
             FunctionName = args.FunctionName,
@@ -39,13 +39,13 @@ public static class OracleArgsExtensions
         };
     }
     
-    public static OracleArgs WithFunction(this OracleArgs args, string ownerName, string packageName, string functionName)
+    public static OracleArgs WithFunction(this OracleArgs args, string schemaName, string packageName, string functionName)
     {
         return new OracleArgs
         {
             DatabaseName = args.DatabaseName,
             TableName = args.TableName,
-            OwnerName = ownerName,
+            SchemaName = schemaName,
             PackageName = packageName,
             ProcedureName = args.ProcedureName,
             FunctionName = functionName,
@@ -58,13 +58,13 @@ public static class OracleArgsExtensions
         };
     }
     
-    public static OracleArgs WithProcedure(this OracleArgs args, string ownerName, string packageName, string procedureName)
+    public static OracleArgs WithProcedure(this OracleArgs args, string schemaName, string packageName, string procedureName)
     {
         return new OracleArgs
         {
             DatabaseName = args.DatabaseName,
             TableName = args.TableName,
-            OwnerName = ownerName,
+            SchemaName = schemaName,
             PackageName = packageName,
             ProcedureName = procedureName,
             FunctionName = args.FunctionName,

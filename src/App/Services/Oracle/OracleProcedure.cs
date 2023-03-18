@@ -2,7 +2,7 @@ namespace App.Services.Oracle;
 
 public sealed class OracleProcedure : IEquatable<OracleProcedure>
 {
-    public string OwnerName { get; init; }
+    public string SchemaName { get; init; }
     public string PackageName { get; init; }
     public string ProcedureName { get; init; }
     public DateTime CreationDate { get; init; }
@@ -12,7 +12,7 @@ public sealed class OracleProcedure : IEquatable<OracleProcedure>
     {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;
-        return OwnerName == other.OwnerName 
+        return SchemaName == other.SchemaName 
                && PackageName == other.PackageName 
                && ProcedureName == other.ProcedureName 
                && CreationDate.Equals(other.CreationDate) 
@@ -26,6 +26,6 @@ public sealed class OracleProcedure : IEquatable<OracleProcedure>
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(OwnerName, PackageName, ProcedureName, CreationDate, ModificationDate);
+        return HashCode.Combine(SchemaName, PackageName, ProcedureName, CreationDate, ModificationDate);
     }
 }

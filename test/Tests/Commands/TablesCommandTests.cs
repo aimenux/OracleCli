@@ -26,7 +26,7 @@ public class TablesCommandTests
     [InlineData(null, "VDK_DATABASE", null, 5)]
     [InlineData("SYSTEM", "VDK_DATABASE", null, 5)]
     [InlineData("SYSTEM", "VDK_USER_RULE", null, 1)]
-    public async Task Should_TablesCommand_Return_Ok(string ownerName, string tableName, string filterKeyword, int maxItems)
+    public async Task Should_TablesCommand_Return_Ok(string schemaName, string tableName, string filterKeyword, int maxItems)
     {
         // arrange
         var connectionString = _oracleFixture.ConnectionString;
@@ -45,7 +45,7 @@ public class TablesCommandTests
         {
             DatabaseName = DatabaseName,
             FilterKeyword = filterKeyword,
-            OwnerName = ownerName,
+            SchemaName = schemaName,
             TableName = tableName,
             MaxItems = maxItems
         };
@@ -61,7 +61,7 @@ public class TablesCommandTests
     [InlineData(null, null, "*", 5)]
     [InlineData(null, null, null, 0)]
     [InlineData(null, null, null, 5001)]
-    public async Task Should_TablesCommand_Return_Ko(string ownerName, string tableName, string filterKeyword, int maxItems)
+    public async Task Should_TablesCommand_Return_Ko(string schemaName, string tableName, string filterKeyword, int maxItems)
     {
         // arrange
         var connectionString = _oracleFixture.ConnectionString;
@@ -80,7 +80,7 @@ public class TablesCommandTests
         {
             DatabaseName = DatabaseName,
             FilterKeyword = filterKeyword,
-            OwnerName = ownerName,
+            SchemaName = schemaName,
             TableName = tableName,
             MaxItems = maxItems
         };

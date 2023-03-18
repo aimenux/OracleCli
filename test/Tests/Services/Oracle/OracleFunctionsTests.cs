@@ -6,15 +6,15 @@ namespace Tests.Services.Oracle;
 public class OracleFunctionsTests
 {
     [Theory]
-    [InlineData("Owner1", "Package1", "Function1" )]
-    [InlineData("Owner2", "Package2", "Function2" )]
-    public void Should_Oracle_Functions_Be_Equals(string ownerName, string packageName, string functionName)
+    [InlineData("Schema1", "Package1", "Function1" )]
+    [InlineData("Schema2", "Package2", "Function2" )]
+    public void Should_Oracle_Functions_Be_Equals(string schemaName, string packageName, string functionName)
     {
         // arrange
         var date = DateTime.Now.Date;
         var obj1 = new OracleFunction
         {
-            OwnerName = ownerName,
+            SchemaName = schemaName,
             PackageName = packageName,
             FunctionName = functionName,
             CreationDate = date,
@@ -22,7 +22,7 @@ public class OracleFunctionsTests
         };
         var obj2 = new OracleFunction
         {
-            OwnerName = ownerName,
+            SchemaName = schemaName,
             PackageName = packageName,
             FunctionName = functionName,
             CreationDate = date,
@@ -47,7 +47,7 @@ public class OracleFunctionsTests
         var date1 = DateTime.Now.AddDays(-1);
         var obj1 = new OracleFunction
         {
-            OwnerName = "owner",
+            SchemaName = "schema",
             PackageName = "package",
             FunctionName = "function",
             CreationDate = date1,
@@ -57,7 +57,7 @@ public class OracleFunctionsTests
         var date2 = DateTime.Now.AddDays(-2);
         var obj2 = new OracleFunction
         {
-            OwnerName = "owner",
+            SchemaName = "schema",
             PackageName = "package",
             FunctionName = "function",
             CreationDate = date2,
@@ -86,7 +86,7 @@ public class OracleFunctionsTests
         {
             new()
             {
-                OwnerName = "owner",
+                SchemaName = "schema",
                 PackageName = "package",
                 FunctionName = "function",
                 CreationDate = date,
@@ -94,7 +94,7 @@ public class OracleFunctionsTests
             },
             new()
             {
-                OwnerName = "owner",
+                SchemaName = "schema",
                 PackageName = "package",
                 FunctionName = "function",
                 CreationDate = date,

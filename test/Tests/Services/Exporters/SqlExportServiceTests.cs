@@ -13,7 +13,7 @@ public class SqlExportServiceTests
         var textExportService = Substitute.For<ITextExportService>();
         var oracleArgs = new OracleArgs
         {
-            OwnerName = "SYS",
+            SchemaName = "SYS",
             ProcedureName = "GET_INFO"
         };
         var oracleSources = new List<OracleSource>

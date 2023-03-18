@@ -20,13 +20,14 @@ public class LocksCommand : AbstractCommand
     {
         _oracleService = oracleService ?? throw new ArgumentNullException(nameof(oracleService));
         DatabaseName = Settings.DefaultDatabaseToUse;
+        SchemaName = Settings.DefaultSchemaToUse;
     }
     
     [Option("-d|--db", "Database name", CommandOptionType.SingleValue)]
     public string DatabaseName { get; init; }
     
-    [Option("-o|--owner", "Owner/Schema name", CommandOptionType.SingleValue)]
-    public string OwnerName { get; init; }
+    [Option("-u|--schema", "Schema/User name", CommandOptionType.SingleValue)]
+    public string SchemaName { get; init; }
 
     [Option("-t|--time", "Minimum blocking time in minutes", CommandOptionType.SingleValue)]
     public int MinBlockingTimeInMinutes { get; init; } = 5;
@@ -39,7 +40,7 @@ public class LocksCommand : AbstractCommand
         var oracleArgs = new OracleArgs
         {
             DatabaseName = DatabaseName,
-            OwnerName = OwnerName,
+            SchemaName = SchemaName,
             MinBlockingTimeInMinutes = MinBlockingTimeInMinutes,
             MaxItems = MaxItems
         };

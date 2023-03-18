@@ -19,13 +19,14 @@ public class SessionsCommand : AbstractCommand
     {
         _oracleService = oracleService ?? throw new ArgumentNullException(nameof(oracleService));
         DatabaseName = Settings.DefaultDatabaseToUse;
+        SchemaName = Settings.DefaultSchemaToUse;
     }
     
     [Option("-d|--db", "Database name", CommandOptionType.SingleValue)]
     public string DatabaseName { get; init; }
     
-    [Option("-o|--owner", "Owner/Schema name", CommandOptionType.SingleValue)]
-    public string OwnerName { get; init; }
+    [Option("-u|--schema", "Schema/User name", CommandOptionType.SingleValue)]
+    public string SchemaName { get; init; }
 
     [Option("-m|--max", "Max items", CommandOptionType.SingleValue)]
     public int MaxItems { get; init; } = Settings.DatabaseMaxItems;
@@ -35,7 +36,7 @@ public class SessionsCommand : AbstractCommand
         var oracleArgs = new OracleArgs
         {
             DatabaseName = DatabaseName,
-            OwnerName = OwnerName,
+            SchemaName = SchemaName,
             MaxItems = MaxItems
         };
 

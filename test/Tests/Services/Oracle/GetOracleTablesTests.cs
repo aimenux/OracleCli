@@ -19,7 +19,7 @@ public class GetOracleTablesTests
     [InlineData("SYSTEM", "VDK_DATABASE")]
     [InlineData("SYSTEM", "VDK_DATAFILE")]
     [InlineData("SYSTEM", "VDK_INSTANCE")]
-    public async Task Should_Get_Table(string ownerName, string tableName)
+    public async Task Should_Get_Table(string schemaName, string tableName)
     {
         // arrange
         const string databaseName = "oracle-for-tests";
@@ -35,7 +35,7 @@ public class GetOracleTablesTests
         var oracleArgs = new OracleArgs
         {
             DatabaseName = databaseName,
-            OwnerName = ownerName,
+            SchemaName = schemaName,
             TableName = tableName
         };
 

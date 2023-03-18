@@ -6,15 +6,15 @@ namespace Tests.Services.Oracle;
 public class OracleProceduresTests
 {
     [Theory]
-    [InlineData("Owner1", "Package1", "Procedure1" )]
-    [InlineData("Owner2", "Package2", "Procedure2" )]
-    public void Should_Oracle_Procedures_Be_Equals(string ownerName, string packageName, string procedureName)
+    [InlineData("Schema1", "Package1", "Procedure1" )]
+    [InlineData("Schema2", "Package2", "Procedure2" )]
+    public void Should_Oracle_Procedures_Be_Equals(string schemaName, string packageName, string procedureName)
     {
         // arrange
         var date = DateTime.Now.Date;
         var obj1 = new OracleProcedure
         {
-            OwnerName = ownerName,
+            SchemaName = schemaName,
             PackageName = packageName,
             ProcedureName = procedureName,
             CreationDate = date,
@@ -22,7 +22,7 @@ public class OracleProceduresTests
         };
         var obj2 = new OracleProcedure
         {
-            OwnerName = ownerName,
+            SchemaName = schemaName,
             PackageName = packageName,
             ProcedureName = procedureName,
             CreationDate = date,
@@ -47,7 +47,7 @@ public class OracleProceduresTests
         var date1 = DateTime.Now.AddDays(-1);
         var obj1 = new OracleProcedure
         {
-            OwnerName = "owner",
+            SchemaName = "schema",
             PackageName = "package",
             ProcedureName = "procedure",
             CreationDate = date1,
@@ -57,7 +57,7 @@ public class OracleProceduresTests
         var date2 = DateTime.Now.AddDays(-2);
         var obj2 = new OracleProcedure
         {
-            OwnerName = "owner",
+            SchemaName = "schema",
             PackageName = "package",
             ProcedureName = "procedure",
             CreationDate = date2,
@@ -86,7 +86,7 @@ public class OracleProceduresTests
         {
             new()
             {
-                OwnerName = "owner",
+                SchemaName = "schema",
                 PackageName = "package",
                 ProcedureName = "Procedure",
                 CreationDate = date,
@@ -94,7 +94,7 @@ public class OracleProceduresTests
             },
             new()
             {
-                OwnerName = "owner",
+                SchemaName = "schema",
                 PackageName = "package",
                 ProcedureName = "Procedure",
                 CreationDate = date,

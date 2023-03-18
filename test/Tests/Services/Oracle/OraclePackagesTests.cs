@@ -6,22 +6,22 @@ namespace Tests.Services.Oracle;
 public class OraclePackagesTests
 {
     [Theory]
-    [InlineData("Owner1", "Package1")]
-    [InlineData("Owner2", "Package2")]
-    public void Should_Oracle_Packages_Be_Equals(string ownerName, string packageName)
+    [InlineData("Schema1", "Package1")]
+    [InlineData("Schema2", "Package2")]
+    public void Should_Oracle_Packages_Be_Equals(string schemaName, string packageName)
     {
         // arrange
         var date = DateTime.Now.Date;
         var obj1 = new OraclePackage
         {
-            OwnerName = ownerName,
+            SchemaName = schemaName,
             PackageName = packageName,
             CreationDate = date,
             ModificationDate = date
         };
         var obj2 = new OraclePackage
         {
-            OwnerName = ownerName,
+            SchemaName = schemaName,
             PackageName = packageName,
             CreationDate = date,
             ModificationDate = date
@@ -45,7 +45,7 @@ public class OraclePackagesTests
         var date1 = DateTime.Now.AddDays(-1);
         var obj1 = new OraclePackage
         {
-            OwnerName = "owner",
+            SchemaName = "schema",
             PackageName = "package",
             CreationDate = date1,
             ModificationDate = date1
@@ -54,7 +54,7 @@ public class OraclePackagesTests
         var date2 = DateTime.Now.AddDays(-2);
         var obj2 = new OraclePackage
         {
-            OwnerName = "owner",
+            SchemaName = "schema",
             PackageName = "package",
             CreationDate = date2,
             ModificationDate = date2
@@ -82,14 +82,14 @@ public class OraclePackagesTests
         {
             new()
             {
-                OwnerName = "owner",
+                SchemaName = "schema",
                 PackageName = "package",
                 CreationDate = date,
                 ModificationDate = date
             },
             new()
             {
-                OwnerName = "owner",
+                SchemaName = "schema",
                 PackageName = "package",
                 CreationDate = date,
                 ModificationDate = date

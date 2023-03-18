@@ -46,7 +46,7 @@ public class SourcesCommandTests
     [InlineData("SYS", "STANDARD", null, "GREATEST")]
     [InlineData("SYS", "STANDARD", null, "TO_MULTI_BYTE")]
     [InlineData("SYS", "STANDARD", null, "TO_SINGLE_BYTE")]
-    public async Task Should_SourcesCommand_Return_Ok(string ownerName, string packageName, string procedureName, string functionName)
+    public async Task Should_SourcesCommand_Return_Ok(string schemaName, string packageName, string procedureName, string functionName)
     {
         // arrange
         var connectionString = _oracleFixture.ConnectionString;
@@ -65,7 +65,7 @@ public class SourcesCommandTests
         var command = new SourcesCommand(consoleService, oracleService, exportService, options)
         {
             DatabaseName = DatabaseName,
-            OwnerName = ownerName,
+            SchemaName = schemaName,
             PackageName = packageName,
             ProcedureName = procedureName,
             FunctionName = functionName
@@ -85,7 +85,7 @@ public class SourcesCommandTests
     [InlineData("SYS", "STANDARD", "", null)]
     [InlineData("SYS", "STANDARD", null, "")]
     [InlineData("SYS", "STANDARD", "", "")]
-    public async Task Should_SourcesCommand_Return_Ko(string ownerName, string packageName, string procedureName, string functionName)
+    public async Task Should_SourcesCommand_Return_Ko(string schemaName, string packageName, string procedureName, string functionName)
     {
         // arrange
         var connectionString = _oracleFixture.ConnectionString;
@@ -104,7 +104,7 @@ public class SourcesCommandTests
         var command = new SourcesCommand(consoleService, oracleService, exportService, options)
         {
             DatabaseName = DatabaseName,
-            OwnerName = ownerName,
+            SchemaName = schemaName,
             PackageName = packageName,
             ProcedureName = procedureName,
             FunctionName = functionName

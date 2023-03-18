@@ -24,7 +24,7 @@ public class LocksCommandTests
     [InlineData(null, 0, 5)]
     [InlineData("SYS", 1, 5)]
     [InlineData("SYSTEM", 2, 5)]
-    public async Task Should_LocksCommand_Return_Ok(string ownerName, int minTime, int maxItems)
+    public async Task Should_LocksCommand_Return_Ok(string schemaName, int minTime, int maxItems)
     {
         // arrange
         var connectionString = _oracleFixture.ConnectionString;
@@ -42,7 +42,7 @@ public class LocksCommandTests
         var command = new LocksCommand(consoleService, oracleService, options)
         {
             DatabaseName = DatabaseName,
-            OwnerName = ownerName,
+            SchemaName = schemaName,
             MinBlockingTimeInMinutes = minTime,
             MaxItems = maxItems
         };
@@ -59,7 +59,7 @@ public class LocksCommandTests
     [InlineData(null, 3001, 5)]
     [InlineData(null, 1, 0)]
     [InlineData(null, 1, 5001)]
-    public async Task Should_LocksCommand_Return_Ko(string ownerName, int minTime, int maxItems)
+    public async Task Should_LocksCommand_Return_Ko(string schemaName, int minTime, int maxItems)
     {
         // arrange
         var connectionString = _oracleFixture.ConnectionString;
@@ -77,7 +77,7 @@ public class LocksCommandTests
         var command = new LocksCommand(consoleService, oracleService, options)
         {
             DatabaseName = DatabaseName,
-            OwnerName = ownerName,
+            SchemaName = schemaName,
             MinBlockingTimeInMinutes = minTime,
             MaxItems = maxItems
         };

@@ -8,7 +8,7 @@ public class OracleObjectsTests
     [Theory]
     [InlineData("USR", "PROCEDURE", "GET_INFOS" )]
     [InlineData("SYS", "PROCEDURE", "GET_SYS_DATE")]
-    public void Should_Oracle_Objects_Be_Equals(string ownerName, string objectType, string objectName)
+    public void Should_Oracle_Objects_Be_Equals(string schemaName, string objectType, string objectName)
     {
         // arrange
         var date = DateTime.Now.Date;
@@ -16,7 +16,7 @@ public class OracleObjectsTests
         {
             ObjectName = objectName,
             ObjectType = objectType,
-            OwnerName = ownerName,
+            SchemaName = schemaName,
             CreationDate = date,
             ModificationDate = date
         };
@@ -24,7 +24,7 @@ public class OracleObjectsTests
         {
             ObjectName = objectName,
             ObjectType = objectType,
-            OwnerName = ownerName,
+            SchemaName = schemaName,
             CreationDate = date,
             ModificationDate = date
         };
@@ -49,7 +49,7 @@ public class OracleObjectsTests
         {
             ObjectName = "name",
             ObjectType = "type",
-            OwnerName = "owner",
+            SchemaName = "schema",
             CreationDate = date1,
             ModificationDate = date1
         };
@@ -59,7 +59,7 @@ public class OracleObjectsTests
         {
             ObjectName = "name",
             ObjectType = "type",
-            OwnerName = "owner",
+            SchemaName = "schema",
             CreationDate = date2,
             ModificationDate = date2
         };
@@ -87,13 +87,13 @@ public class OracleObjectsTests
             {
                 ObjectName = "name",
                 ObjectType = "type",
-                OwnerName = "owner",
+                SchemaName = "schema",
             },
             new()
             {
                 ObjectName = "name",
                 ObjectType = "type",
-                OwnerName = "owner",
+                SchemaName = "schema",
             },
             new(),
             new(),

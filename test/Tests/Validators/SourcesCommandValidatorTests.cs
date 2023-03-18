@@ -54,7 +54,7 @@ public class SourcesCommandValidatorTests
                 DatabaseName = "oracle-for-tests",
                 ProcedureName = "oracle-spc",
                 PackageName = "oracle-pkg",
-                OwnerName = "owner"
+                SchemaName = "schema"
             });
             
             Add(new SourcesCommand(consoleService, oracleService, exportService, options)

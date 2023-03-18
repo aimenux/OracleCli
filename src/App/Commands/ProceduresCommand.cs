@@ -20,14 +20,14 @@ public class ProceduresCommand : AbstractCommand
     {
         _oracleService = oracleService ?? throw new ArgumentNullException(nameof(oracleService));
         DatabaseName = Settings.DefaultDatabaseToUse;
-        OwnerName = Settings.DefaultSchemaToUse;
+        SchemaName = Settings.DefaultSchemaToUse;
     }
     
     [Option("-d|--db", "Database name", CommandOptionType.SingleValue)]
     public string DatabaseName { get; init; }
     
-    [Option("-o|--owner", "Owner/Schema name", CommandOptionType.SingleValue)]
-    public string OwnerName { get; init; }
+    [Option("-u|--schema", "Schema/User name", CommandOptionType.SingleValue)]
+    public string SchemaName { get; init; }
     
     [Option("-p|--pkg", "Package name", CommandOptionType.SingleValue)]
     public string PackageName { get; init; }
@@ -48,7 +48,7 @@ public class ProceduresCommand : AbstractCommand
             DatabaseName = DatabaseName,
             PackageName = PackageName,
             ProcedureName = ProcedureName,
-            OwnerName = OwnerName,
+            SchemaName = SchemaName,
             MaxItems = MaxItems,
             FilterKeyword = FilterKeyword
         };

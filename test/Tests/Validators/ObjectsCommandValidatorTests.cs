@@ -50,21 +50,21 @@ public class ObjectsCommandValidatorTests
             Add(new ObjectsCommand(consoleService, oracleService, options)
             {
                 DatabaseName = "oracle-for-tests",
-                OwnerName = null,
+                SchemaName = null,
                 FilterKeyword = null,
             });
             
             Add(new ObjectsCommand(consoleService, oracleService, options)
             {
                 DatabaseName = "oracle-for-tests",
-                OwnerName = "owner",
+                SchemaName = "schema",
                 FilterKeyword = null,
             });
             
             Add(new ObjectsCommand(consoleService, oracleService, options)
             {
                 DatabaseName = "oracle-for-tests",
-                OwnerName = null,
+                SchemaName = null,
                 FilterKeyword = null,
                 MaxItems = 1
             });
@@ -72,14 +72,14 @@ public class ObjectsCommandValidatorTests
             Add(new ObjectsCommand(consoleService, oracleService, options)
             {
                 DatabaseName = "oracle-for-tests",
-                OwnerName = null,
+                SchemaName = null,
                 FilterKeyword = "keyword",
             });
 
             Add(new ObjectsCommand(consoleService, oracleService, options)
             {
                 DatabaseName = "oracle-for-tests",
-                OwnerName = "owner",
+                SchemaName = "schema",
                 FilterKeyword = "keyword",
                 MaxItems = 5000
             });
@@ -98,14 +98,14 @@ public class ObjectsCommandValidatorTests
             Add(new ObjectsCommand(consoleService, oracleService, options)
             {
                 DatabaseName = null,
-                OwnerName = null,
+                SchemaName = null,
                 FilterKeyword = null,
             });
             
             Add(new ObjectsCommand(consoleService, oracleService, options)
             {
                 DatabaseName = "oracle-for-tests",
-                OwnerName = null,
+                SchemaName = null,
                 FilterKeyword = null,
                 MaxItems = 0
             });
@@ -113,7 +113,7 @@ public class ObjectsCommandValidatorTests
             Add(new ObjectsCommand(consoleService, oracleService, options)
             {
                 DatabaseName = "oracle-for-tests",
-                OwnerName = null,
+                SchemaName = null,
                 FilterKeyword = null,
                 MaxItems = 5001
             });
@@ -121,14 +121,14 @@ public class ObjectsCommandValidatorTests
             Add(new ObjectsCommand(consoleService, oracleService, options)
             {
                 DatabaseName = "oracle-for-tests",
-                OwnerName = null,
+                SchemaName = null,
                 FilterKeyword = "a"
             });
             
             Add(new ObjectsCommand(consoleService, oracleService, options)
             {
                 DatabaseName = "oracle-for-tests",
-                OwnerName = null,
+                SchemaName = null,
                 FilterKeyword = "ab",
                 MaxItems = -1
             });

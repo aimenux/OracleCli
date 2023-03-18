@@ -25,14 +25,14 @@ public class SourcesCommand : AbstractCommand
         _oracleService = oracleService ?? throw new ArgumentNullException(nameof(oracleService));
         _exportService = exportService ?? throw new ArgumentNullException(nameof(exportService));
         DatabaseName = Settings.DefaultDatabaseToUse;
-        OwnerName = Settings.DefaultSchemaToUse;
+        SchemaName = Settings.DefaultSchemaToUse;
     }
 
     [Option("-d|--db", "Database name", CommandOptionType.SingleValue)]
     public string DatabaseName { get; init; }
 
-    [Option("-o|--owner", "Owner/Schema name", CommandOptionType.SingleValue)]
-    public string OwnerName { get; init; }
+    [Option("-u|--schema", "Schema/User name", CommandOptionType.SingleValue)]
+    public string SchemaName { get; init; }
 
     [Option("-p|--pkg", "Package name", CommandOptionType.SingleValue)]
     public string PackageName { get; init; }
@@ -53,7 +53,7 @@ public class SourcesCommand : AbstractCommand
         var oracleArgs = new OracleArgs
         {
             DatabaseName = DatabaseName,
-            OwnerName = OwnerName,
+            SchemaName = SchemaName,
             PackageName = PackageName,
             ProcedureName = ProcedureName,
             FunctionName = FunctionName,
@@ -93,7 +93,7 @@ public class SourcesCommand : AbstractCommand
             await ConsoleService.RenderStatusAsync(async () =>
             {
                 var oracleProcedure = oracleProcedures.Single();
-                args = args.WithProcedure(oracleProcedure.OwnerName, oracleProcedure.PackageName, oracleProcedure.ProcedureName);
+                args = args.WithProcedure(oracleProcedure.SchemaName, oracleProcedure.PackageName, oracleProcedure.ProcedureName);
                 var oracleSources = await _oracleService.GetOracleSourcesAsync(args, cancellationToken);
                 await _exportService.ExportOracleSourcesAsync(oracleSources, args, cancellationToken);
                 ConsoleService.RenderOracleSources(oracleSources, args);
@@ -124,7 +124,7 @@ public class SourcesCommand : AbstractCommand
             await ConsoleService.RenderStatusAsync(async () =>
             {
                 var oracleFunction = oracleFunctions.Single();
-                args = args.WithFunction(oracleFunction.OwnerName, oracleFunction.PackageName, oracleFunction.FunctionName);
+                args = args.WithFunction(oracleFunction.SchemaName, oracleFunction.PackageName, oracleFunction.FunctionName);
                 var oracleSources = await _oracleService.GetOracleSourcesAsync(args, cancellationToken);
                 await _exportService.ExportOracleSourcesAsync(oracleSources, args, cancellationToken);
                 ConsoleService.RenderOracleSources(oracleSources, args);

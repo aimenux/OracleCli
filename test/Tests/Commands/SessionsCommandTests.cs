@@ -24,7 +24,7 @@ public class SessionsCommandTests
     [InlineData(null, 5)]
     [InlineData("SYS", 5)]
     [InlineData("SYSTEM", 5)]
-    public async Task Should_SessionsCommand_Return_Ok(string ownerName, int maxItems)
+    public async Task Should_SessionsCommand_Return_Ok(string schemaName, int maxItems)
     {
         // arrange
         var connectionString = _oracleFixture.ConnectionString;
@@ -42,7 +42,7 @@ public class SessionsCommandTests
         var command = new SessionsCommand(consoleService, oracleService, options)
         {
             DatabaseName = DatabaseName,
-            OwnerName = ownerName,
+            SchemaName = schemaName,
             MaxItems = maxItems
         };
 
@@ -56,7 +56,7 @@ public class SessionsCommandTests
     [Theory]
     [InlineData(null, 0)]
     [InlineData(null, 5001)]
-    public async Task Should_SessionsCommand_Return_Ko(string ownerName, int maxItems)
+    public async Task Should_SessionsCommand_Return_Ko(string schemaName, int maxItems)
     {
         // arrange
         var connectionString = _oracleFixture.ConnectionString;
@@ -74,7 +74,7 @@ public class SessionsCommandTests
         var command = new SessionsCommand(consoleService, oracleService, options)
         {
             DatabaseName = DatabaseName,
-            OwnerName = ownerName,
+            SchemaName = schemaName,
             MaxItems = maxItems
         };
 

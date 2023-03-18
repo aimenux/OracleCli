@@ -6,20 +6,20 @@ namespace Tests.Services.Oracle;
 public class OracleTableTests
 {
     [Theory]
-    [InlineData("Owner1", "Table1", 10)]
-    [InlineData("Owner2", "Table2", 20)]
-    public void Should_Oracle_Tables_Be_Equals(string ownerName, string tableName, int rowsCount)
+    [InlineData("Schema1", "Table1", 10)]
+    [InlineData("Schema2", "Table2", 20)]
+    public void Should_Oracle_Tables_Be_Equals(string schemaName, string tableName, int rowsCount)
     {
         // arrange
         var obj1 = new OracleTable
         {
-            OwnerName = ownerName,
+            SchemaName = schemaName,
             TableName = tableName,
             RowsCount = rowsCount
         };
         var obj2 = new OracleTable
         {
-            OwnerName = ownerName,
+            SchemaName = schemaName,
             TableName = tableName,
             RowsCount = rowsCount
         };
@@ -41,14 +41,14 @@ public class OracleTableTests
         // arrange
         var obj1 = new OracleTable
         {
-            OwnerName = "owner",
+            SchemaName = "schema",
             TableName = "table",
             RowsCount = 1
         };
         
         var obj2 = new OracleTable
         {
-            OwnerName = "owner",
+            SchemaName = "schema",
             TableName = "table",
             RowsCount = 2
         };
@@ -74,13 +74,13 @@ public class OracleTableTests
         {
             new()
             {
-                OwnerName = "owner",
+                SchemaName = "schema",
                 TableName = "table",
                 RowsCount = 5
             },
             new()
             {
-                OwnerName = "owner",
+                SchemaName = "schema",
                 TableName = "table",
                 RowsCount = 5
             },

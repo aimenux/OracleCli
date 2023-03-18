@@ -50,26 +50,26 @@ public class LocksCommandValidatorTests
             Add(new LocksCommand(consoleService, oracleService, options)
             {
                 DatabaseName = "oracle-for-tests",
-                OwnerName = null
+                SchemaName = null
             });
             
             Add(new LocksCommand(consoleService, oracleService, options)
             {
                 DatabaseName = "oracle-for-tests",
-                OwnerName = "owner-name"
+                SchemaName = "schema-name"
             });
             
             Add(new LocksCommand(consoleService, oracleService, options)
             {
                 DatabaseName = "oracle-for-tests",
-                OwnerName = "owner-name",
+                SchemaName = "schema-name",
                 MinBlockingTimeInMinutes = 1
             });
             
             Add(new LocksCommand(consoleService, oracleService, options)
             {
                 DatabaseName = "oracle-for-tests",
-                OwnerName = "owner-name",
+                SchemaName = "schema-name",
                 MinBlockingTimeInMinutes = 1,
                 MaxItems = 1
             });
@@ -88,34 +88,34 @@ public class LocksCommandValidatorTests
             Add(new LocksCommand(consoleService, oracleService, options)
             {
                 DatabaseName = null,
-                OwnerName = null,
+                SchemaName = null,
             });
             
             Add(new LocksCommand(consoleService, oracleService, options)
             {
                 DatabaseName = "oracle-for-tests",
-                OwnerName = null,
+                SchemaName = null,
                 MinBlockingTimeInMinutes = -1
             });
             
             Add(new LocksCommand(consoleService, oracleService, options)
             {
                 DatabaseName = "oracle-for-tests",
-                OwnerName = null,
+                SchemaName = null,
                 MinBlockingTimeInMinutes = 3001
             });
             
             Add(new LocksCommand(consoleService, oracleService, options)
             {
                 DatabaseName = "oracle-for-tests",
-                OwnerName = null,
+                SchemaName = null,
                 MaxItems = 0
             });
             
             Add(new LocksCommand(consoleService, oracleService, options)
             {
                 DatabaseName = "oracle-for-tests",
-                OwnerName = null,
+                SchemaName = null,
                 MaxItems = 5001
             });
         }

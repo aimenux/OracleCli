@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 
 namespace App.Commands;
 
-[Command("Schema", "Schemas", "Owner", "Owners", FullName = "List oracle schema", Description = "List oracle schemas.")]
+[Command("Schema", "Schemas", "User", "Users", FullName = "List oracle schema/user", Description = "List oracle schemas/users.")]
 public class SchemasCommand : AbstractCommand
 {
     private readonly IOracleService _oracleService;
@@ -20,12 +20,13 @@ public class SchemasCommand : AbstractCommand
     {
         _oracleService = oracleService ?? throw new ArgumentNullException(nameof(oracleService));
         DatabaseName = Settings.DefaultDatabaseToUse;
+        SchemaName = Settings.DefaultSchemaToUse;
     }
     
     [Option("-d|--db", "Database name", CommandOptionType.SingleValue)]
     public string DatabaseName { get; init; }
         
-    [Option("-n|--name", "Schema name", CommandOptionType.SingleValue)]
+    [Option("-u|--schema", "Schema/User name", CommandOptionType.SingleValue)]
     public string SchemaName { get; init; }
     
     [Option("--filter", "Filter keyword", CommandOptionType.SingleValue)]
@@ -39,7 +40,7 @@ public class SchemasCommand : AbstractCommand
         var oracleArgs = new OracleArgs
         {
             DatabaseName = DatabaseName,
-            OwnerName = SchemaName,
+            SchemaName = SchemaName,
             MaxItems = MaxItems,
             FilterKeyword = FilterKeyword
         };

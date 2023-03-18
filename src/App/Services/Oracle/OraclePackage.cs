@@ -2,7 +2,7 @@ namespace App.Services.Oracle;
 
 public sealed class OraclePackage : IEquatable<OraclePackage>
 {
-    public string OwnerName { get; init; }
+    public string SchemaName { get; init; }
     public string PackageName { get; init; }
     public DateTime CreationDate { get; init; }
     public DateTime ModificationDate { get; init; }
@@ -11,7 +11,7 @@ public sealed class OraclePackage : IEquatable<OraclePackage>
     {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;
-        return OwnerName == other.OwnerName 
+        return SchemaName == other.SchemaName 
                && PackageName == other.PackageName 
                && CreationDate.Equals(other.CreationDate) 
                && ModificationDate.Equals(other.ModificationDate);
@@ -24,6 +24,6 @@ public sealed class OraclePackage : IEquatable<OraclePackage>
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(OwnerName, PackageName, CreationDate, ModificationDate);
+        return HashCode.Combine(SchemaName, PackageName, CreationDate, ModificationDate);
     }
 }

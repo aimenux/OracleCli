@@ -24,14 +24,14 @@ public class ParametersCommand : AbstractCommand
         _oracleService = oracleService ?? throw new ArgumentNullException(nameof(oracleService));
         _exportService = exportService ?? throw new ArgumentNullException(nameof(exportService));
         DatabaseName = Settings.DefaultDatabaseToUse;
-        OwnerName = Settings.DefaultSchemaToUse;
+        SchemaName = Settings.DefaultSchemaToUse;
     }
 
     [Option("-d|--db", "Database name", CommandOptionType.SingleValue)]
     public string DatabaseName { get; init; }
 
-    [Option("-o|--owner", "Owner/Schema name", CommandOptionType.SingleValue)]
-    public string OwnerName { get; init; }
+    [Option("-u|--schema", "Schema/User name", CommandOptionType.SingleValue)]
+    public string SchemaName { get; init; }
 
     [Option("-p|--pkg", "Package name", CommandOptionType.SingleValue)]
     public string PackageName { get; init; }
@@ -47,7 +47,7 @@ public class ParametersCommand : AbstractCommand
         var oracleArgs = new OracleArgs
         {
             DatabaseName = DatabaseName,
-            OwnerName = OwnerName,
+            SchemaName = SchemaName,
             PackageName = PackageName,
             ProcedureName = ProcedureName,
             FunctionName = FunctionName
@@ -85,7 +85,7 @@ public class ParametersCommand : AbstractCommand
             await ConsoleService.RenderStatusAsync(async () =>
             {
                 var oracleProcedure = oracleProcedures.Single();
-                oracleArgs = oracleArgs.WithProcedure(oracleProcedure.OwnerName, oracleProcedure.PackageName, oracleProcedure.ProcedureName);
+                oracleArgs = oracleArgs.WithProcedure(oracleProcedure.SchemaName, oracleProcedure.PackageName, oracleProcedure.ProcedureName);
                 var oracleParameters = await _oracleService.GetOracleParametersAsync(oracleArgs, cancellationToken);
                 await _exportService.ExportOracleParametersAsync(oracleParameters, oracleArgs, cancellationToken);
                 ConsoleService.RenderOracleParameters(oracleParameters, oracleArgs);
@@ -116,7 +116,7 @@ public class ParametersCommand : AbstractCommand
             await ConsoleService.RenderStatusAsync(async () =>
             {
                 var oracleFunction = oracleFunctions.Single();
-                oracleArgs = oracleArgs.WithFunction(oracleFunction.OwnerName, oracleFunction.PackageName, oracleFunction.FunctionName);
+                oracleArgs = oracleArgs.WithFunction(oracleFunction.SchemaName, oracleFunction.PackageName, oracleFunction.FunctionName);
                 var oracleParameters = await _oracleService.GetOracleParametersAsync(oracleArgs, cancellationToken);
                 await _exportService.ExportOracleParametersAsync(oracleParameters, oracleArgs, cancellationToken);
                 ConsoleService.RenderOracleParameters(oracleParameters, oracleArgs);

@@ -22,7 +22,7 @@ public class GetOracleSourcesTests
     [InlineData("SYS", "STANDARD", null, "GREATEST")]
     [InlineData("SYS", "STANDARD", null, "TO_MULTI_BYTE")]
     [InlineData("SYS", "STANDARD", null, "TO_SINGLE_BYTE")]
-    public async Task Should_Get_Sources(string ownerName, string packageName, string procedureName, string functionName)
+    public async Task Should_Get_Sources(string schemaName, string packageName, string procedureName, string functionName)
     {
         // arrange
         const string databaseName = "oracle-for-tests";
@@ -37,7 +37,7 @@ public class GetOracleSourcesTests
 
         var oracleArgs = new OracleArgs
         {
-            OwnerName = ownerName,
+            SchemaName = schemaName,
             DatabaseName = databaseName,
             ProcedureName = procedureName,
             FunctionName = functionName,

@@ -54,7 +54,7 @@ public class ParametersCommandValidatorTests
                 DatabaseName = "oracle-for-tests",
                 ProcedureName = "oracle-spc",
                 PackageName = "oracle-pkg",
-                OwnerName = "owner"
+                SchemaName = "schema"
             });
             
             Add(new ParametersCommand(consoleService, oracleService, exportService, options)

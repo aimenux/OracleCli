@@ -18,7 +18,7 @@ public class GetOracleSessionsTests
     [Theory]
     [InlineData(null)]
     [InlineData("SYS")]
-    public async Task Should_Get_Sessions(string ownerName)
+    public async Task Should_Get_Sessions(string schemaName)
     {
         // arrange
         const string databaseName = "oracle-for-tests";
@@ -34,7 +34,7 @@ public class GetOracleSessionsTests
         var oracleArgs = new OracleArgs
         {
             DatabaseName = databaseName,
-            OwnerName = ownerName,
+            SchemaName = schemaName,
             MaxItems = 5
         };
 

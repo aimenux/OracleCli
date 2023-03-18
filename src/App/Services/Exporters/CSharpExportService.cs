@@ -125,7 +125,7 @@ public class CSharpExportService : ICSharpExportService
 
     private static string GetCSharpName(OracleArgs oracleArgs)
     {
-        var schemaName = oracleArgs.OwnerName.ToUpper();
+        var schemaName = oracleArgs.SchemaName.ToUpper();
         var pkgName = oracleArgs.PackageName?.ToUpper();
         var spcName = oracleArgs.ProcedureName?.ToUpper();
         var funName = oracleArgs.FunctionName?.ToUpper();

@@ -13,7 +13,7 @@ public class CSharpExportServiceTests
         var textExportService = Substitute.For<ITextExportService>();
         var oracleArgs = new OracleArgs
         {
-            OwnerName = "USER",
+            SchemaName = "USER",
             ProcedureName = "GET_INFO"
         };
         var oracleParameters = new List<OracleParameter>
@@ -59,7 +59,7 @@ public class CSharpExportServiceTests
         var textExportService = Substitute.For<ITextExportService>();
         var oracleArgs = new OracleArgs
         {
-            OwnerName = "USER",
+            SchemaName = "USER",
             FunctionName = "GET_INFO"
         };
         var oracleParameters = new List<OracleParameter>

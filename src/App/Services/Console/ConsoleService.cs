@@ -187,10 +187,10 @@ public class ConsoleService : IConsoleService
 
     public void RenderOracleTable(OracleTable oracleTable, OracleArgs oracleArgs)
     {
-        var ownerName = oracleArgs.OwnerName.ToUpper();
+        var schemaName = oracleArgs.SchemaName.ToUpper();
         var tableName = oracleArgs.TableName.ToUpper();
         var databaseName = oracleArgs.DatabaseName.ToUpper();
-        var title = $"[yellow][bold]Table {ownerName}.{tableName}[/][/]";
+        var title = $"[yellow][bold]Table {schemaName}.{tableName}[/][/]";
         var table = new Table()
             .BorderColor(Color.White)
             .Border(TableBorder.Square)
@@ -227,7 +227,7 @@ public class ConsoleService : IConsoleService
             .Border(TableBorder.Square)
             .Title(title)
             .AddColumn(new TableColumn("[u]#[/]").Centered())
-            .AddColumn(new TableColumn("[u]OwnerName[/]").Centered())
+            .AddColumn(new TableColumn("[u]SchemaName[/]").Centered())
             .AddColumn(new TableColumn("[u]TableName[/]").Centered())
             .AddColumn(new TableColumn("[u]RowsCount[/]").Centered())
             .Caption($"[yellow][bold]{databaseName}[/][/]");
@@ -238,7 +238,7 @@ public class ConsoleService : IConsoleService
         {
             table.AddRow(
                 IndexMarkup(index++),
-                ToMarkup(result.OwnerName),
+                ToMarkup(result.SchemaName),
                 ToMarkup(result.TableName),
                 ToMarkup($"{result.RowsCount}"));
         }
@@ -259,7 +259,7 @@ public class ConsoleService : IConsoleService
             .Border(TableBorder.Square)
             .Title(title)
             .AddColumn(new TableColumn("[u]#[/]").Centered())
-            .AddColumn(new TableColumn("[u]OwnerName[/]").Centered())
+            .AddColumn(new TableColumn("[u]SchemaName[/]").Centered())
             .AddColumn(new TableColumn("[u]ObjectName[/]").Centered())
             .AddColumn(new TableColumn("[u]ObjectType[/]").Centered())
             .AddColumn(new TableColumn("[u]CreationDate[/]").Centered())
@@ -272,7 +272,7 @@ public class ConsoleService : IConsoleService
         {
             table.AddRow(
                 IndexMarkup(index++),
-                ToMarkup(result.OwnerName),
+                ToMarkup(result.SchemaName),
                 ToMarkup(result.ObjectName),
                 ToMarkup(result.ObjectType),
                 ToMarkup(result.CreationDate.ToString("g")),
@@ -361,7 +361,7 @@ public class ConsoleService : IConsoleService
             .Border(TableBorder.Square)
             .Title(title)
             .AddColumn(new TableColumn("[u]#[/]").Centered())
-            .AddColumn(new TableColumn("[u]OwnerName[/]").Centered())
+            .AddColumn(new TableColumn("[u]SchemaName[/]").Centered())
             .AddColumn(new TableColumn("[u]PackageName[/]").Centered())
             .AddColumn(new TableColumn("[u]CreationDate[/]").Centered())
             .AddColumn(new TableColumn("[u]ModificationDate[/]").Centered())
@@ -373,7 +373,7 @@ public class ConsoleService : IConsoleService
         {
             table.AddRow(
                 IndexMarkup(index++),
-                ToMarkup(result.OwnerName),
+                ToMarkup(result.SchemaName),
                 ToMarkup(result.PackageName),
                 ToMarkup(result.CreationDate.ToString("g")),
                 ToMarkup(result.ModificationDate.ToString("g")));
@@ -422,7 +422,7 @@ public class ConsoleService : IConsoleService
             .Border(TableBorder.Square)
             .Title(title)
             .AddColumn(new TableColumn("[u]#[/]").Centered())
-            .AddColumn(new TableColumn("[u]OwnerName[/]").Centered())
+            .AddColumn(new TableColumn("[u]SchemaName[/]").Centered())
             .AddColumn(new TableColumn("[u]PackageName[/]").Centered())
             .AddColumn(new TableColumn("[u]FunctionName[/]").Centered())
             .AddColumn(new TableColumn("[u]CreationDate[/]").Centered())
@@ -435,7 +435,7 @@ public class ConsoleService : IConsoleService
         {
             table.AddRow(
                 IndexMarkup(index++),
-                ToMarkup(result.OwnerName),
+                ToMarkup(result.SchemaName),
                 ToMarkup(result.PackageName),
                 ToMarkup(result.FunctionName),
                 ToMarkup(result.CreationDate.ToString("g")),
@@ -458,7 +458,7 @@ public class ConsoleService : IConsoleService
             .Border(TableBorder.Square)
             .Title(title)
             .AddColumn(new TableColumn("[u]#[/]").Centered())
-            .AddColumn(new TableColumn("[u]OwnerName[/]").Centered())
+            .AddColumn(new TableColumn("[u]SchemaName[/]").Centered())
             .AddColumn(new TableColumn("[u]PackageName[/]").Centered())
             .AddColumn(new TableColumn("[u]ProcedureName[/]").Centered())
             .AddColumn(new TableColumn("[u]CreationDate[/]").Centered())
@@ -471,7 +471,7 @@ public class ConsoleService : IConsoleService
         {
             table.AddRow(
                 IndexMarkup(index++),
-                ToMarkup(result.OwnerName),
+                ToMarkup(result.SchemaName),
                 ToMarkup(result.PackageName),
                 ToMarkup(result.ProcedureName),
                 ToMarkup(result.CreationDate.ToString("g")),

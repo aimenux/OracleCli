@@ -50,19 +50,19 @@ public class SessionsCommandValidatorTests
             Add(new SessionsCommand(consoleService, oracleService, options)
             {
                 DatabaseName = "oracle-for-tests",
-                OwnerName = null
+                SchemaName = null
             });
             
             Add(new SessionsCommand(consoleService, oracleService, options)
             {
                 DatabaseName = "oracle-for-tests",
-                OwnerName = "owner-name"
+                SchemaName = "schema-name"
             });
 
             Add(new SessionsCommand(consoleService, oracleService, options)
             {
                 DatabaseName = "oracle-for-tests",
-                OwnerName = "owner-name",
+                SchemaName = "schema-name",
                 MaxItems = 1
             });
         }
@@ -80,20 +80,20 @@ public class SessionsCommandValidatorTests
             Add(new SessionsCommand(consoleService, oracleService, options)
             {
                 DatabaseName = null,
-                OwnerName = null,
+                SchemaName = null,
             });
             
             Add(new SessionsCommand(consoleService, oracleService, options)
             {
                 DatabaseName = "oracle-for-tests",
-                OwnerName = null,
+                SchemaName = null,
                 MaxItems = 0
             });
             
             Add(new SessionsCommand(consoleService, oracleService, options)
             {
                 DatabaseName = "oracle-for-tests",
-                OwnerName = null,
+                SchemaName = null,
                 MaxItems = 5001
             });
         }
