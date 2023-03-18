@@ -61,51 +61,51 @@ internal class FakeConsoleService : IConsoleService
         return Task.CompletedTask;
     }
 
-    public void RenderOracleInfo(OracleInfo oracleInfo, OracleParameters parameters)
+    public void RenderOracleInfo(OracleInfo oracleInfo, OracleArgs args)
     {
     }
 
-    public void RenderOracleTable(OracleTable oracleTable, OracleParameters parameters)
+    public void RenderOracleTable(OracleTable oracleTable, OracleArgs args)
     {
     }
 
-    public void RenderOracleTables(ICollection<OracleTable> oracleTables, OracleParameters parameters)
+    public void RenderOracleTables(ICollection<OracleTable> oracleTables, OracleArgs args)
     {
     }
 
-    public void RenderOracleObjects(ICollection<OracleObject> oracleObjects, OracleParameters parameters)
+    public void RenderOracleObjects(ICollection<OracleObject> oracleObjects, OracleArgs args)
     {
     }
 
-    public void RenderOracleSchemas(ICollection<OracleSchema> oracleSchemas, OracleParameters parameters)
+    public void RenderOracleSchemas(ICollection<OracleSchema> oracleSchemas, OracleArgs args)
     {
     }
 
-    public void RenderOracleSources(ICollection<OracleSource> oracleSources, OracleParameters parameters)
+    public void RenderOracleSources(ICollection<OracleSource> oracleSources, OracleArgs args)
     {
     }
 
-    public void RenderOraclePackages(ICollection<OraclePackage> oraclePackages, OracleParameters parameters)
+    public void RenderOraclePackages(ICollection<OraclePackage> oraclePackages, OracleArgs args)
     {
     }
 
-    public void RenderOracleArguments(ICollection<OracleArgument> oracleArguments, OracleParameters parameters)
+    public void RenderOracleArguments(ICollection<OracleArgument> oracleArguments, OracleArgs args)
     {
     }
 
-    public void RenderOracleFunctions(ICollection<OracleFunction> oracleFunctions, OracleParameters parameters)
+    public void RenderOracleFunctions(ICollection<OracleFunction> oracleFunctions, OracleArgs args)
     {
     }
 
-    public void RenderOracleProcedures(ICollection<OracleProcedure> oracleProcedures, OracleParameters parameters)
+    public void RenderOracleProcedures(ICollection<OracleProcedure> oracleProcedures, OracleArgs args)
     {
     }
 
-    public void RenderOracleLocks(ICollection<OracleLock> oracleLocks, OracleParameters parameters)
+    public void RenderOracleLocks(ICollection<OracleLock> oracleLocks, OracleArgs args)
     {
     }
 
-    public void RenderOracleSessions(ICollection<OracleSession> oracleSessions, OracleParameters parameters)
+    public void RenderOracleSessions(ICollection<OracleSession> oracleSessions, OracleArgs args)
     {
     }
 }

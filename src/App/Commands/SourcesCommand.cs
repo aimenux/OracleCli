@@ -50,7 +50,7 @@ public class SourcesCommand : AbstractCommand
     {
         var outputFile = OutputDirectory.GenerateFileName(ProcedureName ?? FunctionName);
         
-        var parameters = new OracleParameters
+        var oracleArgs = new OracleArgs
         {
             DatabaseName = DatabaseName,
             OwnerName = OwnerName,
@@ -63,29 +63,29 @@ public class SourcesCommand : AbstractCommand
         
         var tasks = new List<Task>
         {
-            ExecuteProcedureSourcesAsync(parameters, cancellationToken),
-            ExecuteFunctionSourcesAsync(parameters, cancellationToken)
+            ExecuteProcedureSourcesAsync(oracleArgs, cancellationToken),
+            ExecuteFunctionSourcesAsync(oracleArgs, cancellationToken)
         };
 
         await Task.WhenAll(tasks);
     }
     
-    private async Task ExecuteProcedureSourcesAsync(OracleParameters parameters, CancellationToken cancellationToken)
+    private async Task ExecuteProcedureSourcesAsync(OracleArgs args, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(parameters.ProcedureName)) return;
+        if (string.IsNullOrWhiteSpace(args.ProcedureName)) return;
         
         var oracleProcedures = await ConsoleService.RenderStatusAsync(async () =>
         {
-            var oracleProcedures = await _oracleService.GetOracleProceduresAsync(parameters, cancellationToken);
+            var oracleProcedures = await _oracleService.GetOracleProceduresAsync(args, cancellationToken);
             return oracleProcedures;
         });
         
         if (oracleProcedures.Count is 0 or > 1)
         {
-            ConsoleService.RenderProblem($"Found {oracleProcedures.Count} procedure(s) matching name '{parameters.ProcedureName}'");
+            ConsoleService.RenderProblem($"Found {oracleProcedures.Count} procedure(s) matching name '{args.ProcedureName}'");
             if (oracleProcedures.Count > 1 && ConsoleService.GetYesOrNoAnswer("display found procedures on console screen", true))
             {
-                ConsoleService.RenderOracleProcedures(oracleProcedures, parameters);
+                ConsoleService.RenderOracleProcedures(oracleProcedures, args);
             }
         }
         else
@@ -93,30 +93,30 @@ public class SourcesCommand : AbstractCommand
             await ConsoleService.RenderStatusAsync(async () =>
             {
                 var oracleProcedure = oracleProcedures.Single();
-                parameters = parameters.WithProcedure(oracleProcedure.OwnerName, oracleProcedure.PackageName, oracleProcedure.ProcedureName);
-                var oracleSources = await _oracleService.GetOracleSourcesAsync(parameters, cancellationToken);
-                await _exportService.ExportOracleSourcesAsync(oracleSources, parameters, cancellationToken);
-                ConsoleService.RenderOracleSources(oracleSources, parameters);
+                args = args.WithProcedure(oracleProcedure.OwnerName, oracleProcedure.PackageName, oracleProcedure.ProcedureName);
+                var oracleSources = await _oracleService.GetOracleSourcesAsync(args, cancellationToken);
+                await _exportService.ExportOracleSourcesAsync(oracleSources, args, cancellationToken);
+                ConsoleService.RenderOracleSources(oracleSources, args);
             });
         }
     }
     
-    private async Task ExecuteFunctionSourcesAsync(OracleParameters parameters, CancellationToken cancellationToken)
+    private async Task ExecuteFunctionSourcesAsync(OracleArgs args, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(parameters.FunctionName)) return;
+        if (string.IsNullOrWhiteSpace(args.FunctionName)) return;
         
         var oracleFunctions = await ConsoleService.RenderStatusAsync(async () =>
         {
-            var oracleFunctions = await _oracleService.GetOracleFunctionsAsync(parameters, cancellationToken);
+            var oracleFunctions = await _oracleService.GetOracleFunctionsAsync(args, cancellationToken);
             return oracleFunctions;
         });
         
         if (oracleFunctions.Count is 0 or > 1)
         {
-            ConsoleService.RenderProblem($"Found {oracleFunctions.Count} function(s) matching name '{parameters.FunctionName}'");
+            ConsoleService.RenderProblem($"Found {oracleFunctions.Count} function(s) matching name '{args.FunctionName}'");
             if (oracleFunctions.Count > 1 && ConsoleService.GetYesOrNoAnswer("display found functions on console screen", true))
             {
-                ConsoleService.RenderOracleFunctions(oracleFunctions, parameters);
+                ConsoleService.RenderOracleFunctions(oracleFunctions, args);
             }
         }
         else
@@ -124,10 +124,10 @@ public class SourcesCommand : AbstractCommand
             await ConsoleService.RenderStatusAsync(async () =>
             {
                 var oracleFunction = oracleFunctions.Single();
-                parameters = parameters.WithFunction(oracleFunction.OwnerName, oracleFunction.PackageName, oracleFunction.FunctionName);
-                var oracleSources = await _oracleService.GetOracleSourcesAsync(parameters, cancellationToken);
-                await _exportService.ExportOracleSourcesAsync(oracleSources, parameters, cancellationToken);
-                ConsoleService.RenderOracleSources(oracleSources, parameters);
+                args = args.WithFunction(oracleFunction.OwnerName, oracleFunction.PackageName, oracleFunction.FunctionName);
+                var oracleSources = await _oracleService.GetOracleSourcesAsync(args, cancellationToken);
+                await _exportService.ExportOracleSourcesAsync(oracleSources, args, cancellationToken);
+                ConsoleService.RenderOracleSources(oracleSources, args);
             });
         }
     }

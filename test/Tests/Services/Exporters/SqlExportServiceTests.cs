@@ -11,7 +11,7 @@ public class SqlExportServiceTests
     {
         // arrange
         var textExportService = Substitute.For<ITextExportService>();
-        var oracleParameters = new OracleParameters
+        var oracleArgs = new OracleArgs
         {
             OwnerName = "SYS",
             ProcedureName = "GET_INFO"
@@ -33,7 +33,7 @@ public class SqlExportServiceTests
         var sqlExportService = new SqlExportService(textExportService);
 
         // act
-        await sqlExportService.ExportOracleSourcesAsync(oracleSources, oracleParameters, CancellationToken.None);
+        await sqlExportService.ExportOracleSourcesAsync(oracleSources, oracleArgs, CancellationToken.None);
 
         // assert
         await textExportService
@@ -46,13 +46,13 @@ public class SqlExportServiceTests
     {
         // arrange
         var textExportService = Substitute.For<ITextExportService>();
-        var oracleParameters = new OracleParameters();
+        var oracleArgs = new OracleArgs();
         var oracleSources = new List<OracleSource>();
 
         var sqlExportService = new SqlExportService(textExportService);
 
         // act
-        await sqlExportService.ExportOracleSourcesAsync(oracleSources, oracleParameters, CancellationToken.None);
+        await sqlExportService.ExportOracleSourcesAsync(oracleSources, oracleArgs, CancellationToken.None);
 
         // assert
         await textExportService

@@ -38,7 +38,7 @@ public class GetOracleProceduresTests
         var options = Options.Create(settings);
         var logger = NullLogger<OracleService>.Instance;
 
-        var parameters = new OracleParameters
+        var oracleArgs = new OracleArgs
         {
             DatabaseName = databaseName,
             OwnerName = ownerName,
@@ -51,7 +51,7 @@ public class GetOracleProceduresTests
         var service = new OracleService(options, logger);
 
         // act
-        var procedures = await service.GetOracleProceduresAsync(parameters, CancellationToken.None);
+        var procedures = await service.GetOracleProceduresAsync(oracleArgs, CancellationToken.None);
 
         // assert
         procedures.Should().NotBeEmpty();

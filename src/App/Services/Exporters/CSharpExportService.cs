@@ -13,10 +13,10 @@ public class CSharpExportService : ICSharpExportService
         _textExportService = textExportService ?? throw new ArgumentNullException(nameof(textExportService));
     }
 
-    public async Task ExportOracleArgumentsAsync(ICollection<OracleArgument> oracleArguments, OracleParameters parameters, CancellationToken cancellationToken)
+    public async Task ExportOracleArgumentsAsync(ICollection<OracleArgument> oracleArguments, OracleArgs args, CancellationToken cancellationToken)
     {
-        var name = GetCSharpName(parameters);
-        var type = GetCSharpType(parameters);
+        var name = GetCSharpName(args);
+        var type = GetCSharpType(args);
 
         var csharpBuilder = new StringBuilder
         (
@@ -123,21 +123,21 @@ public class CSharpExportService : ICSharpExportService
         return $"IEnumerable<OracleCursor{oracleArgument.Position}>";
     }
 
-    private static string GetCSharpName(OracleParameters parameters)
+    private static string GetCSharpName(OracleArgs args)
     {
-        var schemaName = parameters.OwnerName.ToUpper();
-        var pkgName = parameters.PackageName?.ToUpper();
-        var spcName = parameters.ProcedureName?.ToUpper();
-        var funName = parameters.FunctionName?.ToUpper();
+        var schemaName = args.OwnerName.ToUpper();
+        var pkgName = args.PackageName?.ToUpper();
+        var spcName = args.ProcedureName?.ToUpper();
+        var funName = args.FunctionName?.ToUpper();
         var prgName = spcName ?? funName;
         return string.IsNullOrWhiteSpace(pkgName) 
             ? $"{schemaName}.{prgName}" 
             : $"{schemaName}.{pkgName}.{prgName}";
     }
     
-    private static string GetCSharpType(OracleParameters parameters)
+    private static string GetCSharpType(OracleArgs args)
     {
-        return string.IsNullOrWhiteSpace(parameters.FunctionName)
+        return string.IsNullOrWhiteSpace(args.FunctionName)
             ? "OracleProcedure"
             : "OracleFunction";
     }

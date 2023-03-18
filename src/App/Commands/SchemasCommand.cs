@@ -36,7 +36,7 @@ public class SchemasCommand : AbstractCommand
 
     protected override async Task ExecuteAsync(CommandLineApplication app, CancellationToken cancellationToken = default)
     {
-        var parameters = new OracleParameters
+        var oracleArgs = new OracleArgs
         {
             DatabaseName = DatabaseName,
             OwnerName = SchemaName,
@@ -46,8 +46,8 @@ public class SchemasCommand : AbstractCommand
 
         await ConsoleService.RenderStatusAsync(async () =>
         {
-            var oracleSchemas = await _oracleService.GetOracleSchemasAsync(parameters, cancellationToken);
-            ConsoleService.RenderOracleSchemas(oracleSchemas, parameters);
+            var oracleSchemas = await _oracleService.GetOracleSchemasAsync(oracleArgs, cancellationToken);
+            ConsoleService.RenderOracleSchemas(oracleSchemas, oracleArgs);
         });
     }
 }

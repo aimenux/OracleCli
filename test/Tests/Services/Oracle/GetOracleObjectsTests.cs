@@ -33,7 +33,7 @@ public class GetOracleObjectsTests
         var options = Options.Create(settings);
         var logger = NullLogger<OracleService>.Instance;
 
-        var parameters = new OracleParameters
+        var oracleArgs = new OracleArgs
         {
             DatabaseName = databaseName,
             FilterKeyword = filterKeyword,
@@ -43,7 +43,7 @@ public class GetOracleObjectsTests
         var service = new OracleService(options, logger);
 
         // act
-        var objects = await service.GetOracleObjectsAsync(parameters, CancellationToken.None);
+        var objects = await service.GetOracleObjectsAsync(oracleArgs, CancellationToken.None);
 
         // assert
         objects.Should().NotBeEmpty();
@@ -71,7 +71,7 @@ public class GetOracleObjectsTests
         var options = Options.Create(settings);
         var logger = NullLogger<OracleService>.Instance;
 
-        var parameters = new OracleParameters
+        var oracleArgs = new OracleArgs
         {
             DatabaseName = databaseName,
             ObjectTypes = new[] { objectType },
@@ -81,7 +81,7 @@ public class GetOracleObjectsTests
         var service = new OracleService(options, logger);
 
         // act
-        var objects = await service.GetOracleObjectsAsync(parameters, CancellationToken.None);
+        var objects = await service.GetOracleObjectsAsync(oracleArgs, CancellationToken.None);
 
         // assert
         objects.Should().NotBeEmpty();

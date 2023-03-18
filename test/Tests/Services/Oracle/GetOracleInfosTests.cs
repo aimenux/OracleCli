@@ -29,7 +29,7 @@ public class GetOracleInfosTests
         var options = Options.Create(settings);
         var logger = NullLogger<OracleService>.Instance;
 
-        var parameters = new OracleParameters
+        var oracleArgs = new OracleArgs
         {
             DatabaseName = databaseName
         };
@@ -37,7 +37,7 @@ public class GetOracleInfosTests
         var service = new OracleService(options, logger);
 
         // act
-        var info = await service.GetOracleInfoAsync(parameters, CancellationToken.None);
+        var info = await service.GetOracleInfoAsync(oracleArgs, CancellationToken.None);
 
         // assert
         info.Should().NotBeNull();

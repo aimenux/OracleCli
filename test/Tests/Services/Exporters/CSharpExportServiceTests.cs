@@ -11,7 +11,7 @@ public class CSharpExportServiceTests
     {
         // arrange
         var textExportService = Substitute.For<ITextExportService>();
-        var oracleParameters = new OracleParameters
+        var oracleArgs = new OracleArgs
         {
             OwnerName = "USER",
             ProcedureName = "GET_INFO"
@@ -44,7 +44,7 @@ public class CSharpExportServiceTests
         var csharpExportService = new CSharpExportService(textExportService);
 
         // act
-        await csharpExportService.ExportOracleArgumentsAsync(oracleArguments, oracleParameters, CancellationToken.None);
+        await csharpExportService.ExportOracleArgumentsAsync(oracleArguments, oracleArgs, CancellationToken.None);
 
         // assert
         await textExportService
@@ -57,7 +57,7 @@ public class CSharpExportServiceTests
     {
         // arrange
         var textExportService = Substitute.For<ITextExportService>();
-        var oracleParameters = new OracleParameters
+        var oracleArgs = new OracleArgs
         {
             OwnerName = "USER",
             FunctionName = "GET_INFO"
@@ -90,7 +90,7 @@ public class CSharpExportServiceTests
         var csharpExportService = new CSharpExportService(textExportService);
 
         // act
-        await csharpExportService.ExportOracleArgumentsAsync(oracleArguments, oracleParameters, CancellationToken.None);
+        await csharpExportService.ExportOracleArgumentsAsync(oracleArguments, oracleArgs, CancellationToken.None);
 
         // assert
         await textExportService

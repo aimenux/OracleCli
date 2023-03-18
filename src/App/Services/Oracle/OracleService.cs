@@ -20,11 +20,11 @@ public class OracleService : IOracleService
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task<OracleInfo> GetOracleInfoAsync(OracleParameters parameters, CancellationToken cancellationToken)
+    public async Task<OracleInfo> GetOracleInfoAsync(OracleArgs args, CancellationToken cancellationToken)
     {
-        var infoVersionTask = GetOracleInfoFromVersionAsync(parameters, cancellationToken);
-        var infoInstanceTask = GetOracleInfoFromInstanceAsync(parameters, cancellationToken);
-        var infoDatabaseTask = GetOracleInfoFromDatabaseAsync(parameters, cancellationToken);
+        var infoVersionTask = GetOracleInfoFromVersionAsync(args, cancellationToken);
+        var infoInstanceTask = GetOracleInfoFromInstanceAsync(args, cancellationToken);
+        var infoDatabaseTask = GetOracleInfoFromDatabaseAsync(args, cancellationToken);
         await Task.WhenAll(infoVersionTask, infoInstanceTask, infoDatabaseTask);
         return new OracleInfo
         {
@@ -42,7 +42,7 @@ public class OracleService : IOracleService
         };
     }
 
-    public async Task<ICollection<OraclePackage>> GetOraclePackagesAsync(OracleParameters parameters, CancellationToken cancellationToken)
+    public async Task<ICollection<OraclePackage>> GetOraclePackagesAsync(OracleArgs args, CancellationToken cancellationToken)
     {
         var sqlBuilder = new StringBuilder
         (
@@ -59,17 +59,17 @@ public class OracleService : IOracleService
             """
         );
 
-        if (!string.IsNullOrWhiteSpace(parameters.OwnerName))
+        if (!string.IsNullOrWhiteSpace(args.OwnerName))
         {
             sqlBuilder.AppendLine(" AND UPPER(AO.OWNER) = :owner");
         }
         
-        if (!string.IsNullOrWhiteSpace(parameters.PackageName))
+        if (!string.IsNullOrWhiteSpace(args.PackageName))
         {
             sqlBuilder.AppendLine(" AND UPPER(AO.OBJECT_NAME) = :package");
         }
 
-        if (!string.IsNullOrWhiteSpace(parameters.FilterKeyword))
+        if (!string.IsNullOrWhiteSpace(args.FilterKeyword))
         {
             sqlBuilder.AppendLine($" AND ({HasKeyWord("AO.OWNER")} OR {HasKeyWord("AO.OBJECT_NAME")})");
         }
@@ -79,16 +79,16 @@ public class OracleService : IOracleService
         var sql = sqlBuilder.ToString();
         var sqlParameters = new
         {
-            max = parameters.MaxItems + 1,
-            owner = parameters.OwnerName?.ToUpper(),
-            package = parameters.PackageName?.ToUpper(),
-            keyword = parameters.FilterKeyword?.ToUpper()
+            max = args.MaxItems + 1,
+            owner = args.OwnerName?.ToUpper(),
+            package = args.PackageName?.ToUpper(),
+            keyword = args.FilterKeyword?.ToUpper()
         };
 
         var retryPolicy = GetRetryPolicy<ICollection<OraclePackage>>();
         return await retryPolicy.ExecuteAsync(async () =>
         {
-            await using var connection = CreateOracleConnection(parameters);
+            await using var connection = CreateOracleConnection(args);
             var oraclePackages = await connection.QueryAsync<OraclePackage>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
             return oraclePackages
                 .Distinct()
@@ -98,10 +98,10 @@ public class OracleService : IOracleService
         });
     }
 
-    public async Task<ICollection<OracleFunction>> GetOracleFunctionsAsync(OracleParameters parameters, CancellationToken cancellationToken)
+    public async Task<ICollection<OracleFunction>> GetOracleFunctionsAsync(OracleArgs args, CancellationToken cancellationToken)
     {
-        var getFromAllProceduresTask = GetOracleFunctionsFromAllProceduresAsync(parameters, cancellationToken);
-        var getFromAllArgumentsTask = GetOracleFunctionsFromAllArgumentsAsync(parameters, cancellationToken);
+        var getFromAllProceduresTask = GetOracleFunctionsFromAllProceduresAsync(args, cancellationToken);
+        var getFromAllArgumentsTask = GetOracleFunctionsFromAllArgumentsAsync(args, cancellationToken);
         await Task.WhenAll(getFromAllProceduresTask, getFromAllArgumentsTask);
         var functionsFromAllProcedures = await getFromAllProceduresTask;
         var functionsFromAllSources = await getFromAllArgumentsTask;
@@ -110,11 +110,11 @@ public class OracleService : IOracleService
             .Distinct()
             .OrderBy(x => x.OwnerName)
             .ThenBy(x => x.FunctionName)
-            .Take(parameters.MaxItems + 1)
+            .Take(args.MaxItems + 1)
             .ToList();
     }
 
-    public async Task<ICollection<OracleProcedure>> GetOracleProceduresAsync(OracleParameters parameters, CancellationToken cancellationToken)
+    public async Task<ICollection<OracleProcedure>> GetOracleProceduresAsync(OracleArgs args, CancellationToken cancellationToken)
     {
         var sqlBuilder = new StringBuilder
         (
@@ -133,22 +133,22 @@ public class OracleService : IOracleService
             """
         );
 
-        if (!string.IsNullOrWhiteSpace(parameters.OwnerName))
+        if (!string.IsNullOrWhiteSpace(args.OwnerName))
         {
             sqlBuilder.AppendLine(" AND UPPER(AP.OWNER) = :owner");
         }
 
-        if (!string.IsNullOrWhiteSpace(parameters.PackageName))
+        if (!string.IsNullOrWhiteSpace(args.PackageName))
         {
             sqlBuilder.AppendLine(" AND UPPER(AP.OBJECT_NAME) = :package");
         }
         
-        if (!string.IsNullOrWhiteSpace(parameters.ProcedureName))
+        if (!string.IsNullOrWhiteSpace(args.ProcedureName))
         {
             sqlBuilder.AppendLine(" AND ((UPPER(AO.OBJECT_TYPE) = 'PROCEDURE' AND UPPER(AP.OBJECT_NAME) = :procedure) OR (UPPER(AO.OBJECT_TYPE) = 'PACKAGE' AND UPPER(AP.PROCEDURE_NAME) = :procedure))");
         }
 
-        if (!string.IsNullOrWhiteSpace(parameters.FilterKeyword))
+        if (!string.IsNullOrWhiteSpace(args.FilterKeyword))
         {
             sqlBuilder.AppendLine($" AND ({HasKeyWord("AP.OWNER")} OR {HasKeyWord("AP.OBJECT_NAME")} OR {HasKeyWord("AP.PROCEDURE_NAME")})");
         }
@@ -158,17 +158,17 @@ public class OracleService : IOracleService
         var sql = sqlBuilder.ToString();
         var sqlParameters = new
         {
-            max = parameters.MaxItems + 1,
-            owner = parameters.OwnerName?.ToUpper(),
-            package = parameters.PackageName?.ToUpper(),
-            procedure = parameters.ProcedureName?.ToUpper(),
-            keyword = parameters.FilterKeyword?.ToUpper()
+            max = args.MaxItems + 1,
+            owner = args.OwnerName?.ToUpper(),
+            package = args.PackageName?.ToUpper(),
+            procedure = args.ProcedureName?.ToUpper(),
+            keyword = args.FilterKeyword?.ToUpper()
         };
 
         var retryPolicy = GetRetryPolicy<ICollection<OracleProcedure>>();
         return await retryPolicy.ExecuteAsync(async () =>
         {
-            await using var connection = CreateOracleConnection(parameters);
+            await using var connection = CreateOracleConnection(args);
             var oracleProcedures = await connection.QueryAsync<OracleProcedure>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
             return oracleProcedures
                 .Distinct()
@@ -178,7 +178,7 @@ public class OracleService : IOracleService
         });
     }
 
-    public async Task<ICollection<OracleArgument>> GetOracleArgumentsAsync(OracleParameters parameters, CancellationToken cancellationToken)
+    public async Task<ICollection<OracleArgument>> GetOracleArgumentsAsync(OracleArgs args, CancellationToken cancellationToken)
     {
         var sqlBuilder = new StringBuilder
         (
@@ -190,21 +190,21 @@ public class OracleService : IOracleService
             """
         );
 
-        if (!string.IsNullOrWhiteSpace(parameters.OwnerName))
+        if (!string.IsNullOrWhiteSpace(args.OwnerName))
         {
             sqlBuilder.AppendLine(" AND UPPER(AA.OWNER) = :owner");
         }
         
-        sqlBuilder.AppendLine(!string.IsNullOrWhiteSpace(parameters.PackageName)
+        sqlBuilder.AppendLine(!string.IsNullOrWhiteSpace(args.PackageName)
             ? " AND UPPER(AA.PACKAGE_NAME) = :package"
             : " AND AA.PACKAGE_NAME IS NULL");
 
-        if (!string.IsNullOrWhiteSpace(parameters.ProcedureName))
+        if (!string.IsNullOrWhiteSpace(args.ProcedureName))
         {
             sqlBuilder.AppendLine(" AND UPPER(AA.OBJECT_NAME) = :procedure");
         }
         
-        if (!string.IsNullOrWhiteSpace(parameters.FunctionName))
+        if (!string.IsNullOrWhiteSpace(args.FunctionName))
         {
             sqlBuilder.AppendLine(" AND UPPER(AA.OBJECT_NAME) = :function");
         }
@@ -214,16 +214,16 @@ public class OracleService : IOracleService
         var sql = sqlBuilder.ToString();
         var sqlParameters = new
         {
-            owner = parameters.OwnerName?.ToUpper(),
-            package = parameters.PackageName?.ToUpper(),
-            procedure = parameters.ProcedureName?.ToUpper(),
-            function = parameters.FunctionName?.ToUpper()
+            owner = args.OwnerName?.ToUpper(),
+            package = args.PackageName?.ToUpper(),
+            procedure = args.ProcedureName?.ToUpper(),
+            function = args.FunctionName?.ToUpper()
         };
 
         var retryPolicy = GetRetryPolicy<ICollection<OracleArgument>>();
         return await retryPolicy.ExecuteAsync(async () =>
         {
-            await using var connection = CreateOracleConnection(parameters);
+            await using var connection = CreateOracleConnection(args);
             var oracleArguments = await connection.QueryAsync<OracleArgument>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
             return oracleArguments
                 .Distinct()
@@ -232,32 +232,32 @@ public class OracleService : IOracleService
         });
     }
 
-    public async Task<ICollection<OracleSource>> GetOracleSourcesAsync(OracleParameters parameters, CancellationToken cancellationToken)
+    public async Task<ICollection<OracleSource>> GetOracleSourcesAsync(OracleArgs args, CancellationToken cancellationToken)
     {
-        var unwrappedOracleSources = await GetUnwrappedOracleSourcesAsync(parameters, cancellationToken);
+        var unwrappedOracleSources = await GetUnwrappedOracleSourcesAsync(args, cancellationToken);
         if (unwrappedOracleSources.Any())
         {
             return unwrappedOracleSources;
         }
 
-        var wrappedOracleSources = await GetWrappedOracleSourcesAsync(parameters, cancellationToken);
+        var wrappedOracleSources = await GetWrappedOracleSourcesAsync(args, cancellationToken);
         return wrappedOracleSources;
     }
 
-    public async Task<ICollection<OracleObject>> GetOracleObjectsAsync(OracleParameters parameters, CancellationToken cancellationToken)
+    public async Task<ICollection<OracleObject>> GetOracleObjectsAsync(OracleArgs args, CancellationToken cancellationToken)
     {
-        var getFromAllObjectsSourceTask = GetOracleObjectsFromAllObjectsSourceAsync(parameters, cancellationToken);
+        var getFromAllObjectsSourceTask = GetOracleObjectsFromAllObjectsSourceAsync(args, cancellationToken);
         
-        var getPackagesFromAllProceduresSourceTask = parameters.ObjectTypes.IgnoreContains("PACKAGE")
-            ? GetOraclePackagesAsync(parameters, cancellationToken)
+        var getPackagesFromAllProceduresSourceTask = args.ObjectTypes.IgnoreContains("PACKAGE")
+            ? GetOraclePackagesAsync(args, cancellationToken)
             : GetCompletedTask(new List<OraclePackage>());
         
-        var getProceduresFromAllProceduresSourceTask = parameters.ObjectTypes.IgnoreContains("PROCEDURE") 
-            ? GetOracleProceduresAsync(parameters, cancellationToken)
+        var getProceduresFromAllProceduresSourceTask = args.ObjectTypes.IgnoreContains("PROCEDURE") 
+            ? GetOracleProceduresAsync(args, cancellationToken)
             : GetCompletedTask(new List<OracleProcedure>());
 
-        var getFunctionsFromAllProceduresSourceTask = parameters.ObjectTypes.IgnoreContains("FUNCTION")
-            ? GetOracleFunctionsAsync(parameters, cancellationToken)
+        var getFunctionsFromAllProceduresSourceTask = args.ObjectTypes.IgnoreContains("FUNCTION")
+            ? GetOracleFunctionsAsync(args, cancellationToken)
             : GetCompletedTask(new List<OracleFunction>());
 
         await Task.WhenAll(
@@ -317,13 +317,13 @@ public class OracleService : IOracleService
             .Distinct()
             .OrderBy(x => x.OwnerName)
             .ThenBy(x => x.ObjectName)
-            .Take(parameters.MaxItems + 1)
+            .Take(args.MaxItems + 1)
             .ToList();
 
         return objects;
     }
 
-    public async Task<ICollection<OracleSchema>> GetOracleSchemasAsync(OracleParameters parameters, CancellationToken cancellationToken)
+    public async Task<ICollection<OracleSchema>> GetOracleSchemasAsync(OracleArgs args, CancellationToken cancellationToken)
     {
         var sqlBuilder = new StringBuilder
         (
@@ -337,12 +337,12 @@ public class OracleService : IOracleService
             """
         );
         
-        if (!string.IsNullOrWhiteSpace(parameters.OwnerName))
+        if (!string.IsNullOrWhiteSpace(args.OwnerName))
         {
             sqlBuilder.AppendLine($" AND UPPER(AU.USERNAME) = :owner");
         }
 
-        if (!string.IsNullOrWhiteSpace(parameters.FilterKeyword))
+        if (!string.IsNullOrWhiteSpace(args.FilterKeyword))
         {
             sqlBuilder.AppendLine($" AND {HasKeyWord("AU.USERNAME")}");
         }
@@ -352,15 +352,15 @@ public class OracleService : IOracleService
         var sql = sqlBuilder.ToString();
         var sqlParameters = new
         {
-            max = parameters.MaxItems + 1,
-            owner = parameters.OwnerName?.ToUpper(),
-            keyword = parameters.FilterKeyword?.ToUpper()
+            max = args.MaxItems + 1,
+            owner = args.OwnerName?.ToUpper(),
+            keyword = args.FilterKeyword?.ToUpper()
         };
         
         var retryPolicy = GetRetryPolicy<ICollection<OracleSchema>>();
         return await retryPolicy.ExecuteAsync(async () =>
         {
-            await using var connection = CreateOracleConnection(parameters);
+            await using var connection = CreateOracleConnection(args);
             var oracleSchemas = await connection.QueryAsync<OracleSchema>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
             return oracleSchemas
                 .Distinct()
@@ -369,7 +369,7 @@ public class OracleService : IOracleService
         });
     }
 
-    public async Task<ICollection<OracleTable>> GetOracleTablesAsync(OracleParameters parameters, CancellationToken cancellationToken)
+    public async Task<ICollection<OracleTable>> GetOracleTablesAsync(OracleArgs args, CancellationToken cancellationToken)
     {
         var sqlBuilder = new StringBuilder
         (
@@ -384,17 +384,17 @@ public class OracleService : IOracleService
             """
         );
         
-        if (!string.IsNullOrWhiteSpace(parameters.OwnerName))
+        if (!string.IsNullOrWhiteSpace(args.OwnerName))
         {
             sqlBuilder.AppendLine(" AND UPPER(AT.OWNER) = :owner");
         }
 
-        if (!string.IsNullOrWhiteSpace(parameters.FilterKeyword))
+        if (!string.IsNullOrWhiteSpace(args.FilterKeyword))
         {
             sqlBuilder.AppendLine($" AND ( {HasKeyWord("AT.OWNER")} OR {HasKeyWord("AT.TABLE_NAME")} )");
         }
         
-        if (!string.IsNullOrWhiteSpace(parameters.TableName))
+        if (!string.IsNullOrWhiteSpace(args.TableName))
         {
             sqlBuilder.AppendLine(" AND UPPER(AT.TABLE_NAME) = :tabname");
         }
@@ -404,16 +404,16 @@ public class OracleService : IOracleService
         var sql = sqlBuilder.ToString();
         var sqlParameters = new
         {
-            max = parameters.MaxItems + 1,
-            owner = parameters.OwnerName?.ToUpper(),
-            tabname = parameters.TableName?.ToUpper(),
-            keyword = parameters.FilterKeyword?.ToUpper()
+            max = args.MaxItems + 1,
+            owner = args.OwnerName?.ToUpper(),
+            tabname = args.TableName?.ToUpper(),
+            keyword = args.FilterKeyword?.ToUpper()
         };
         
         var retryPolicy = GetRetryPolicy<ICollection<OracleTable>>();
         return await retryPolicy.ExecuteAsync(async () =>
         {
-            await using var connection = CreateOracleConnection(parameters);
+            await using var connection = CreateOracleConnection(args);
             var oracleTables = await connection.QueryAsync<OracleTable>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
             return oracleTables
                 .Distinct()
@@ -423,7 +423,7 @@ public class OracleService : IOracleService
         });
     }
 
-    public async Task<OracleTable> GetOracleTableAsync(OracleParameters parameters, CancellationToken cancellationToken)
+    public async Task<OracleTable> GetOracleTableAsync(OracleArgs args, CancellationToken cancellationToken)
     {
         var sqlBuilder = new StringBuilder
         (
@@ -446,15 +446,15 @@ public class OracleService : IOracleService
         var sql = sqlBuilder.ToString();
         var sqlParameters = new
         {
-            max = parameters.MaxItems + 1,
-            owner = parameters.OwnerName.ToUpper(),
-            tabname = parameters.TableName.ToUpper()
+            max = args.MaxItems + 1,
+            owner = args.OwnerName.ToUpper(),
+            tabname = args.TableName.ToUpper()
         };
         
         var retryPolicy = GetRetryPolicy<ICollection<OracleColumn>>();
         var tableColumns = await retryPolicy.ExecuteAsync(async () =>
         {
-            await using var connection = CreateOracleConnection(parameters);
+            await using var connection = CreateOracleConnection(args);
             var oracleColumns = await connection.QueryAsync<OracleColumn>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
             return oracleColumns
                 .Distinct()
@@ -464,13 +464,13 @@ public class OracleService : IOracleService
 
         return new OracleTable
         {
-            TableName = parameters.TableName,
-            OwnerName = parameters.OwnerName,
+            TableName = args.TableName,
+            OwnerName = args.OwnerName,
             TableColumns = tableColumns
         };
     }
 
-    public async Task<ICollection<OracleLock>> GetOracleLocksAsync(OracleParameters parameters, CancellationToken cancellationToken)
+    public async Task<ICollection<OracleLock>> GetOracleLocksAsync(OracleArgs args, CancellationToken cancellationToken)
     {
         var sqlBuilder = new StringBuilder
         (
@@ -494,7 +494,7 @@ public class OracleService : IOracleService
             """
         );
         
-        if (!string.IsNullOrWhiteSpace(parameters.OwnerName))
+        if (!string.IsNullOrWhiteSpace(args.OwnerName))
         {
             sqlBuilder.AppendLine(" AND UPPER(VS.SCHEMANAME) = :owner");
         }
@@ -504,15 +504,15 @@ public class OracleService : IOracleService
         var sql = sqlBuilder.ToString();
         var sqlParameters = new
         {
-            max = parameters.MaxItems + 1,
-            owner = parameters.OwnerName?.ToUpper(),
-            time = parameters.MinBlockingTimeInMinutes * 60
+            max = args.MaxItems + 1,
+            owner = args.OwnerName?.ToUpper(),
+            time = args.MinBlockingTimeInMinutes * 60
         };
         
         var retryPolicy = GetRetryPolicy<ICollection<OracleLock>>();
         return await retryPolicy.ExecuteAsync(async () =>
         {
-            await using var connection = CreateOracleConnection(parameters);
+            await using var connection = CreateOracleConnection(args);
             var oracleLocks = await connection.QueryAsync<OracleLock>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
             return oracleLocks
                 .Distinct()
@@ -521,7 +521,7 @@ public class OracleService : IOracleService
         });
     }
 
-    public async Task<ICollection<OracleSession>> GetOracleSessionsAsync(OracleParameters parameters, CancellationToken cancellationToken)
+    public async Task<ICollection<OracleSession>> GetOracleSessionsAsync(OracleArgs args, CancellationToken cancellationToken)
     {
         var sqlBuilder = new StringBuilder
         (
@@ -545,7 +545,7 @@ public class OracleService : IOracleService
             """
         );
         
-        if (!string.IsNullOrWhiteSpace(parameters.OwnerName))
+        if (!string.IsNullOrWhiteSpace(args.OwnerName))
         {
             sqlBuilder.AppendLine(" AND UPPER(VS.SCHEMANAME) = :owner");
         }
@@ -555,14 +555,14 @@ public class OracleService : IOracleService
         var sql = sqlBuilder.ToString();
         var sqlParameters = new
         {
-            max = parameters.MaxItems + 1,
-            owner = parameters.OwnerName?.ToUpper()
+            max = args.MaxItems + 1,
+            owner = args.OwnerName?.ToUpper()
         };
         
         var retryPolicy = GetRetryPolicy<ICollection<OracleSession>>();
         return await retryPolicy.ExecuteAsync(async () =>
         {
-            await using var connection = CreateOracleConnection(parameters);
+            await using var connection = CreateOracleConnection(args);
             var oracleSessions = await connection.QueryAsync<OracleSession>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
             return oracleSessions
                 .Distinct()
@@ -571,7 +571,7 @@ public class OracleService : IOracleService
         });
     }
     
-    private async Task<OracleInfo> GetOracleInfoFromVersionAsync(OracleParameters parameters, CancellationToken cancellationToken)
+    private async Task<OracleInfo> GetOracleInfoFromVersionAsync(OracleArgs args, CancellationToken cancellationToken)
     {
         var sqlBuilder = new StringBuilder
         (
@@ -589,13 +589,13 @@ public class OracleService : IOracleService
         var retryPolicy = GetRetryPolicy<OracleInfo>();
         return await retryPolicy.ExecuteAsync(async () =>
         {
-            await using var connection = CreateOracleConnection(parameters);
+            await using var connection = CreateOracleConnection(args);
             var infos = await connection.QueryAsync<OracleInfo>(sql, commandTimeout: Settings.DatabaseTimeoutInSeconds);
             return infos.SingleOrDefault();
         });
     }
     
-    private async Task<OracleInfo> GetOracleInfoFromInstanceAsync(OracleParameters parameters, CancellationToken cancellationToken)
+    private async Task<OracleInfo> GetOracleInfoFromInstanceAsync(OracleArgs args, CancellationToken cancellationToken)
     {
         var sqlBuilder = new StringBuilder
         (
@@ -617,13 +617,13 @@ public class OracleService : IOracleService
         var retryPolicy = GetRetryPolicy<OracleInfo>();
         return await retryPolicy.ExecuteAsync(async () =>
         {
-            await using var connection = CreateOracleConnection(parameters);
+            await using var connection = CreateOracleConnection(args);
             var infos = await connection.QueryAsync<OracleInfo>(sql, commandTimeout: Settings.DatabaseTimeoutInSeconds);
             return infos.SingleOrDefault();
         });
     }
     
-    private async Task<OracleInfo> GetOracleInfoFromDatabaseAsync(OracleParameters parameters, CancellationToken cancellationToken)
+    private async Task<OracleInfo> GetOracleInfoFromDatabaseAsync(OracleArgs args, CancellationToken cancellationToken)
     {
         var sqlBuilder = new StringBuilder
         (
@@ -643,23 +643,23 @@ public class OracleService : IOracleService
         var retryPolicy = GetRetryPolicy<OracleInfo>();
         return await retryPolicy.ExecuteAsync(async () =>
         {
-            await using var connection = CreateOracleConnection(parameters);
+            await using var connection = CreateOracleConnection(args);
             var infos = await connection.QueryAsync<OracleInfo>(sql, commandTimeout: Settings.DatabaseTimeoutInSeconds);
             return infos.SingleOrDefault();
         });
     }
 
-    private async Task<ICollection<OracleSource>> GetUnwrappedOracleSourcesAsync(OracleParameters parameters, CancellationToken cancellationToken)
+    private async Task<ICollection<OracleSource>> GetUnwrappedOracleSourcesAsync(OracleArgs args, CancellationToken cancellationToken)
     {
-        var name = !string.IsNullOrWhiteSpace(parameters.ProcedureName)
-            ? parameters.ProcedureName
-            : parameters.FunctionName;
+        var name = !string.IsNullOrWhiteSpace(args.ProcedureName)
+            ? args.ProcedureName
+            : args.FunctionName;
         
-        var type = !string.IsNullOrWhiteSpace(parameters.ProcedureName)
+        var type = !string.IsNullOrWhiteSpace(args.ProcedureName)
             ? "PROCEDURE"
             : "FUNCTION";
         
-        var hasOwnerName = !string.IsNullOrWhiteSpace(parameters.OwnerName)
+        var hasOwnerName = !string.IsNullOrWhiteSpace(args.OwnerName)
             ? "UPPER(OWNER) = :owner"
             : "1 = 1";
         
@@ -708,15 +708,15 @@ public class OracleService : IOracleService
         var sqlParameters = new
         {
             name = name?.ToUpper(),
-            owner = parameters.OwnerName?.ToUpper(),
-            package = parameters.PackageName?.ToUpper(),
+            owner = args.OwnerName?.ToUpper(),
+            package = args.PackageName?.ToUpper(),
             regex = $@"{name?.ToUpper()}(;|\(|\s)+"
         };
 
         var retryPolicy = GetRetryPolicy<ICollection<OracleSource>>();
         return await retryPolicy.ExecuteAsync(async () =>
         {
-            await using var connection = CreateOracleConnection(parameters);
+            await using var connection = CreateOracleConnection(args);
             var oracleSources = await connection.QueryAsync<OracleSource>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
             return oracleSources
                 .Distinct()
@@ -725,9 +725,9 @@ public class OracleService : IOracleService
         });
     }
     
-    private async Task<ICollection<OracleSource>> GetWrappedOracleSourcesAsync(OracleParameters parameters, CancellationToken cancellationToken)
+    private async Task<ICollection<OracleSource>> GetWrappedOracleSourcesAsync(OracleArgs args, CancellationToken cancellationToken)
     {
-        var hasOwnerName = !string.IsNullOrWhiteSpace(parameters.OwnerName)
+        var hasOwnerName = !string.IsNullOrWhiteSpace(args.OwnerName)
             ? "UPPER(OWNER) = :owner"
             : "1 = 1";
         
@@ -745,14 +745,14 @@ public class OracleService : IOracleService
         var sql = sqlBuilder.ToString();
         var sqlParameters = new
         {
-            owner = parameters.OwnerName?.ToUpper(),
-            package = parameters.PackageName?.ToUpper()
+            owner = args.OwnerName?.ToUpper(),
+            package = args.PackageName?.ToUpper()
         };
 
         var retryPolicy = GetRetryPolicy<ICollection<OracleSource>>();
         return await retryPolicy.ExecuteAsync(async () =>
         {
-            await using var connection = CreateOracleConnection(parameters);
+            await using var connection = CreateOracleConnection(args);
             var oracleSources = await connection.QueryAsync<OracleSource>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
             return oracleSources
                 .Distinct()
@@ -761,7 +761,7 @@ public class OracleService : IOracleService
         });
     }
     
-    private async Task<ICollection<OracleFunction>> GetOracleFunctionsFromAllProceduresAsync(OracleParameters parameters, CancellationToken cancellationToken)
+    private async Task<ICollection<OracleFunction>> GetOracleFunctionsFromAllProceduresAsync(OracleArgs args, CancellationToken cancellationToken)
     {
         var sqlBuilder = new StringBuilder
         (
@@ -780,22 +780,22 @@ public class OracleService : IOracleService
             """
         );
 
-        if (!string.IsNullOrWhiteSpace(parameters.OwnerName))
+        if (!string.IsNullOrWhiteSpace(args.OwnerName))
         {
             sqlBuilder.AppendLine(" AND UPPER(AP.OWNER) = :owner");
         }
         
-        if (!string.IsNullOrWhiteSpace(parameters.PackageName))
+        if (!string.IsNullOrWhiteSpace(args.PackageName))
         {
             sqlBuilder.AppendLine(" AND 1 = 2");
         }
         
-        if (!string.IsNullOrWhiteSpace(parameters.FunctionName))
+        if (!string.IsNullOrWhiteSpace(args.FunctionName))
         {
             sqlBuilder.AppendLine(" AND UPPER(AP.OBJECT_NAME) = :function");
         }
 
-        if (!string.IsNullOrWhiteSpace(parameters.FilterKeyword))
+        if (!string.IsNullOrWhiteSpace(args.FilterKeyword))
         {
             sqlBuilder.AppendLine($" AND ({HasKeyWord("AP.OWNER")} OR {HasKeyWord("AP.OBJECT_NAME")})");
         }
@@ -805,16 +805,16 @@ public class OracleService : IOracleService
         var sql = sqlBuilder.ToString();
         var sqlParameters = new
         {
-            max = parameters.MaxItems + 1,
-            owner = parameters.OwnerName?.ToUpper(),
-            function = parameters.FunctionName?.ToUpper(),
-            keyword = parameters.FilterKeyword?.ToUpper()
+            max = args.MaxItems + 1,
+            owner = args.OwnerName?.ToUpper(),
+            function = args.FunctionName?.ToUpper(),
+            keyword = args.FilterKeyword?.ToUpper()
         };
 
         var retryPolicy = GetRetryPolicy<ICollection<OracleFunction>>();
         return await retryPolicy.ExecuteAsync(async () =>
         {
-            await using var connection = CreateOracleConnection(parameters);
+            await using var connection = CreateOracleConnection(args);
             var oracleFunctions = await connection.QueryAsync<OracleFunction>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
             return oracleFunctions
                 .Distinct()
@@ -824,7 +824,7 @@ public class OracleService : IOracleService
         });
     }
     
-    private async Task<ICollection<OracleFunction>> GetOracleFunctionsFromAllArgumentsAsync(OracleParameters parameters, CancellationToken cancellationToken)
+    private async Task<ICollection<OracleFunction>> GetOracleFunctionsFromAllArgumentsAsync(OracleArgs args, CancellationToken cancellationToken)
     {
         var sqlBuilder = new StringBuilder
         (
@@ -843,22 +843,22 @@ public class OracleService : IOracleService
             """
         );
 
-        if (!string.IsNullOrWhiteSpace(parameters.OwnerName))
+        if (!string.IsNullOrWhiteSpace(args.OwnerName))
         {
             sqlBuilder.AppendLine(" AND UPPER(AG.OWNER) = :owner");
         }
         
-        if (!string.IsNullOrWhiteSpace(parameters.PackageName))
+        if (!string.IsNullOrWhiteSpace(args.PackageName))
         {
             sqlBuilder.AppendLine(" AND UPPER(AG.PACKAGE_NAME) = :package");
         }
         
-        if (!string.IsNullOrWhiteSpace(parameters.FunctionName))
+        if (!string.IsNullOrWhiteSpace(args.FunctionName))
         {
             sqlBuilder.AppendLine(" AND UPPER(AG.OBJECT_NAME) = :function");
         }
 
-        if (!string.IsNullOrWhiteSpace(parameters.FilterKeyword))
+        if (!string.IsNullOrWhiteSpace(args.FilterKeyword))
         {
             sqlBuilder.AppendLine($" AND ({HasKeyWord("AG.OWNER")} OR {HasKeyWord("AG.PACKAGE_NAME")} OR {HasKeyWord("AG.OBJECT_NAME")})");
         }
@@ -868,17 +868,17 @@ public class OracleService : IOracleService
         var sql = sqlBuilder.ToString();
         var sqlParameters = new
         {
-            max = parameters.MaxItems + 1,
-            owner = parameters.OwnerName?.ToUpper(),
-            package = parameters.PackageName?.ToUpper(),
-            function = parameters.FunctionName?.ToUpper(),
-            keyword = parameters.FilterKeyword?.ToUpper()
+            max = args.MaxItems + 1,
+            owner = args.OwnerName?.ToUpper(),
+            package = args.PackageName?.ToUpper(),
+            function = args.FunctionName?.ToUpper(),
+            keyword = args.FilterKeyword?.ToUpper()
         };
 
         var retryPolicy = GetRetryPolicy<ICollection<OracleFunction>>();
         return await retryPolicy.ExecuteAsync(async () =>
         {
-            await using var connection = CreateOracleConnection(parameters);
+            await using var connection = CreateOracleConnection(args);
             var oracleFunctions = await connection.QueryAsync<OracleFunction>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
             return oracleFunctions
                 .Distinct()
@@ -888,7 +888,7 @@ public class OracleService : IOracleService
         });
     }
 
-    private async Task<ICollection<OracleObject>> GetOracleObjectsFromAllObjectsSourceAsync(OracleParameters parameters, CancellationToken cancellationToken)
+    private async Task<ICollection<OracleObject>> GetOracleObjectsFromAllObjectsSourceAsync(OracleArgs args, CancellationToken cancellationToken)
     {
         var sqlBuilder = new StringBuilder
         (
@@ -905,17 +905,17 @@ public class OracleService : IOracleService
             """
         );
 
-        if (!string.IsNullOrWhiteSpace(parameters.OwnerName))
+        if (!string.IsNullOrWhiteSpace(args.OwnerName))
         {
             sqlBuilder.AppendLine(" AND UPPER(AO.OWNER) = :owner");
         }
 
-        if (!string.IsNullOrWhiteSpace(parameters.FilterKeyword))
+        if (!string.IsNullOrWhiteSpace(args.FilterKeyword))
         {
             sqlBuilder.AppendLine($" AND ({HasKeyWord("AO.OWNER")} OR {HasKeyWord("AO.OBJECT_NAME")} OR {HasKeyWord("AO.OBJECT_TYPE")})");
         }
 
-        if (parameters.ObjectTypes?.Any() == true)
+        if (args.ObjectTypes?.Any() == true)
         {
             sqlBuilder.AppendLine(" AND UPPER(AO.OBJECT_TYPE) IN :types");
         }
@@ -925,16 +925,16 @@ public class OracleService : IOracleService
         var sql = sqlBuilder.ToString();
         var sqlParameters = new
         {
-            max = parameters.MaxItems + 1,
-            owner = parameters.OwnerName?.ToUpper(),
-            keyword = parameters.FilterKeyword?.ToUpper(),
-            types = parameters.ObjectTypes?.Select(x => x.ToUpper())
+            max = args.MaxItems + 1,
+            owner = args.OwnerName?.ToUpper(),
+            keyword = args.FilterKeyword?.ToUpper(),
+            types = args.ObjectTypes?.Select(x => x.ToUpper())
         };
 
         var retryPolicy = GetRetryPolicy<ICollection<OracleObject>>();
         return await retryPolicy.ExecuteAsync(async () =>
         {
-            await using var connection = CreateOracleConnection(parameters);
+            await using var connection = CreateOracleConnection(args);
             var oracleObjects = await connection.QueryAsync<OracleObject>(sql, sqlParameters, commandTimeout: Settings.DatabaseTimeoutInSeconds);
             return oracleObjects
                 .Distinct()
@@ -944,20 +944,20 @@ public class OracleService : IOracleService
         });
     }
 
-    private OracleConnection CreateOracleConnection(OracleParameters parameters)
+    private OracleConnection CreateOracleConnection(OracleArgs args)
     {
-        if (parameters.DatabaseName.IsConnectionString())
+        if (args.DatabaseName.IsConnectionString())
         {
-            return new OracleConnection(parameters.DatabaseName);
+            return new OracleConnection(args.DatabaseName);
         }
         
         var connectionString = _settings.Databases
-            .SingleOrDefault(x => x.DatabaseName.IgnoreEquals(parameters.DatabaseName))
+            .SingleOrDefault(x => x.DatabaseName.IgnoreEquals(args.DatabaseName))
             ?.ConnectionString;
 
         if (string.IsNullOrWhiteSpace(connectionString))
         {
-            throw new ArgumentException($"ConnectionString not found for database name '{parameters.DatabaseName}'");
+            throw new ArgumentException($"ConnectionString not found for database name '{args.DatabaseName}'");
         }
 
         return new OracleConnection(connectionString);

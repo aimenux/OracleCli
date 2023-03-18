@@ -2,16 +2,16 @@ namespace App.Services.Oracle;
 
 public interface IOracleService
 {
-    Task<OracleInfo> GetOracleInfoAsync(OracleParameters parameters, CancellationToken cancellationToken);
-    Task<ICollection<OraclePackage>> GetOraclePackagesAsync(OracleParameters parameters, CancellationToken cancellationToken);
-    Task<ICollection<OracleFunction>> GetOracleFunctionsAsync(OracleParameters parameters, CancellationToken cancellationToken);
-    Task<ICollection<OracleProcedure>> GetOracleProceduresAsync(OracleParameters parameters, CancellationToken cancellationToken);
-    Task<ICollection<OracleArgument>> GetOracleArgumentsAsync(OracleParameters parameters, CancellationToken cancellationToken);
-    Task<ICollection<OracleSource>> GetOracleSourcesAsync(OracleParameters parameters, CancellationToken cancellationToken);
-    Task<ICollection<OracleObject>> GetOracleObjectsAsync(OracleParameters parameters, CancellationToken cancellationToken);
-    Task<ICollection<OracleSchema>> GetOracleSchemasAsync(OracleParameters parameters, CancellationToken cancellationToken);
-    Task<ICollection<OracleTable>> GetOracleTablesAsync(OracleParameters parameters, CancellationToken cancellationToken);
-    Task<OracleTable> GetOracleTableAsync(OracleParameters parameters, CancellationToken cancellationToken);
-    Task<ICollection<OracleLock>> GetOracleLocksAsync(OracleParameters parameters, CancellationToken cancellationToken);
-    Task<ICollection<OracleSession>> GetOracleSessionsAsync(OracleParameters parameters, CancellationToken cancellationToken);
+    Task<OracleInfo> GetOracleInfoAsync(OracleArgs args, CancellationToken cancellationToken);
+    Task<ICollection<OraclePackage>> GetOraclePackagesAsync(OracleArgs args, CancellationToken cancellationToken);
+    Task<ICollection<OracleFunction>> GetOracleFunctionsAsync(OracleArgs args, CancellationToken cancellationToken);
+    Task<ICollection<OracleProcedure>> GetOracleProceduresAsync(OracleArgs args, CancellationToken cancellationToken);
+    Task<ICollection<OracleArgument>> GetOracleArgumentsAsync(OracleArgs args, CancellationToken cancellationToken);
+    Task<ICollection<OracleSource>> GetOracleSourcesAsync(OracleArgs args, CancellationToken cancellationToken);
+    Task<ICollection<OracleObject>> GetOracleObjectsAsync(OracleArgs args, CancellationToken cancellationToken);
+    Task<ICollection<OracleSchema>> GetOracleSchemasAsync(OracleArgs args, CancellationToken cancellationToken);
+    Task<ICollection<OracleTable>> GetOracleTablesAsync(OracleArgs args, CancellationToken cancellationToken);
+    Task<OracleTable> GetOracleTableAsync(OracleArgs args, CancellationToken cancellationToken);
+    Task<ICollection<OracleLock>> GetOracleLocksAsync(OracleArgs args, CancellationToken cancellationToken);
+    Task<ICollection<OracleSession>> GetOracleSessionsAsync(OracleArgs args, CancellationToken cancellationToken);
 }

@@ -40,7 +40,7 @@ public class TablesCommand : AbstractCommand
 
     protected override async Task ExecuteAsync(CommandLineApplication app, CancellationToken cancellationToken = default)
     {
-        var parameters = new OracleParameters
+        var oracleArgs = new OracleArgs
         {
             DatabaseName = DatabaseName,
             TableName = TableName,
@@ -51,17 +51,17 @@ public class TablesCommand : AbstractCommand
 
         var oracleTables = await ConsoleService.RenderStatusAsync(async () =>
         {
-            var results = await _oracleService.GetOracleTablesAsync(parameters, cancellationToken);
-            ConsoleService.RenderOracleTables(results, parameters);
+            var results = await _oracleService.GetOracleTablesAsync(oracleArgs, cancellationToken);
+            ConsoleService.RenderOracleTables(results, oracleArgs);
             return results;
         });
 
         if (oracleTables.Count == 1 && ConsoleService.GetYesOrNoAnswer("display table columns on console screen", true))
         {
             var oracleTable = oracleTables.Single();
-            parameters = parameters.WithTable(oracleTable.OwnerName, oracleTable.TableName);
-            oracleTable = await _oracleService.GetOracleTableAsync(parameters, cancellationToken);
-            ConsoleService.RenderOracleTable(oracleTable, parameters);
+            oracleArgs = oracleArgs.WithTable(oracleTable.OwnerName, oracleTable.TableName);
+            oracleTable = await _oracleService.GetOracleTableAsync(oracleArgs, cancellationToken);
+            ConsoleService.RenderOracleTable(oracleTable, oracleArgs);
         }
     }
 }

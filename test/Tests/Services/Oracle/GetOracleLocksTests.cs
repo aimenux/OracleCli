@@ -32,7 +32,7 @@ public class GetOracleLocksTests
         var options = Options.Create(settings);
         var logger = NullLogger<OracleService>.Instance;
 
-        var parameters = new OracleParameters
+        var oracleArgs = new OracleArgs
         {
             DatabaseName = databaseName,
             OwnerName = ownerName,
@@ -43,7 +43,7 @@ public class GetOracleLocksTests
         var service = new OracleService(options, logger);
 
         // act
-        var locks = await service.GetOracleLocksAsync(parameters, CancellationToken.None);
+        var locks = await service.GetOracleLocksAsync(oracleArgs, CancellationToken.None);
 
         // assert
         locks.Should().NotBeNull().And.BeEmpty();

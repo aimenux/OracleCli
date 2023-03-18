@@ -27,15 +27,15 @@ public class InfosCommand : AbstractCommand
 
     protected override async Task ExecuteAsync(CommandLineApplication app, CancellationToken cancellationToken = default)
     {
-        var parameters = new OracleParameters
+        var oracleArgs = new OracleArgs
         {
             DatabaseName = DatabaseName
         };
 
         await ConsoleService.RenderStatusAsync(async () =>
         {
-            var oracleInfo = await _oracleService.GetOracleInfoAsync(parameters, cancellationToken);
-            ConsoleService.RenderOracleInfo(oracleInfo, parameters);
+            var oracleInfo = await _oracleService.GetOracleInfoAsync(oracleArgs, cancellationToken);
+            ConsoleService.RenderOracleInfo(oracleInfo, oracleArgs);
         });
     }
 }

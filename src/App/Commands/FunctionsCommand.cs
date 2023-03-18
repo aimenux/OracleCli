@@ -43,7 +43,7 @@ public class FunctionsCommand : AbstractCommand
 
     protected override async Task ExecuteAsync(CommandLineApplication app, CancellationToken cancellationToken = default)
     {
-        var parameters = new OracleParameters
+        var oracleArgs = new OracleArgs
         {
             DatabaseName = DatabaseName,
             PackageName = PackageName,
@@ -55,8 +55,8 @@ public class FunctionsCommand : AbstractCommand
 
         await ConsoleService.RenderStatusAsync(async () =>
         {
-            var oracleFunctions = await _oracleService.GetOracleFunctionsAsync(parameters, cancellationToken);
-            ConsoleService.RenderOracleFunctions(oracleFunctions, parameters);
+            var oracleFunctions = await _oracleService.GetOracleFunctionsAsync(oracleArgs, cancellationToken);
+            ConsoleService.RenderOracleFunctions(oracleFunctions, oracleArgs);
         });
     }
 }

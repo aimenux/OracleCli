@@ -40,7 +40,7 @@ public class ObjectsCommand : AbstractCommand
 
     protected override async Task ExecuteAsync(CommandLineApplication app, CancellationToken cancellationToken = default)
     {
-        var parameters = new OracleParameters
+        var oracleArgs = new OracleArgs
         {
             DatabaseName = DatabaseName,
             OwnerName = OwnerName,
@@ -51,8 +51,8 @@ public class ObjectsCommand : AbstractCommand
 
         await ConsoleService.RenderStatusAsync(async () =>
         {
-            var oracleObjects = await _oracleService.GetOracleObjectsAsync(parameters, cancellationToken);
-            ConsoleService.RenderOracleObjects(oracleObjects, parameters);
+            var oracleObjects = await _oracleService.GetOracleObjectsAsync(oracleArgs, cancellationToken);
+            ConsoleService.RenderOracleObjects(oracleObjects, oracleArgs);
         });
     }
 }

@@ -33,7 +33,7 @@ public class GetOracleSchemasTests
         var options = Options.Create(settings);
         var logger = NullLogger<OracleService>.Instance;
 
-        var parameters = new OracleParameters
+        var oracleArgs = new OracleArgs
         {
             DatabaseName = databaseName,
             FilterKeyword = filterKeyword,
@@ -43,7 +43,7 @@ public class GetOracleSchemasTests
         var service = new OracleService(options, logger);
 
         // act
-        var schemas = await service.GetOracleSchemasAsync(parameters, CancellationToken.None);
+        var schemas = await service.GetOracleSchemasAsync(oracleArgs, CancellationToken.None);
 
         // assert
         schemas.Should().NotBeEmpty();

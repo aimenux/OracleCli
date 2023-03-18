@@ -35,7 +35,7 @@ public class GetOracleSourcesTests
         var options = Options.Create(settings);
         var logger = NullLogger<OracleService>.Instance;
 
-        var parameters = new OracleParameters
+        var oracleArgs = new OracleArgs
         {
             OwnerName = ownerName,
             DatabaseName = databaseName,
@@ -47,7 +47,7 @@ public class GetOracleSourcesTests
         var service = new OracleService(options, logger);
 
         // act
-        var arguments = await service.GetOracleSourcesAsync(parameters, CancellationToken.None);
+        var arguments = await service.GetOracleSourcesAsync(oracleArgs, CancellationToken.None);
 
         // assert
         arguments.Should().NotBeEmpty();

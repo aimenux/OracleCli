@@ -32,7 +32,7 @@ public class SessionsCommand : AbstractCommand
 
     protected override async Task ExecuteAsync(CommandLineApplication app, CancellationToken cancellationToken = default)
     {
-        var parameters = new OracleParameters
+        var oracleArgs = new OracleArgs
         {
             DatabaseName = DatabaseName,
             OwnerName = OwnerName,
@@ -41,8 +41,8 @@ public class SessionsCommand : AbstractCommand
 
         await ConsoleService.RenderStatusAsync(async () =>
         {
-            var oracleSessions = await _oracleService.GetOracleSessionsAsync(parameters, cancellationToken);
-            ConsoleService.RenderOracleSessions(oracleSessions, parameters);
+            var oracleSessions = await _oracleService.GetOracleSessionsAsync(oracleArgs, cancellationToken);
+            ConsoleService.RenderOracleSessions(oracleSessions, oracleArgs);
         });
     }
 }

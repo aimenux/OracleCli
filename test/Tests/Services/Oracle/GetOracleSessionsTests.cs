@@ -31,7 +31,7 @@ public class GetOracleSessionsTests
         var options = Options.Create(settings);
         var logger = NullLogger<OracleService>.Instance;
 
-        var parameters = new OracleParameters
+        var oracleArgs = new OracleArgs
         {
             DatabaseName = databaseName,
             OwnerName = ownerName,
@@ -41,7 +41,7 @@ public class GetOracleSessionsTests
         var service = new OracleService(options, logger);
 
         // act
-        var sessions = await service.GetOracleSessionsAsync(parameters, CancellationToken.None);
+        var sessions = await service.GetOracleSessionsAsync(oracleArgs, CancellationToken.None);
 
         // assert
         sessions.Should().NotBeNull().And.BeEmpty();

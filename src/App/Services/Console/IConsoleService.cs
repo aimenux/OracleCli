@@ -18,16 +18,16 @@ public interface IConsoleService
     bool GetYesOrNoAnswer(string text, bool defaultAnswer);
     void RenderValidationErrors(ValidationErrors validationErrors);
     Task CopyTextToClipboardAsync(string text, CancellationToken cancellationToken);
-    void RenderOracleInfo(OracleInfo oracleInfo, OracleParameters parameters);
-    void RenderOracleTable(OracleTable oracleTable, OracleParameters parameters);
-    void RenderOracleTables(ICollection<OracleTable> oracleTables, OracleParameters parameters);
-    void RenderOracleObjects(ICollection<OracleObject> oracleObjects, OracleParameters parameters);
-    void RenderOracleSchemas(ICollection<OracleSchema> oracleSchemas, OracleParameters parameters);
-    void RenderOracleSources(ICollection<OracleSource> oracleSources, OracleParameters parameters);
-    void RenderOraclePackages(ICollection<OraclePackage> oraclePackages, OracleParameters parameters);
-    void RenderOracleArguments(ICollection<OracleArgument> oracleArguments, OracleParameters parameters);
-    void RenderOracleFunctions(ICollection<OracleFunction> oracleFunctions, OracleParameters parameters);
-    void RenderOracleProcedures(ICollection<OracleProcedure> oracleProcedures, OracleParameters parameters);
-    void RenderOracleLocks(ICollection<OracleLock> oracleLocks, OracleParameters parameters);
-    void RenderOracleSessions(ICollection<OracleSession> oracleSessions, OracleParameters parameters);
+    void RenderOracleInfo(OracleInfo oracleInfo, OracleArgs args);
+    void RenderOracleTable(OracleTable oracleTable, OracleArgs args);
+    void RenderOracleTables(ICollection<OracleTable> oracleTables, OracleArgs args);
+    void RenderOracleObjects(ICollection<OracleObject> oracleObjects, OracleArgs args);
+    void RenderOracleSchemas(ICollection<OracleSchema> oracleSchemas, OracleArgs args);
+    void RenderOracleSources(ICollection<OracleSource> oracleSources, OracleArgs args);
+    void RenderOraclePackages(ICollection<OraclePackage> oraclePackages, OracleArgs args);
+    void RenderOracleArguments(ICollection<OracleArgument> oracleArguments, OracleArgs args);
+    void RenderOracleFunctions(ICollection<OracleFunction> oracleFunctions, OracleArgs args);
+    void RenderOracleProcedures(ICollection<OracleProcedure> oracleProcedures, OracleArgs args);
+    void RenderOracleLocks(ICollection<OracleLock> oracleLocks, OracleArgs args);
+    void RenderOracleSessions(ICollection<OracleSession> oracleSessions, OracleArgs args);
 }

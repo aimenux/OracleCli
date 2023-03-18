@@ -33,7 +33,7 @@ public class GetOraclePackagesTests
         var options = Options.Create(settings);
         var logger = NullLogger<OracleService>.Instance;
 
-        var parameters = new OracleParameters
+        var oracleArgs = new OracleArgs
         {
             DatabaseName = databaseName,
             FilterKeyword = filterKeyword,
@@ -43,7 +43,7 @@ public class GetOraclePackagesTests
         var service = new OracleService(options, logger);
 
         // act
-        var packages = await service.GetOraclePackagesAsync(parameters, CancellationToken.None);
+        var packages = await service.GetOraclePackagesAsync(oracleArgs, CancellationToken.None);
 
         // assert
         packages.Should().NotBeEmpty();

@@ -36,7 +36,7 @@ public class LocksCommand : AbstractCommand
 
     protected override async Task ExecuteAsync(CommandLineApplication app, CancellationToken cancellationToken = default)
     {
-        var parameters = new OracleParameters
+        var oracleArgs = new OracleArgs
         {
             DatabaseName = DatabaseName,
             OwnerName = OwnerName,
@@ -46,8 +46,8 @@ public class LocksCommand : AbstractCommand
 
         await ConsoleService.RenderStatusAsync(async () =>
         {
-            var oracleLocks = await _oracleService.GetOracleLocksAsync(parameters, cancellationToken);
-            ConsoleService.RenderOracleLocks(oracleLocks, parameters);
+            var oracleLocks = await _oracleService.GetOracleLocksAsync(oracleArgs, cancellationToken);
+            ConsoleService.RenderOracleLocks(oracleLocks, oracleArgs);
         });
     }
 }

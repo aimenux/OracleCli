@@ -32,7 +32,7 @@ public class GetOracleTablesTests
         var options = Options.Create(settings);
         var logger = NullLogger<OracleService>.Instance;
 
-        var parameters = new OracleParameters
+        var oracleArgs = new OracleArgs
         {
             DatabaseName = databaseName,
             OwnerName = ownerName,
@@ -42,7 +42,7 @@ public class GetOracleTablesTests
         var service = new OracleService(options, logger);
 
         // act
-        var table = await service.GetOracleTableAsync(parameters, CancellationToken.None);
+        var table = await service.GetOracleTableAsync(oracleArgs, CancellationToken.None);
 
         // assert
         table.Should().NotBeNull();
@@ -64,7 +64,7 @@ public class GetOracleTablesTests
         var options = Options.Create(settings);
         var logger = NullLogger<OracleService>.Instance;
 
-        var parameters = new OracleParameters
+        var oracleArgs = new OracleArgs
         {
             DatabaseName = databaseName,
             FilterKeyword = filterKeyword,
@@ -74,7 +74,7 @@ public class GetOracleTablesTests
         var service = new OracleService(options, logger);
 
         // act
-        var tables = await service.GetOracleTablesAsync(parameters, CancellationToken.None);
+        var tables = await service.GetOracleTablesAsync(oracleArgs, CancellationToken.None);
 
         // assert
         tables.Should().NotBeEmpty();
