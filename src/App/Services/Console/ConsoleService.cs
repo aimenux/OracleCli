@@ -296,6 +296,7 @@ public class ConsoleService : IConsoleService
             .Title(title)
             .AddColumn(new TableColumn("[u]#[/]").Centered())
             .AddColumn(new TableColumn("[u]SchemaName[/]").Centered())
+            .AddColumn(new TableColumn("[u]IsMaintainedByOracle[/]").Centered())
             .AddColumn(new TableColumn("[u]CreationDate[/]").Centered())
             .Caption($"[yellow][bold]{databaseName}[/][/]");
 
@@ -306,6 +307,7 @@ public class ConsoleService : IConsoleService
             table.AddRow(
                 IndexMarkup(index++),
                 ToMarkup(result.SchemaName),
+                ToMarkup(result.IsMaintainedByOracle),
                 ToMarkup(result.CreationDate.ToString("g")));
         }
 

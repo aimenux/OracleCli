@@ -3,14 +3,16 @@ namespace App.Services.Oracle;
 public sealed class OracleSchema : IEquatable<OracleSchema>
 {
     public string SchemaName { get; init; }
-    
+    public string IsMaintainedByOracle { get; init; }
     public DateTime CreationDate { get; init; }
 
     public bool Equals(OracleSchema other)
     {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;
-        return SchemaName == other.SchemaName && CreationDate.Equals(other.CreationDate);
+        return SchemaName == other.SchemaName && 
+               IsMaintainedByOracle == other.IsMaintainedByOracle &&
+               CreationDate.Equals(other.CreationDate);
     }
 
     public override bool Equals(object obj)
@@ -20,6 +22,6 @@ public sealed class OracleSchema : IEquatable<OracleSchema>
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(SchemaName, CreationDate);
+        return HashCode.Combine(SchemaName, IsMaintainedByOracle, CreationDate);
     }
 }

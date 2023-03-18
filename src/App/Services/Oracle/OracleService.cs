@@ -330,6 +330,7 @@ public class OracleService : IOracleService
             """
                   SELECT 
                     AU.USERNAME AS SchemaName, 
+                    AU.ORACLE_MAINTAINED AS IsMaintainedByOracle,
                     AU.CREATED AS CreationDate 
                   FROM ALL_USERS AU
                   WHERE 1 = 1 

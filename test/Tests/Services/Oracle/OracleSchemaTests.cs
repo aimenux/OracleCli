@@ -6,20 +6,22 @@ namespace Tests.Services.Oracle;
 public class OracleSchemaTests
 {
     [Theory]
-    [InlineData("SYS", "01/06/2020")]
-    [InlineData("OPS", "01/08/2022")]
-    public void Should_Oracle_Schemas_Be_Equals(string schemaName, string creationDate)
+    [InlineData("SYS", "Y", "01/06/2020")]
+    [InlineData("OPS", "Y", "01/08/2022")]
+    public void Should_Oracle_Schemas_Be_Equals(string schemaName, string isMaintainedByOracle, string creationDate)
     {
         // arrange
         var schemaDate = DateTime.Parse(creationDate);
         var obj1 = new OracleSchema
         {
             SchemaName = schemaName,
+            IsMaintainedByOracle = isMaintainedByOracle,
             CreationDate = schemaDate
         };
         var obj2 = new OracleSchema
         {
             SchemaName = schemaName,
+            IsMaintainedByOracle = isMaintainedByOracle,
             CreationDate = schemaDate
         };
 
@@ -42,6 +44,7 @@ public class OracleSchemaTests
         var obj1 = new OracleSchema
         {
             SchemaName = "schema",
+            IsMaintainedByOracle = "Y",
             CreationDate = date1
         };
         
@@ -49,6 +52,7 @@ public class OracleSchemaTests
         var obj2 = new OracleSchema
         {
             SchemaName = "schema",
+            IsMaintainedByOracle = "Y",
             CreationDate = date2
         };
         
