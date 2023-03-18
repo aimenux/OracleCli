@@ -145,12 +145,12 @@ public class ConsoleService : IConsoleService
         }
     }
 
-    public void RenderOracleInfo(OracleInfo oracleInfo, OracleArgs args)
+    public void RenderOracleInfo(OracleInfo oracleInfo, OracleArgs oracleArgs)
     {
         var description = oracleInfo.Description
             .Replace("Production", "")
             .Trim(' ', '-');
-        var databaseName = args.DatabaseName.ToUpper();
+        var databaseName = oracleArgs.DatabaseName.ToUpper();
         var title = $"[yellow][bold]{description}[/][/]";
         var table = new Table()
             .BorderColor(Color.White)
@@ -185,11 +185,11 @@ public class ConsoleService : IConsoleService
         AnsiConsole.WriteLine();
     }
 
-    public void RenderOracleTable(OracleTable oracleTable, OracleArgs args)
+    public void RenderOracleTable(OracleTable oracleTable, OracleArgs oracleArgs)
     {
-        var ownerName = args.OwnerName.ToUpper();
-        var tableName = args.TableName.ToUpper();
-        var databaseName = args.DatabaseName.ToUpper();
+        var ownerName = oracleArgs.OwnerName.ToUpper();
+        var tableName = oracleArgs.TableName.ToUpper();
+        var databaseName = oracleArgs.DatabaseName.ToUpper();
         var title = $"[yellow][bold]Table {ownerName}.{tableName}[/][/]";
         var table = new Table()
             .BorderColor(Color.White)
@@ -216,11 +216,11 @@ public class ConsoleService : IConsoleService
         AnsiConsole.WriteLine();
     }
 
-    public void RenderOracleTables(ICollection<OracleTable> oracleTables, OracleArgs args)
+    public void RenderOracleTables(ICollection<OracleTable> oracleTables, OracleArgs oracleArgs)
     {
-        var databaseName = args.DatabaseName.ToUpper();
-        var title = oracleTables.Count > args.MaxItems
-            ? $"[yellow][bold]Found more than {args.MaxItems} table(s)[/][/]"
+        var databaseName = oracleArgs.DatabaseName.ToUpper();
+        var title = oracleTables.Count > oracleArgs.MaxItems
+            ? $"[yellow][bold]Found more than {oracleArgs.MaxItems} table(s)[/][/]"
             : $"[yellow][bold]Found {oracleTables.Count} table(s)[/][/]";
         var table = new Table()
             .BorderColor(Color.White)
@@ -233,7 +233,7 @@ public class ConsoleService : IConsoleService
             .Caption($"[yellow][bold]{databaseName}[/][/]");
 
         var index = 1;
-        var count = Math.Min(oracleTables.Count, args.MaxItems);
+        var count = Math.Min(oracleTables.Count, oracleArgs.MaxItems);
         foreach (var result in oracleTables.Take(count))
         {
             table.AddRow(
@@ -248,11 +248,11 @@ public class ConsoleService : IConsoleService
         AnsiConsole.WriteLine();
     }
 
-    public void RenderOracleObjects(ICollection<OracleObject> oracleObjects, OracleArgs args)
+    public void RenderOracleObjects(ICollection<OracleObject> oracleObjects, OracleArgs oracleArgs)
     {
-        var databaseName = args.DatabaseName.ToUpper();
-        var title = oracleObjects.Count > args.MaxItems
-            ? $"[yellow][bold]Found more than {args.MaxItems} object(s)[/][/]"
+        var databaseName = oracleArgs.DatabaseName.ToUpper();
+        var title = oracleObjects.Count > oracleArgs.MaxItems
+            ? $"[yellow][bold]Found more than {oracleArgs.MaxItems} object(s)[/][/]"
             : $"[yellow][bold]Found {oracleObjects.Count} object(s)[/][/]";
         var table = new Table()
             .BorderColor(Color.White)
@@ -267,7 +267,7 @@ public class ConsoleService : IConsoleService
             .Caption($"[yellow][bold]{databaseName}[/][/]");
 
         var index = 1;
-        var count = Math.Min(oracleObjects.Count, args.MaxItems);
+        var count = Math.Min(oracleObjects.Count, oracleArgs.MaxItems);
         foreach (var result in oracleObjects.Take(count))
         {
             table.AddRow(
@@ -284,11 +284,11 @@ public class ConsoleService : IConsoleService
         AnsiConsole.WriteLine();
     }
 
-    public void RenderOracleSchemas(ICollection<OracleSchema> oracleSchemas, OracleArgs args)
+    public void RenderOracleSchemas(ICollection<OracleSchema> oracleSchemas, OracleArgs oracleArgs)
     {
-        var databaseName = args.DatabaseName.ToUpper();
-        var title = oracleSchemas.Count > args.MaxItems
-            ? $"[yellow][bold]Found more than {args.MaxItems} schema(s)[/][/]"
+        var databaseName = oracleArgs.DatabaseName.ToUpper();
+        var title = oracleSchemas.Count > oracleArgs.MaxItems
+            ? $"[yellow][bold]Found more than {oracleArgs.MaxItems} schema(s)[/][/]"
             : $"[yellow][bold]Found {oracleSchemas.Count} schema(s)[/][/]";
         var table = new Table()
             .BorderColor(Color.White)
@@ -300,7 +300,7 @@ public class ConsoleService : IConsoleService
             .Caption($"[yellow][bold]{databaseName}[/][/]");
 
         var index = 1;
-        var count = Math.Min(oracleSchemas.Count, args.MaxItems);
+        var count = Math.Min(oracleSchemas.Count, oracleArgs.MaxItems);
         foreach (var result in oracleSchemas.Take(count))
         {
             table.AddRow(
@@ -314,14 +314,14 @@ public class ConsoleService : IConsoleService
         AnsiConsole.WriteLine();
     }
 
-    public void RenderOracleSources(ICollection<OracleSource> oracleSources, OracleArgs args)
+    public void RenderOracleSources(ICollection<OracleSource> oracleSources, OracleArgs oracleArgs)
     {
-        var isProcedure = !string.IsNullOrWhiteSpace(args.ProcedureName);
+        var isProcedure = !string.IsNullOrWhiteSpace(oracleArgs.ProcedureName);
         var column = isProcedure ? "ProcedureName" : "FunctionName";
         var @object = isProcedure ? "procedure" : "function"; 
         var name = isProcedure
-            ? args.ProcedureName
-            : args.FunctionName;
+            ? oracleArgs.ProcedureName
+            : oracleArgs.FunctionName;
         
         if (oracleSources.Count == 0)
         {
@@ -329,7 +329,7 @@ public class ConsoleService : IConsoleService
             return;
         }
 
-        var databaseName = args.DatabaseName.ToUpper();
+        var databaseName = oracleArgs.DatabaseName.ToUpper();
         var lines = oracleSources.Count(x => !string.IsNullOrWhiteSpace(x.Text));
         var table = new Table()
             .BorderColor(Color.White)
@@ -341,20 +341,20 @@ public class ConsoleService : IConsoleService
             .Caption($"[yellow][bold]{databaseName}[/][/]");
         
         table.AddRow(
-            ToMarkup(args.PackageName),
+            ToMarkup(oracleArgs.PackageName),
             ToMarkup(name),
-            ToMarkupLink(args.OutputFile));
+            ToMarkupLink(oracleArgs.OutputFile));
         
         AnsiConsole.WriteLine();
         AnsiConsole.Write(table);
         AnsiConsole.WriteLine();
     }
 
-    public void RenderOraclePackages(ICollection<OraclePackage> oraclePackages, OracleArgs args)
+    public void RenderOraclePackages(ICollection<OraclePackage> oraclePackages, OracleArgs oracleArgs)
     {
-        var databaseName = args.DatabaseName.ToUpper();
-        var title = oraclePackages.Count > args.MaxItems
-            ? $"[yellow][bold]Found more than {args.MaxItems} package(s)[/][/]"
+        var databaseName = oracleArgs.DatabaseName.ToUpper();
+        var title = oraclePackages.Count > oracleArgs.MaxItems
+            ? $"[yellow][bold]Found more than {oracleArgs.MaxItems} package(s)[/][/]"
             : $"[yellow][bold]Found {oraclePackages.Count} package(s)[/][/]";
         var table = new Table()
             .BorderColor(Color.White)
@@ -368,7 +368,7 @@ public class ConsoleService : IConsoleService
             .Caption($"[yellow][bold]{databaseName}[/][/]");
 
         var index = 1;
-        var count = Math.Min(oraclePackages.Count, args.MaxItems);
+        var count = Math.Min(oraclePackages.Count, oracleArgs.MaxItems);
         foreach (var result in oraclePackages.Take(count))
         {
             table.AddRow(
@@ -384,20 +384,20 @@ public class ConsoleService : IConsoleService
         AnsiConsole.WriteLine();
     }
 
-    public void RenderOracleArguments(ICollection<OracleArgument> oracleArguments, OracleArgs args)
+    public void RenderOracleParameters(ICollection<OracleParameter> oracleParameters, OracleArgs oracleArgs)
     {
-        var databaseName = args.DatabaseName.ToUpper();
+        var databaseName = oracleArgs.DatabaseName.ToUpper();
         var table = new Table()
             .BorderColor(Color.White)
             .Border(TableBorder.Square)
-            .Title($"[yellow][bold]Found {oracleArguments.Count} argument(s)[/][/]")
+            .Title($"[yellow][bold]Found {oracleParameters.Count} parameter(s)[/][/]")
             .AddColumn(new TableColumn("[u]Position[/]").Centered())
             .AddColumn(new TableColumn("[u]Name[/]").Centered())
             .AddColumn(new TableColumn("[u]DataType[/]").Centered())
             .AddColumn(new TableColumn("[u]Direction[/]").Centered())
             .Caption($"[yellow][bold]{databaseName}[/][/]");
 
-        foreach (var result in oracleArguments)
+        foreach (var result in oracleParameters)
         {
             table.AddRow(
                 ToMarkup($"{result.Position}"),
@@ -411,11 +411,11 @@ public class ConsoleService : IConsoleService
         AnsiConsole.WriteLine();
     }
 
-    public void RenderOracleFunctions(ICollection<OracleFunction> oracleFunctions, OracleArgs args)
+    public void RenderOracleFunctions(ICollection<OracleFunction> oracleFunctions, OracleArgs oracleArgs)
     {
-        var databaseName = args.DatabaseName.ToUpper();
-        var title = oracleFunctions.Count > args.MaxItems
-            ? $"[yellow][bold]Found more than {args.MaxItems} function(s)[/][/]"
+        var databaseName = oracleArgs.DatabaseName.ToUpper();
+        var title = oracleFunctions.Count > oracleArgs.MaxItems
+            ? $"[yellow][bold]Found more than {oracleArgs.MaxItems} function(s)[/][/]"
             : $"[yellow][bold]Found {oracleFunctions.Count} function(s)[/][/]";
         var table = new Table()
             .BorderColor(Color.White)
@@ -430,7 +430,7 @@ public class ConsoleService : IConsoleService
             .Caption($"[yellow][bold]{databaseName}[/][/]");
 
         var index = 1;
-        var count = Math.Min(oracleFunctions.Count, args.MaxItems);
+        var count = Math.Min(oracleFunctions.Count, oracleArgs.MaxItems);
         foreach (var result in oracleFunctions.Take(count))
         {
             table.AddRow(
@@ -447,11 +447,11 @@ public class ConsoleService : IConsoleService
         AnsiConsole.WriteLine();
     }
 
-    public void RenderOracleProcedures(ICollection<OracleProcedure> oracleProcedures, OracleArgs args)
+    public void RenderOracleProcedures(ICollection<OracleProcedure> oracleProcedures, OracleArgs oracleArgs)
     {
-        var databaseName = args.DatabaseName.ToUpper();
-        var title = oracleProcedures.Count > args.MaxItems
-            ? $"[yellow][bold]Found more than {args.MaxItems} procedure(s)[/][/]"
+        var databaseName = oracleArgs.DatabaseName.ToUpper();
+        var title = oracleProcedures.Count > oracleArgs.MaxItems
+            ? $"[yellow][bold]Found more than {oracleArgs.MaxItems} procedure(s)[/][/]"
             : $"[yellow][bold]Found {oracleProcedures.Count} procedure(s)[/][/]";
         var table = new Table()
             .BorderColor(Color.White)
@@ -466,7 +466,7 @@ public class ConsoleService : IConsoleService
             .Caption($"[yellow][bold]{databaseName}[/][/]");
 
         var index = 1;
-        var count = Math.Min(oracleProcedures.Count, args.MaxItems);
+        var count = Math.Min(oracleProcedures.Count, oracleArgs.MaxItems);
         foreach (var result in oracleProcedures.Take(count))
         {
             table.AddRow(
@@ -483,11 +483,11 @@ public class ConsoleService : IConsoleService
         AnsiConsole.WriteLine();
     }
 
-    public void RenderOracleLocks(ICollection<OracleLock> oracleLocks, OracleArgs args)
+    public void RenderOracleLocks(ICollection<OracleLock> oracleLocks, OracleArgs oracleArgs)
     {
-        var databaseName = args.DatabaseName.ToUpper();
-        var title = oracleLocks.Count > args.MaxItems
-            ? $"[yellow][bold]Found more than {args.MaxItems} lock(s)[/][/]"
+        var databaseName = oracleArgs.DatabaseName.ToUpper();
+        var title = oracleLocks.Count > oracleArgs.MaxItems
+            ? $"[yellow][bold]Found more than {oracleArgs.MaxItems} lock(s)[/][/]"
             : $"[yellow][bold]Found {oracleLocks.Count} lock(s)[/][/]";
         var table = new Table()
             .BorderColor(Color.White)
@@ -506,7 +506,7 @@ public class ConsoleService : IConsoleService
             .Caption($"[yellow][bold]{databaseName}[/][/]");
 
         var index = 1;
-        var count = Math.Min(oracleLocks.Count, args.MaxItems);
+        var count = Math.Min(oracleLocks.Count, oracleArgs.MaxItems);
         foreach (var result in oracleLocks.Take(count))
         {
             var program = result.ProgramName.Truncate(50);
@@ -536,11 +536,11 @@ public class ConsoleService : IConsoleService
         AnsiConsole.WriteLine();
     }
 
-    public void RenderOracleSessions(ICollection<OracleSession> oracleSessions, OracleArgs args)
+    public void RenderOracleSessions(ICollection<OracleSession> oracleSessions, OracleArgs oracleArgs)
     {
-        var databaseName = args.DatabaseName.ToUpper();
-        var title = oracleSessions.Count > args.MaxItems
-            ? $"[yellow][bold]Found more than {args.MaxItems} active session(s)[/][/]"
+        var databaseName = oracleArgs.DatabaseName.ToUpper();
+        var title = oracleSessions.Count > oracleArgs.MaxItems
+            ? $"[yellow][bold]Found more than {oracleArgs.MaxItems} active session(s)[/][/]"
             : $"[yellow][bold]Found {oracleSessions.Count} active session(s)[/][/]";
         var table = new Table()
             .BorderColor(Color.White)
@@ -558,7 +558,7 @@ public class ConsoleService : IConsoleService
             .Caption($"[yellow][bold]{databaseName}[/][/]");
 
         var index = 1;
-        var count = Math.Min(oracleSessions.Count, args.MaxItems);
+        var count = Math.Min(oracleSessions.Count, oracleArgs.MaxItems);
         foreach (var result in oracleSessions.Take(count))
         {
             var module = result.ModuleName.Truncate(50);

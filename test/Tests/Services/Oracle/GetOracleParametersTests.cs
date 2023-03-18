@@ -6,11 +6,11 @@ using Microsoft.Extensions.Options;
 namespace Tests.Services.Oracle;
 
 [Collection(Collections.OracleCollectionName)]
-public class GetOracleArgumentsTests
+public class GetOracleParametersTests
 {
     private readonly OracleFixture _oracleFixture;
 
-    public GetOracleArgumentsTests(OracleFixture oracleFixture)
+    public GetOracleParametersTests(OracleFixture oracleFixture)
     {
         _oracleFixture = oracleFixture;
     }
@@ -22,7 +22,7 @@ public class GetOracleArgumentsTests
     [InlineData("SYS", "STANDARD", null, "GREATEST")]
     [InlineData("SYS", "STANDARD", null, "TO_MULTI_BYTE")]
     [InlineData("SYS", "STANDARD", null, "TO_SINGLE_BYTE")]
-    public async Task Should_Get_Arguments(string ownerName, string packageName, string procedureName, string functionName)
+    public async Task Should_Get_Parameters(string ownerName, string packageName, string procedureName, string functionName)
     {
         // arrange
         const string databaseName = "oracle-for-tests";
@@ -47,9 +47,9 @@ public class GetOracleArgumentsTests
         var service = new OracleService(options, logger);
 
         // act
-        var arguments = await service.GetOracleArgumentsAsync(oracleArgs, CancellationToken.None);
+        var oracleParameters = await service.GetOracleParametersAsync(oracleArgs, CancellationToken.None);
 
         // assert
-        arguments.Should().NotBeEmpty();
+        oracleParameters.Should().NotBeEmpty();
     }
 }

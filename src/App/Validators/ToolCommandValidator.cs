@@ -17,7 +17,7 @@ public static class ToolCommandValidator
             SchemasCommand schemasCommand => Validate(new SchemasCommandValidator(), schemasCommand),
             SourcesCommand sourcesCommand => Validate(new SourcesCommandValidator(), sourcesCommand),
             SessionsCommand sessionsCommand => Validate(new SessionsCommandValidator(), sessionsCommand),
-            ArgumentsCommand argumentsCommand => Validate(new ArgumentsCommandValidator(), argumentsCommand),
+            ParametersCommand parametersCommand => Validate(new ParametersCommandValidator(), parametersCommand),
             FunctionsCommand functionsCommand => Validate(new FunctionsCommandValidator(), functionsCommand),
             ProceduresCommand proceduresCommand => Validate(new ProceduresCommandValidator(), proceduresCommand),
             PackagesCommand packagesCommand => Validate(new PackagesCommandValidator(), packagesCommand),

@@ -7,7 +7,7 @@ namespace Tests.Services.Exporters;
 public class CSharpExportServiceTests
 {
     [Fact]
-    public async Task Should_Export_Procedure_OracleArguments_To_CSharp()
+    public async Task Should_Export_Procedure_OracleParameters_To_CSharp()
     {
         // arrange
         var textExportService = Substitute.For<ITextExportService>();
@@ -16,7 +16,7 @@ public class CSharpExportServiceTests
             OwnerName = "USER",
             ProcedureName = "GET_INFO"
         };
-        var oracleArguments = new List<OracleArgument>
+        var oracleParameters = new List<OracleParameter>
         {
             new()
             {
@@ -44,7 +44,7 @@ public class CSharpExportServiceTests
         var csharpExportService = new CSharpExportService(textExportService);
 
         // act
-        await csharpExportService.ExportOracleArgumentsAsync(oracleArguments, oracleArgs, CancellationToken.None);
+        await csharpExportService.ExportOracleParametersAsync(oracleParameters, oracleArgs, CancellationToken.None);
 
         // assert
         await textExportService
@@ -53,7 +53,7 @@ public class CSharpExportServiceTests
     }
     
     [Fact]
-    public async Task Should_Export_Function_OracleArguments_To_CSharp()
+    public async Task Should_Export_Function_OracleParameters_To_CSharp()
     {
         // arrange
         var textExportService = Substitute.For<ITextExportService>();
@@ -62,7 +62,7 @@ public class CSharpExportServiceTests
             OwnerName = "USER",
             FunctionName = "GET_INFO"
         };
-        var oracleArguments = new List<OracleArgument>
+        var oracleParameters = new List<OracleParameter>
         {
             new()
             {
@@ -90,7 +90,7 @@ public class CSharpExportServiceTests
         var csharpExportService = new CSharpExportService(textExportService);
 
         // act
-        await csharpExportService.ExportOracleArgumentsAsync(oracleArguments, oracleArgs, CancellationToken.None);
+        await csharpExportService.ExportOracleParametersAsync(oracleParameters, oracleArgs, CancellationToken.None);
 
         // assert
         await textExportService

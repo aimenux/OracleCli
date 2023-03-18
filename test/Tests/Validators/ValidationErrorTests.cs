@@ -26,8 +26,8 @@ public class ValidationErrorTests
     public void Should_Get_OptionName_V2()
     {
         // arrange
-        var validationFailure = new ValidationFailure(nameof(ArgumentsCommand.ProcedureName), "Required option");
-        var validationError = ValidationError.New<ArgumentsCommand>(validationFailure);
+        var validationFailure = new ValidationFailure(nameof(ParametersCommand.ProcedureName), "Required option");
+        var validationError = ValidationError.New<ParametersCommand>(validationFailure);
 
         // act
         var optionName = validationError.OptionName();

@@ -11,13 +11,13 @@ using NSubstitute;
 namespace Tests.Commands;
 
 [Collection(Collections.OracleCollectionName)]
-public class ArgumentsCommandTests
+public class ParametersCommandTests
 {
     private readonly OracleFixture _oracleFixture;
     
     private const string DatabaseName = "oracle-for-tests";
 
-    public ArgumentsCommandTests(OracleFixture oracleFixture)
+    public ParametersCommandTests(OracleFixture oracleFixture)
     {
         _oracleFixture = oracleFixture;
     }
@@ -46,7 +46,7 @@ public class ArgumentsCommandTests
     [InlineData("SYS", "STANDARD", null, "GREATEST")]
     [InlineData("SYS", "STANDARD", null, "TO_MULTI_BYTE")]
     [InlineData("SYS", "STANDARD", null, "TO_SINGLE_BYTE")]
-    public async Task Should_ArgumentsCommand_Return_Ok(string ownerName, string packageName, string procedureName, string functionName)
+    public async Task Should_ParametersCommand_Return_Ok(string ownerName, string packageName, string procedureName, string functionName)
     {
         // arrange
         var connectionString = _oracleFixture.ConnectionString;
@@ -62,7 +62,7 @@ public class ArgumentsCommandTests
         var logger = NullLogger<OracleService>.Instance;
         var oracleService = new OracleService(options, logger);
         var exportService = Substitute.For<ICSharpExportService>();
-        var command = new ArgumentsCommand(consoleService, oracleService, exportService, options)
+        var command = new ParametersCommand(consoleService, oracleService, exportService, options)
         {
             DatabaseName = DatabaseName,
             OwnerName = ownerName,
@@ -85,7 +85,7 @@ public class ArgumentsCommandTests
     [InlineData("SYS", "STANDARD", "", null)]
     [InlineData("SYS", "STANDARD", null, "")]
     [InlineData("SYS", "STANDARD", "", "")]
-    public async Task Should_ArgumentsCommand_Return_Ko(string ownerName, string packageName, string procedureName, string functionName)
+    public async Task Should_ParametersCommand_Return_Ko(string ownerName, string packageName, string procedureName, string functionName)
     {
         // arrange
         var connectionString = _oracleFixture.ConnectionString;
@@ -101,7 +101,7 @@ public class ArgumentsCommandTests
         var logger = NullLogger<OracleService>.Instance;
         var oracleService = new OracleService(options, logger);
         var exportService = Substitute.For<ICSharpExportService>();
-        var command = new ArgumentsCommand(consoleService, oracleService, exportService, options)
+        var command = new ParametersCommand(consoleService, oracleService, exportService, options)
         {
             DatabaseName = DatabaseName,
             OwnerName = ownerName,

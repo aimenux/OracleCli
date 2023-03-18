@@ -9,14 +9,14 @@ using NSubstitute;
 
 namespace Tests.Validators;
 
-public class ArgumentsCommandValidatorTests
+public class ParametersCommandValidatorTests
 {
     [Theory]
     [ClassData(typeof(ValidOracleTestCases))]
-    public void ArgumentsCommand_Should_Be_Valid(ArgumentsCommand command)
+    public void ParametersCommand_Should_Be_Valid(ParametersCommand command)
     {
         // arrange
-        var validator = new ArgumentsCommandValidator();
+        var validator = new ParametersCommandValidator();
 
         // act
         var result = validator.Validate(command);
@@ -27,10 +27,10 @@ public class ArgumentsCommandValidatorTests
     
     [Theory]
     [ClassData(typeof(NotValidOracleTestCases))]
-    public void ArgumentsCommand_Should_Not_Be_Valid(ArgumentsCommand command)
+    public void ParametersCommand_Should_Not_Be_Valid(ParametersCommand command)
     {
         // arrange
-        var validator = new ArgumentsCommandValidator();
+        var validator = new ParametersCommandValidator();
 
         // act
         var result = validator.Validate(command);
@@ -39,7 +39,7 @@ public class ArgumentsCommandValidatorTests
         result.IsValid.Should().BeFalse();
     }
     
-    private class ValidOracleTestCases : TheoryData<ArgumentsCommand>
+    private class ValidOracleTestCases : TheoryData<ParametersCommand>
     {
         public ValidOracleTestCases()
         {
@@ -49,7 +49,7 @@ public class ArgumentsCommandValidatorTests
             var settings = new SettingsBuilder().Build();
             var options = Options.Create(settings);
 
-            Add(new ArgumentsCommand(consoleService, oracleService, exportService, options)
+            Add(new ParametersCommand(consoleService, oracleService, exportService, options)
             {
                 DatabaseName = "oracle-for-tests",
                 ProcedureName = "oracle-spc",
@@ -57,27 +57,27 @@ public class ArgumentsCommandValidatorTests
                 OwnerName = "owner"
             });
             
-            Add(new ArgumentsCommand(consoleService, oracleService, exportService, options)
+            Add(new ParametersCommand(consoleService, oracleService, exportService, options)
             {
                 DatabaseName = "oracle-for-tests",
                 ProcedureName = "oracle-spc",
                 PackageName = "oracle-pkg"
             });
             
-            Add(new ArgumentsCommand(consoleService, oracleService, exportService, options)
+            Add(new ParametersCommand(consoleService, oracleService, exportService, options)
             {
                 DatabaseName = "oracle-for-tests",
                 FunctionName = "oracle-fun",
                 PackageName = "oracle-pkg"
             });
             
-            Add(new ArgumentsCommand(consoleService, oracleService, exportService, options)
+            Add(new ParametersCommand(consoleService, oracleService, exportService, options)
             {
                 DatabaseName = "oracle-for-tests",
                 ProcedureName = "oracle-spc"
             });
             
-            Add(new ArgumentsCommand(consoleService, oracleService, exportService, options)
+            Add(new ParametersCommand(consoleService, oracleService, exportService, options)
             {
                 DatabaseName = "oracle-for-tests",
                 FunctionName = "oracle-fun"
@@ -85,7 +85,7 @@ public class ArgumentsCommandValidatorTests
         }
     }
     
-    private class NotValidOracleTestCases : TheoryData<ArgumentsCommand>
+    private class NotValidOracleTestCases : TheoryData<ParametersCommand>
     {
         public NotValidOracleTestCases()
         {
@@ -95,28 +95,28 @@ public class ArgumentsCommandValidatorTests
             var settings = new SettingsBuilder().Build();
             var options = Options.Create(settings);
             
-            Add(new ArgumentsCommand(consoleService, oracleService, exportService, options)
+            Add(new ParametersCommand(consoleService, oracleService, exportService, options)
             {
                 DatabaseName = "oracle-for-tests",
                 ProcedureName = "oracle-spc",
                 FunctionName = "oracle-fun"
             });
             
-            Add(new ArgumentsCommand(consoleService, oracleService, exportService, options)
+            Add(new ParametersCommand(consoleService, oracleService, exportService, options)
             {
                 DatabaseName = "oracle-for-tests",
                 ProcedureName = null,
                 FunctionName = null
             });
             
-            Add(new ArgumentsCommand(consoleService, oracleService, exportService, options)
+            Add(new ParametersCommand(consoleService, oracleService, exportService, options)
             {
                 DatabaseName = null,
                 ProcedureName = "oracle-spc",
                 FunctionName = null
             });
             
-            Add(new ArgumentsCommand(consoleService, oracleService, exportService, options)
+            Add(new ParametersCommand(consoleService, oracleService, exportService, options)
             {
                 DatabaseName = null,
                 ProcedureName = null,

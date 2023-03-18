@@ -13,10 +13,10 @@ public class CSharpExportService : ICSharpExportService
         _textExportService = textExportService ?? throw new ArgumentNullException(nameof(textExportService));
     }
 
-    public async Task ExportOracleArgumentsAsync(ICollection<OracleArgument> oracleArguments, OracleArgs args, CancellationToken cancellationToken)
+    public async Task ExportOracleParametersAsync(ICollection<OracleParameter> oracleParameters, OracleArgs oracleArgs, CancellationToken cancellationToken)
     {
-        var name = GetCSharpName(args);
-        var type = GetCSharpType(args);
+        var name = GetCSharpName(oracleArgs);
+        var type = GetCSharpType(oracleArgs);
 
         var csharpBuilder = new StringBuilder
         (
@@ -26,13 +26,13 @@ public class CSharpExportService : ICSharpExportService
             [OracleProperty("{{name}}")]
             public class {{type}}
             {
-                {{GetCSharpArguments(oracleArguments)}}                
+                {{GetCSharpParameters(oracleParameters)}}                
             }
 
             """
         );
 
-        csharpBuilder.AppendLine($"{GetCSharpCursorClasses(oracleArguments)}");
+        csharpBuilder.AppendLine($"{GetCSharpCursorClasses(oracleParameters)}");
 
         csharpBuilder.AppendLine
         (
@@ -53,13 +53,13 @@ public class CSharpExportService : ICSharpExportService
         await _textExportService.ExportToClipboardAsync(csharpText, cancellationToken);
     }
     
-    private static string GetCSharpCursorClasses(IEnumerable<OracleArgument> oracleArguments)
+    private static string GetCSharpCursorClasses(IEnumerable<OracleParameter> oracleParameters)
     {
         var csharpBuilder = new StringBuilder();
         
-        foreach (var oracleArgument in oracleArguments.Where(x => x.IsCursorType))
+        foreach (var oracleParameter in oracleParameters.Where(x => x.IsCursorType))
         {
-            var cursorClassType = GetCSharpArgumentCursorType(oracleArgument);
+            var cursorClassType = GetCSharpParameterCursorType(oracleParameter);
             csharpBuilder.AppendLine();
             csharpBuilder.AppendLine
             (
@@ -75,19 +75,19 @@ public class CSharpExportService : ICSharpExportService
         return csharpBuilder.ToString();
     }
 
-    private static string GetCSharpArguments(IEnumerable<OracleArgument> oracleArguments)
+    private static string GetCSharpParameters(IEnumerable<OracleParameter> oracleParameters)
     {
         var csharpBuilder = new StringBuilder();
         
-        foreach (var oracleArgument in oracleArguments)
+        foreach (var oracleParameter in oracleParameters)
         {
-            var name = GetCSharpArgumentName(oracleArgument);
-            var type = GetCSharpArgumentType(oracleArgument);
+            var name = GetCSharpParameterName(oracleParameter);
+            var type = GetCSharpParameterType(oracleParameter);
             csharpBuilder.AppendLine();
             csharpBuilder.AppendLine
             (
                 $$"""
-                    [OracleProperty("{{oracleArgument.Name}}")]
+                    [OracleProperty("{{oracleParameter.Name}}")]
                     public {{type}} {{name}} { get; set; }
                 """
             );
@@ -96,48 +96,48 @@ public class CSharpExportService : ICSharpExportService
         return csharpBuilder.ToString();
     }
 
-    private static string GetCSharpArgumentName(OracleArgument oracleArgument)
+    private static string GetCSharpParameterName(OracleParameter oracleParameter)
     {
-        var name = string.IsNullOrWhiteSpace(oracleArgument.Name)
-            ? $"{oracleArgument.Direction}{oracleArgument.Position}"
-            : oracleArgument.Name;
+        var name = string.IsNullOrWhiteSpace(oracleParameter.Name)
+            ? $"{oracleParameter.Direction}{oracleParameter.Position}"
+            : oracleParameter.Name;
         
         return name.Transform(To.LowerCase).Pascalize();
     }
 
-    private static string GetCSharpArgumentType(OracleArgument oracleArgument)
+    private static string GetCSharpParameterType(OracleParameter oracleParameter)
     {
-        return oracleArgument.DataType.ToUpper() switch
+        return oracleParameter.DataType.ToUpper() switch
         {
             "NUMBER" => "long",
             "VARCHAR" => "string",
             "VARCHAR2" => "string",
             "DATE" => "DateTime",
-            "REF CURSOR" => GetCSharpArgumentCursorType(oracleArgument),
+            "REF CURSOR" => GetCSharpParameterCursorType(oracleParameter),
             _ => "NotSupportedType"
         };
     }
 
-    private static string GetCSharpArgumentCursorType(OracleArgument oracleArgument)
+    private static string GetCSharpParameterCursorType(OracleParameter oracleParameter)
     {
-        return $"IEnumerable<OracleCursor{oracleArgument.Position}>";
+        return $"IEnumerable<OracleCursor{oracleParameter.Position}>";
     }
 
-    private static string GetCSharpName(OracleArgs args)
+    private static string GetCSharpName(OracleArgs oracleArgs)
     {
-        var schemaName = args.OwnerName.ToUpper();
-        var pkgName = args.PackageName?.ToUpper();
-        var spcName = args.ProcedureName?.ToUpper();
-        var funName = args.FunctionName?.ToUpper();
+        var schemaName = oracleArgs.OwnerName.ToUpper();
+        var pkgName = oracleArgs.PackageName?.ToUpper();
+        var spcName = oracleArgs.ProcedureName?.ToUpper();
+        var funName = oracleArgs.FunctionName?.ToUpper();
         var prgName = spcName ?? funName;
         return string.IsNullOrWhiteSpace(pkgName) 
             ? $"{schemaName}.{prgName}" 
             : $"{schemaName}.{pkgName}.{prgName}";
     }
     
-    private static string GetCSharpType(OracleArgs args)
+    private static string GetCSharpType(OracleArgs oracleArgs)
     {
-        return string.IsNullOrWhiteSpace(args.FunctionName)
+        return string.IsNullOrWhiteSpace(oracleArgs.FunctionName)
             ? "OracleProcedure"
             : "OracleFunction";
     }

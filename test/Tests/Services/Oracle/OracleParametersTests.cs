@@ -3,22 +3,22 @@ using FluentAssertions;
 
 namespace Tests.Services.Oracle;
 
-public class OracleArgumentsTests
+public class OracleParametersTests
 {
     [Theory]
-    [InlineData("Argument1", 1, "DataType1", "IN")]
-    [InlineData("Argument2", 2, "DataType2", "IN")]
-    public void Should_Oracle_Arguments_Be_Equals(string name, int position, string dataType, string direction)
+    [InlineData("Parameter1", 1, "DataType1", "IN")]
+    [InlineData("Parameter2", 2, "DataType2", "IN")]
+    public void Should_Oracle_Parameters_Be_Equals(string name, int position, string dataType, string direction)
     {
         // arrange
-        var obj1 = new OracleArgument
+        var obj1 = new OracleParameter
         {
             Name = name,
             Position = position,
             DataType = dataType,
             Direction = direction
         };
-        var obj2 = new OracleArgument
+        var obj2 = new OracleParameter
         {
             Name = name,
             Position = position,
@@ -38,10 +38,10 @@ public class OracleArgumentsTests
     }
 
     [Fact]
-    public void Should_Oracle_Arguments_Not_Be_Equals()
+    public void Should_Oracle_Parameters_Not_Be_Equals()
     {
         // arrange
-        var obj1 = new OracleArgument
+        var obj1 = new OracleParameter
         {
             Name = "name",
             Position = 1,
@@ -49,7 +49,7 @@ public class OracleArgumentsTests
             Direction = "direction"
         };
         
-        var obj2 = new OracleArgument
+        var obj2 = new OracleParameter
         {
             Name = "name",
             Position = 2,
@@ -71,10 +71,10 @@ public class OracleArgumentsTests
     }
     
     [Fact]
-    public void Should_Get_Distinct_Oracle_Arguments()
+    public void Should_Get_Distinct_Oracle_Parameters()
     {
         // arrange
-        var list = new List<OracleArgument>
+        var list = new List<OracleParameter>
         {
             new()
             {
@@ -95,7 +95,7 @@ public class OracleArgumentsTests
             null
         };
 
-        var hashset = new HashSet<OracleArgument>(list);
+        var hashset = new HashSet<OracleParameter>(list);
 
         // act
         var hashsetCount = hashset.Count;

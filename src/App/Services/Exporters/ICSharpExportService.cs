@@ -4,5 +4,5 @@ namespace App.Services.Exporters;
 
 public interface ICSharpExportService
 {
-    Task ExportOracleArgumentsAsync(ICollection<OracleArgument> oracleArguments, OracleArgs args, CancellationToken cancellationToken);
+    Task ExportOracleParametersAsync(ICollection<OracleParameter> oracleParameters, OracleArgs args, CancellationToken cancellationToken);
 }

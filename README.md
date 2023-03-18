@@ -7,7 +7,7 @@
 A net global tool helping to retrieve some infos (packages, functions, procedures, etc.) from oracle
 ```
 
-> In this repo, i m building a global tool that allows to retrieve schema(s), package(s), function(s), procedure(s) and argument(s) infos from oracle.
+> In this repo, i m building a global tool that allows to retrieve schema(s), package(s), function(s), procedure(s) and parameter(s) infos from oracle.
 >
 > The tool is based on multiple sub commmands :
 > - Use sub command `Info` or `Infos` to get oracle database infos
@@ -17,7 +17,7 @@ A net global tool helping to retrieve some infos (packages, functions, procedure
 > - Use sub command `Package` or `Packages` to list packages from oracle
 > - Use sub command `Function` or `Functions` to list functions from oracle
 > - Use sub command `Procedure` or `Procedures` to list procedures from oracle
-> - Use sub command `Argument` or `Arguments` to list procedure/function arguments from oracle
+> - Use sub command `Parameter` or `Parameters` to list procedure/function parameters from oracle
 > - Use sub command `Source` or `Sources` to get procedure/function source code from oracle
 > - Use sub command `Session` or `Sessions` to get active sessions from oracle
 > - Use sub command `Lock` or `Locks` to get locked sessions from oracle
@@ -33,8 +33,8 @@ A net global tool helping to retrieve some infos (packages, functions, procedure
 > - `OracleCli Packages -d [db-name]` to list packages from oracle
 > - `OracleCli Functions -d [db-name]` to list functions from oracle
 > - `OracleCli Procedures -d [db-name]` to list procedures from oracle
-> - `OracleCli Arguments -d [db-name] -p [pkg-name] -s [spc-name]` to list procedure arguments from oracle
-> - `OracleCli Arguments -d [db-name] -p [pkg-name] -f [fun-name]` to list function arguments from oracle
+> - `OracleCli Parameters -d [db-name] -p [pkg-name] -s [spc-name]` to list procedure parameters from oracle
+> - `OracleCli Parameters -d [db-name] -p [pkg-name] -f [fun-name]` to list function parameters from oracle
 > - `OracleCli Sources -d [db-name] -p [pkg-name] -s [spc-name]` to get procedure source code from oracle
 > - `OracleCli Sources -d [db-name] -p [pkg-name] -f [fun-name]` to get function source code from oracle
 > - `OracleCli Sessions -d [db-name]` to get active sessions from oracle

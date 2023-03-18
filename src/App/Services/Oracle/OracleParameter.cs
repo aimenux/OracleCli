@@ -2,7 +2,7 @@ using App.Extensions;
 
 namespace App.Services.Oracle;
 
-public sealed class OracleArgument : IEquatable<OracleArgument>
+public sealed class OracleParameter : IEquatable<OracleParameter>
 {
     public string Name { get; init; }
     public int Position { get; init; }
@@ -10,7 +10,7 @@ public sealed class OracleArgument : IEquatable<OracleArgument>
     public string Direction { get; init; }
     public bool IsCursorType => DataType.IgnoreEquals("REF CURSOR");
 
-    public bool Equals(OracleArgument other)
+    public bool Equals(OracleParameter other)
     {
         if (ReferenceEquals(null, other)) return false;
         if (ReferenceEquals(this, other)) return true;
@@ -22,7 +22,7 @@ public sealed class OracleArgument : IEquatable<OracleArgument>
 
     public override bool Equals(object obj)
     {
-        return ReferenceEquals(this, obj) || obj is OracleArgument other && Equals(other);
+        return ReferenceEquals(this, obj) || obj is OracleParameter other && Equals(other);
     }
 
     public override int GetHashCode()

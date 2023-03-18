@@ -14,7 +14,7 @@ namespace App.Commands;
     typeof(ProceduresCommand),
     typeof(FunctionsCommand),
     typeof(TablesCommand),
-    typeof(ArgumentsCommand),
+    typeof(ParametersCommand),
     typeof(SourcesCommand),
     typeof(LocksCommand),
     typeof(SessionsCommand))

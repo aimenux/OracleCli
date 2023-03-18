@@ -30,7 +30,7 @@ public class ToolCommandValidatorTests
     }
     
     [Fact]
-    public void Should_Get_ValidationErrors_For_ArgumentsCommand()
+    public void Should_Get_ValidationErrors_For_ParametersCommand()
     {
         // arrange
         var consoleService = Substitute.For<IConsoleService>();
@@ -39,7 +39,7 @@ public class ToolCommandValidatorTests
         var settings = new SettingsBuilder().Build();
         var options = Options.Create(settings);
 
-        var command = new ArgumentsCommand(consoleService, oracleService, exportService, options);
+        var command = new ParametersCommand(consoleService, oracleService, exportService, options);
 
         // act
         var validationErrors = ToolCommandValidator.Validate(command);
@@ -185,6 +185,24 @@ public class ToolCommandValidatorTests
         var options = Options.Create(settings);
 
         var command = new LocksCommand(consoleService, oracleService, options);
+
+        // act
+        var validationErrors = ToolCommandValidator.Validate(command);
+
+        // assert
+        validationErrors.Should().NotBeNull();
+    }
+    
+    [Fact]
+    public void Should_Get_ValidationErrors_For_InfosCommand()
+    {
+        // arrange
+        var consoleService = Substitute.For<IConsoleService>();
+        var oracleService = Substitute.For<IOracleService>();
+        var settings = new SettingsBuilder().Build();
+        var options = Options.Create(settings);
+
+        var command = new InfosCommand(consoleService, oracleService, options);
 
         // act
         var validationErrors = ToolCommandValidator.Validate(command);
